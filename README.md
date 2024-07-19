@@ -2,6 +2,8 @@
 
 The Salt Function Flow is a lightweight flow orchestration component at the memory level, which uses function APIs to implement orchestration.
 
+[中文](https://github.com/flower-trees/salt-function-flow/blob/master/README_CN.md)
+
 ## Quick Start
 
 Including flow node implementation, flow orchestration and flow execution.
@@ -591,7 +593,3 @@ for (int i=0; i<5; i++) {
 	System.out.println(flowID + " result: " + result);
 }
 ```
-
-## Documentation
-
-[中文](https://blog.csdn.net/fenglingguitar/article/details/128500457)
