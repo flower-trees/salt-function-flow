@@ -34,7 +34,15 @@ public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
     public void afterPropertiesSet() {
         NodeIdentity nodeIdentity = this.getClass().getAnnotation(NodeIdentity.class);
         if (nodeIdentity != null) {
-            nodeId = nodeIdentity.nodeId();
+            if (StringUtils.isNotEmpty(nodeIdentity.value())) {
+                nodeId = nodeIdentity.value();
+            } else if(StringUtils.isNotEmpty(nodeIdentity.nodeId())) {
+                nodeId = nodeIdentity.nodeId();
+            } else if (nodeIdentity.nodeClass() != IFlowNode.class) {
+                nodeId = nodeIdentity.nodeClass().getName();
+            } else {
+                nodeId = this.getClass().getName();
+            }
         }
     }
 
@@ -49,7 +57,7 @@ public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
 
     public void process() {
         ContextBus contextBus = ((ContextBus) getContextBus());
-        I input = getContextBus().getPreResult();
+        I input = contextBus.getPreResult();
         Info info = ContextBus.getNodeInfo(FlowUtil.getNodeInfoKey(nodeId));
         if (info != null && info.input != null) {
             input = (I) info.input.apply(contextBus);
@@ -62,8 +70,8 @@ public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
                 if (info.output != null) {
                     adapterResult = info.output.apply(contextBus, result);
                 }
-                if (StringUtils.isNotEmpty(info.idAlias)) {
-                    idTmp = info.idAlias;
+                if (StringUtils.isNotEmpty(info.getIdAlias())) {
+                    idTmp = info.getIdAlias();
                 }
             }
             if (adapterResult != null) {
@@ -72,6 +80,7 @@ public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
                 contextBus.putPassResult(idTmp, result);
             }
             ContextBus.putLastNodeId(idTmp);
+            contextBus.setResult(result);
         }
     }
 

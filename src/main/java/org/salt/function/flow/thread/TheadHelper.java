@@ -58,11 +58,11 @@ public class TheadHelper {
 
     public Runnable getDecoratorSync(Runnable runnable, Info info) {
         return () -> {
-            putThreadLocal(FlowUtil.getNodeInfoKey(info.id) , info);
+            putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()) , info);
             try {
                 runnable.run();
             } finally {
-                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.id), null);
+                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()), null);
             }
         };
     }
@@ -73,11 +73,11 @@ public class TheadHelper {
         return () -> {
             threadLocal.set(map);
             setThreadContent(content);
-            putThreadLocal(FlowUtil.getNodeInfoKey(info.id) , info);
+            putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()) , info);
             try {
                 runnable.run();
             } finally {
-                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.id), null);
+                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()), null);
                 cleanThreadContent();
                 threadLocal.set(null);
             }
@@ -90,11 +90,11 @@ public class TheadHelper {
         return () -> {
             threadLocal.set(map);
             setThreadContent(content);
-            putThreadLocal(FlowUtil.getNodeInfoKey(info.id) , info);
+            putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()) , info);
             try {
                 return callable.call();
             } finally {
-                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.id), null);
+                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()), null);
                 cleanThreadContent();
                 threadLocal.set(null);
             }

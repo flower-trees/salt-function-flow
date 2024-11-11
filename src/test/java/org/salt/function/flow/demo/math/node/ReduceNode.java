@@ -12,23 +12,18 @@
  * limitations under the License.
  */
 
-package org.salt.function.flow.test.stop.node;
+package org.salt.function.flow.demo.math.node;
 
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "demo_bit_or")
-public class DemoBitOrNode extends FlowNode<Integer, Integer> {
+@NodeIdentity
+public class ReduceNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer preResult) {
-        if (preResult > 500) {
-            System.out.println("DemoBitOrNode: throw exception");
-            throw new RuntimeException("DemoBitOrNode Exception!");
-        } else {
-            Integer result = preResult | 128;
-            System.out.println("DemoBitOrNode: " + preResult + "|128=" + result);
-            return result;
-        }
+    public Integer doProcess(Integer num) {
+        Integer result = num - 15;
+        System.out.println("Reduce: " + num + "-15=" + result) ;
+        return result;
     }
 }

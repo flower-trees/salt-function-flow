@@ -12,24 +12,23 @@
  * limitations under the License.
  */
 
-package org.salt.function.flow.test.thread.node;
+package org.salt.function.flow.test.stop.node;
 
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
-import org.salt.function.flow.test.thread.TestThreadContent;
-import org.springframework.beans.factory.annotation.Autowired;
 
-@NodeIdentity(nodeId = "demo_bit_left")
-public class DemoBitLeftNode extends FlowNode<Integer, Integer> {
-
-    @Autowired
-    TestThreadContent testThreadContent;
+@NodeIdentity
+public class BitOrNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer preResult) {
-        System.out.println("TheadLocal: " + testThreadContent.get("test"));
-        Integer result = preResult << 1;
-        System.out.println("DemoBitLeftNode: " + preResult + "<<1=" + result);
-        return result;
+    public Integer doProcess(Integer num) {
+        if (num > 500) {
+            System.out.println("DemoBitOrNode: throw exception");
+            throw new RuntimeException("DemoBitOrNode Exception!");
+        } else {
+            Integer result = num | 128;
+            System.out.println("DemoBitOrNode: " + num + "|128=" + result);
+            return result;
+        }
     }
 }

@@ -17,17 +17,17 @@ package org.salt.function.flow.test.stop.node;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "demo_bit_xor")
-public class DemoBitXorNode extends FlowNode<Integer, Integer> {
+@NodeIdentity
+public class BitXorNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer preResult) {
-        if (preResult > 500) {
+    public Integer doProcess(Integer num) {
+        if (num > 500) {
             System.out.println("DemoBitOrNode: rollback flow");
             getContextBus().rollbackProcess();
         } else {
-            Integer result = preResult | 128;
-            System.out.println("DemoBitOrNode: " + preResult + "|128=" + result);
+            Integer result = num | 128;
+            System.out.println("DemoBitOrNode: " + num + "|128=" + result);
             return result;
         }
         return null;

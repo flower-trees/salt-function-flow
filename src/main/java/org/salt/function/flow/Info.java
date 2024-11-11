@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.context.IContextBus;
 
 import java.util.function.BiFunction;
@@ -34,4 +35,19 @@ public class Info<P, I> {
     public Function<IContextBus, I> input;
     public BiFunction<IContextBus, P, Object> output;
     public String idAlias;
+    public Class<?> node;
+
+    public String getId() {
+        if (StringUtils.isEmpty(id) || node != null) {
+            return node.getName();
+        }
+        return id;
+    }
+
+    public void SetClass(Class<?> clazz) {
+        this.node = clazz;
+        if (StringUtils.isEmpty(id)) {
+            this.id = clazz.getName();
+        }
+    }
 }

@@ -30,13 +30,13 @@ public class FlowNodeFuture<P> extends FlowNodeStructure<P> {
         for (Info info : infoList) {
             Future<?> future = theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
                 try {
-                    return execute(info.id);
+                    return execute(info.getId());
                 } catch (Exception e) {
-                    ((ContextBus) getContextBus()).putPassException(info.id, e);
+                    ((ContextBus) getContextBus()).putPassException(info.getId(), e);
                 }
                 return null;
             }, info));
-            ((ContextBus) getContextBus()).putPassResult(info.id, future);
+            ((ContextBus) getContextBus()).putPassResult(info.getId(), future);
         }
         return null;
     }

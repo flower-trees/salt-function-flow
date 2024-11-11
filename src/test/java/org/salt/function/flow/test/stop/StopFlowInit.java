@@ -17,7 +17,11 @@ package org.salt.function.flow.test.stop;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.config.IFlowInit;
 import org.salt.function.flow.context.IContextBus;
+import org.salt.function.flow.demo.math.node.*;
 import org.salt.function.flow.node.IResult;
+import org.salt.function.flow.test.stop.node.BitAndNode;
+import org.salt.function.flow.test.stop.node.BitOrNode;
+import org.salt.function.flow.test.stop.node.BitXorNode;
 
 public class StopFlowInit implements IFlowInit {
 
@@ -28,212 +32,212 @@ public class StopFlowInit implements IFlowInit {
     public void configure(FlowEngine flowEngine) {
 
         flowEngine.builder().id("demo_bit_and")
-                .next("demo_add")
-                .next("demo_reduce")
-                .next("demo_bit_and")
-                .next("demo_multiply")
-                .result("demo_division").build();
+                .next(AddNode.class)
+                .next(ReduceNode.class)
+                .next(BitAndNode.class)
+                .next(MultiplyNode.class)
+                .next(DivisionNode.class).build();
 
         flowEngine.builder().id("demo_bit_and_concurrent")
-                .next("demo_add")
-                .concurrent(new AddBitAndResult(), "demo_reduce", "demo_multiply", "demo_bit_and")
-                .result("demo_division")
+                .next(AddNode.class)
+                .concurrent(new AddBitAndResult(), ReduceNode.class, MultiplyNode.class, BitAndNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_and_future")
-                .next("demo_add")
-                .future("demo_reduce", "demo_multiply", "demo_bit_and")
-                .wait(new AddBitAndResult(), "demo_reduce", "demo_multiply", "demo_bit_and")
-                .result("demo_division")
+                .next(AddNode.class)
+                .future(ReduceNode.class, MultiplyNode.class, BitAndNode.class)
+                .wait(new AddBitAndResult(), ReduceNode.class, MultiplyNode.class, BitAndNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_and_all")
-                .next("demo_add")
-                .all("demo_reduce", "demo_bit_and", "demo_multiply")
-                .result("demo_division")
+                .next(AddNode.class)
+                .all(ReduceNode.class, BitAndNode.class, MultiplyNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_and_notify")
-                .next("demo_add")
-                .notify("demo_reduce", "demo_multiply", "demo_bit_and")
-                .result("demo_division")
+                .next(AddNode.class)
+                .notify(ReduceNode.class, MultiplyNode.class, BitAndNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_or")
-                .next("demo_add")
-                .next("demo_reduce")
-                .next("demo_bit_or")
-                .next("demo_multiply")
-                .result("demo_division").build();
+                .next(AddNode.class)
+                .next(ReduceNode.class)
+                .next(BitOrNode.class)
+                .next(MultiplyNode.class)
+                .next(DivisionNode.class).build();
 
         flowEngine.builder().id("demo_bit_or_concurrent")
-                .next("demo_add")
-                .concurrent(new AddBitOrResult(), "demo_reduce", "demo_multiply", "demo_bit_or")
-                .result("demo_division")
+                .next(AddNode.class)
+                .concurrent(new AddBitOrResult(), ReduceNode.class, MultiplyNode.class, BitOrNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_or_future")
-                .next("demo_add")
-                .future("demo_reduce", "demo_multiply", "demo_bit_or")
-                .wait(new AddBitOrResult(), "demo_reduce", "demo_multiply", "demo_bit_or")
-                .result("demo_division")
+                .next(AddNode.class)
+                .future(ReduceNode.class, MultiplyNode.class, BitOrNode.class)
+                .wait(new AddBitOrResult(), ReduceNode.class, MultiplyNode.class, BitOrNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_or_all")
-                .next("demo_add")
-                .all("demo_reduce", "demo_bit_or", "demo_multiply")
-                .result("demo_division")
+                .next(AddNode.class)
+                .all(ReduceNode.class, BitOrNode.class, MultiplyNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_or_notify")
-                .next("demo_add")
-                .notify("demo_reduce", "demo_multiply", "demo_bit_or")
-                .result("demo_division")
+                .next(AddNode.class)
+                .notify(ReduceNode.class, MultiplyNode.class, BitOrNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_xor")
-                .next("demo_add")
-                .next("demo_reduce")
-                .next("demo_bit_xor")
-                .next("demo_multiply")
-                .result("demo_division").build();
+                .next(AddNode.class)
+                .next(ReduceNode.class)
+                .next(BitXorNode.class)
+                .next(MultiplyNode.class)
+                .next(DivisionNode.class).build();
 
         flowEngine.builder().id("demo_bit_xor_concurrent")
-                .next("demo_add")
-                .concurrent(new AddBitAndResult(), "demo_bit_xor", "demo_reduce", "demo_multiply")
-                .result("demo_division")
+                .next(AddNode.class)
+                .concurrent(new AddBitAndResult(), BitXorNode.class, ReduceNode.class, MultiplyNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_xor_future")
-                .next("demo_add")
-                .future("demo_reduce", "demo_multiply", "demo_bit_xor")
-                .wait(new AddBitAndResult(), "demo_reduce", "demo_multiply", "demo_bit_xor")
-                .result("demo_division")
+                .next(AddNode.class)
+                .future(ReduceNode.class, MultiplyNode.class, BitXorNode.class)
+                .wait(new AddBitAndResult(), ReduceNode.class, MultiplyNode.class, BitXorNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_xor_all")
-                .next("demo_add")
-                .all("demo_reduce", "demo_bit_xor", "demo_multiply")
-                .result("demo_division")
+                .next(AddNode.class)
+                .all(ReduceNode.class, BitXorNode.class, MultiplyNode.class)
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_bit_xor_notify")
-                .next("demo_add")
-                .notify("demo_reduce", "demo_multiply", "demo_bit_xor")
-                .result("demo_division")
+                .next(AddNode.class)
+                .notify(ReduceNode.class, MultiplyNode.class, BitXorNode.class)
+                .next(DivisionNode.class)
                 .build();
 
-        flowEngine.builder().id("demo_branch_bit_and_reduce").next("demo_reduce").next("demo_bit_and").result("demo_remainder").build();
-        flowEngine.builder().id("demo_branch_bit_and_multiply").next("demo_multiply").result("demo_remainder").build();
+        flowEngine.builder().id("demo_branch_bit_and_reduce").next(ReduceNode.class).next(BitAndNode.class).next(RemainderNode.class).build();
+        flowEngine.builder().id("demo_branch_bit_and_multiply").next(MultiplyNode.class).next(RemainderNode.class).build();
 
         flowEngine.builder().id("demo_branch_bit_and")
-                .next("demo_add")
+                .next(AddNode.class)
                 .next("demo_branch_bit_and_reduce")
                 .next("demo_branch_bit_and_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_and_concurrent")
-                .next("demo_add")
+                .next(AddNode.class)
                 .concurrent(new AddBranchBitAndResult(),"demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_and_future")
-                .next("demo_add")
+                .next(AddNode.class)
                 .future("demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
                 .wait(new AddBranchBitAndResult(),"demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_and_all")
-                .next("demo_add")
+                .next(AddNode.class)
                 .all("demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_and_notify")
-                .next("demo_add")
+                .next(AddNode.class)
                 .notify("demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
-        flowEngine.builder().id("demo_branch_bit_or_reduce").next("demo_reduce").next("demo_bit_or").result("demo_remainder").build();
-        flowEngine.builder().id("demo_branch_bit_or_multiply").next("demo_multiply").result("demo_remainder").build();
+        flowEngine.builder().id("demo_branch_bit_or_reduce").next(ReduceNode.class).next(BitOrNode.class).next(RemainderNode.class).build();
+        flowEngine.builder().id("demo_branch_bit_or_multiply").next(MultiplyNode.class).next(RemainderNode.class).build();
 
         flowEngine.builder().id("demo_branch_bit_or")
-                .next("demo_add")
+                .next(AddNode.class)
                 .all("demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_or_concurrent")
-                .next("demo_add")
+                .next(AddNode.class)
                 .concurrent(new AddBranchBitOrResult(), "demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_or_future")
-                .next("demo_add")
+                .next(AddNode.class)
                 .future("demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
                 .wait(new AddBranchBitOrResult(),"demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_or_all")
-                .next("demo_add")
+                .next(AddNode.class)
                 .all("demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_or_notify")
-                .next("demo_add")
+                .next(AddNode.class)
                 .notify("demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
-        flowEngine.builder().id("demo_branch_bit_xor_reduce").next("demo_reduce").next("demo_bit_xor").result("demo_remainder").build();
-        flowEngine.builder().id("demo_branch_bit_xor_multiply").next("demo_multiply").result("demo_remainder").build();
+        flowEngine.builder().id("demo_branch_bit_xor_reduce").next(ReduceNode.class).next(BitXorNode.class).next(RemainderNode.class).build();
+        flowEngine.builder().id("demo_branch_bit_xor_multiply").next(MultiplyNode.class).next(RemainderNode.class).build();
 
         flowEngine.builder().id("demo_branch_bit_xor")
-                .next("demo_add")
+                .next(AddNode.class)
                 .next("demo_branch_bit_xor_reduce")
                 .next("demo_branch_bit_xor_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_xor_concurrent")
-                .next("demo_add")
+                .next(AddNode.class)
                 .concurrent(new AddBranchBitAndResult(),"demo_branch_bit_xor_reduce", "demo_branch_bit_xor_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_xor_future")
-                .next("demo_add")
+                .next(AddNode.class)
                 .future("demo_branch_bit_xor_multiply", "demo_branch_bit_xor_reduce")
                 .wait(new AddBranchBitAndResult(),"demo_branch_bit_xor_reduce", "demo_branch_bit_xor_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_xor_all")
-                .next("demo_add")
+                .next(AddNode.class)
                 .all("demo_branch_bit_xor_reduce", "demo_branch_bit_xor_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
 
         flowEngine.builder().id("demo_branch_bit_xor_notify")
-                .next("demo_add")
+                .next(AddNode.class)
                 .notify("demo_branch_bit_xor_reduce", "demo_branch_bit_xor_multiply")
-                .result("demo_division")
+                .next(DivisionNode.class)
                 .build();
     }
 
     private static class AddBitAndResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getPassResult("demo_reduce") != null ?  (Integer) iContextBus.getPassResult("demo_reduce") : 0;
-            Integer demoMultiplyResult = iContextBus.getPassResult("demo_multiply") != null ? (Integer) iContextBus.getPassResult("demo_multiply"): 0;
-            Integer demoBitAndResult = iContextBus.getPassResult("demo_bit_and") != null ? (Integer) iContextBus.getPassResult("demo_bit_and"): 0;
+            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getPassResult(ReduceNode.class.getName()) : 0;
+            Integer demoMultiplyResult = iContextBus.getPassResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(MultiplyNode.class.getName()): 0;
+            Integer demoBitAndResult = iContextBus.getPassResult(BitAndNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(BitAndNode.class.getName()): 0;
             Integer handleResult = demoReduceResult + demoMultiplyResult + demoBitAndResult;
             System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "+" + demoBitAndResult + "=" + handleResult);
             return handleResult;
@@ -243,9 +247,9 @@ public class StopFlowInit implements IFlowInit {
     private static class AddBitOrResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getPassResult("demo_reduce") != null ?  (Integer) iContextBus.getPassResult("demo_reduce") : 0;
-            Integer demoMultiplyResult = iContextBus.getPassResult("demo_multiply") != null ? (Integer) iContextBus.getPassResult("demo_multiply"): 0;
-            Integer demoBitAndResult = iContextBus.getPassResult("demo_bit_or") != null ? (Integer) iContextBus.getPassResult("demo_bit_or"): 0;
+            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getPassResult(ReduceNode.class.getName()) : 0;
+            Integer demoMultiplyResult = iContextBus.getPassResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(MultiplyNode.class.getName()): 0;
+            Integer demoBitAndResult = iContextBus.getPassResult(BitOrNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(BitOrNode.class.getName()): 0;
             Integer handleResult = demoReduceResult + demoMultiplyResult + demoBitAndResult;
             System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "+" + demoBitAndResult + "=" + handleResult);
             return handleResult;

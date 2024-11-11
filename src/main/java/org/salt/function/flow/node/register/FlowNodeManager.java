@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.node.IFlowNode;
-import org.salt.function.flow.util.FlowUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,14 +30,7 @@ public class FlowNodeManager {
     private Map<String, IFlowNode> flowNodeMap = new HashMap<>();
 
     public void doRegistration(IFlowNode iFlowNode) {
-        Class<?> nodeClazz = getNodeClazz(iFlowNode);
-        NodeIdentity nodeIdentity = nodeClazz.getDeclaredAnnotation(NodeIdentity.class);
-        String nodeId;
-        if (nodeIdentity != null) {
-            nodeId = nodeIdentity.nodeId();
-        } else {
-            nodeId = iFlowNode.nodeId();
-        }
+        String nodeId = iFlowNode.nodeId();
         if (StringUtils.isEmpty(nodeId)) {
             throw new RuntimeException("nodeId or extConfig must not be all null ");
         }
@@ -50,20 +42,6 @@ public class FlowNodeManager {
 
     public IFlowNode getIFlowNode(String nodeId) {
         return flowNodeMap.get(nodeId);
-    }
-
-    private Class<?> getNodeClazz(IFlowNode iFlowNode) {
-        Object target = null;
-        try {
-            target = FlowUtil.getTarget(iFlowNode);
-        } catch (Exception ex) {
-            log.error("", ex);
-        }
-        if (target == null) {
-            throw new RuntimeException("get aop target failed with error :" + iFlowNode.getClass());
-        }
-
-        return target.getClass();
     }
 
     public <R> R execute(String nodeId) {
@@ -91,19 +69,4 @@ public class FlowNodeManager {
             iFlowNode.process();
         }
     }
-
-//    public <R> R execute(String nodeId, Function<IFlowNode, R> exeFunction) {
-//        IFlowNode iFlowNode = flowNodeMap.get(nodeId);
-//        if (iFlowNode != null) {
-//            return exeFunction.apply(iFlowNode);
-//        }
-//        return null;
-//    }
-//
-//    public void executeVoid(String nodeId, Consumer<IFlowNode> exeFunction) {
-//        IFlowNode IFlowNode = flowNodeMap.get(nodeId);
-//        if (IFlowNode != null) {
-//            exeFunction.accept(IFlowNode);
-//        }
-//    }
 }

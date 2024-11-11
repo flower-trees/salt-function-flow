@@ -31,19 +31,19 @@ public class FlowNodeWait<P> extends FlowNodeStructure<P> {
         long lastTimeout = theadHelper.getTimeout();
         for (Info info : infoList) {
             if (lastTimeout <= 0) {
-                ((ContextBus) iContextBus).putPassException(info.id, new RuntimeException("beyond maxTimeout"));
+                ((ContextBus) iContextBus).putPassException(info.getId(), new RuntimeException("beyond maxTimeout"));
                 return result(iContextBus, true);
             }
             long start = System.currentTimeMillis();
             try {
-                P result = (P) ((ContextBus) iContextBus).getPassResult(info.id, lastTimeout);
+                P result = (P) ((ContextBus) iContextBus).getPassResult(info.getId(), lastTimeout);
                 if (result != null) {
-                    ((ContextBus) iContextBus).putPassResult(info.id, result);
+                    ((ContextBus) iContextBus).putPassResult(info.getId(), result);
                 } else {
-                    ((ContextBus) iContextBus).removePassResult(info.id);
+                    ((ContextBus) iContextBus).removePassResult(info.getId());
                 }
             } catch (Exception e) {
-                ((ContextBus) iContextBus).putPassException(info.id, e);
+                ((ContextBus) iContextBus).putPassException(info.getId(), e);
             }
             lastTimeout -= System.currentTimeMillis() - start;
         }

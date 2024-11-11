@@ -12,23 +12,18 @@
  * limitations under the License.
  */
 
-package org.salt.function.flow.test.thread.node;
+package org.salt.function.flow.demo.math.node;
 
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "demo_bit_right")
-public class DemoBitRightNode extends FlowNode<Integer, Integer> {
+@NodeIdentity
+public class DivisionNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer preResult) {
-        try {
-            Thread.sleep(15);
-        } catch (InterruptedException e) {
-        }
-        System.out.println("CurrentThread: " + Thread.currentThread().getName());
-        Integer result = preResult >> 1;
-        System.out.println("DemoBitRightNode: " + preResult + ">>1=" + result);
+    public Integer doProcess(Integer num) {
+        Integer result = num / 12;
+        System.out.println("Division: " + num + "/12=" + result);
         return result;
     }
 }

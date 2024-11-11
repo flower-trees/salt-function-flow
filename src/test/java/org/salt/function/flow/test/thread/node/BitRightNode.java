@@ -12,24 +12,23 @@
  * limitations under the License.
  */
 
-package org.salt.function.flow.test.stop.node;
+package org.salt.function.flow.test.thread.node;
 
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "demo_bit_and")
-public class DemoBitAndNode extends FlowNode<Integer, Integer> {
+@NodeIdentity
+public class BitRightNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer preResult) {
-        if (preResult > 500) {
-            System.out.println("DemoBitAndNode: stop flow");
-            getContextBus().stopProcess();
-        } else {
-            Integer result = preResult & 256;
-            System.out.println("DemoBitAndNode: " + preResult + "&256=" + result);
-            return result;
+    public Integer doProcess(Integer num) {
+        try {
+            Thread.sleep(15);
+        } catch (InterruptedException e) {
         }
-        return null;
+        System.out.println("CurrentThread: " + Thread.currentThread().getName());
+        Integer result = num >> 1;
+        System.out.println("DemoBitRightNode: " + num + ">>1=" + result);
+        return result;
     }
 }

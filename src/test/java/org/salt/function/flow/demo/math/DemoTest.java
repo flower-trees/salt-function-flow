@@ -20,6 +20,10 @@ import org.junit.runner.RunWith;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.FlowInstance;
 import org.salt.function.flow.TestApplication;
+import org.salt.function.flow.demo.math.node.AddNode;
+import org.salt.function.flow.demo.math.node.DivisionNode;
+import org.salt.function.flow.demo.math.node.MultiplyNode;
+import org.salt.function.flow.demo.math.node.ReduceNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -182,13 +186,13 @@ public class DemoTest {
             int a = (new Random()).nextInt(20);
             String flowID = "demo_flow_dynamic_" + i;
             FlowEngine.Builder builder = flowEngine.builder().id(flowID);
-            builder.next("demo_add");
+            builder.next(AddNode.class);
             if (a < 10) {
-                builder.next("demo_reduce");
+                builder.next(ReduceNode.class);
             } else {
-                builder.next("demo_multiply");
+                builder.next(MultiplyNode.class);
             }
-            builder.result("demo_division");
+            builder.next(DivisionNode.class);
             FlowInstance flowInstance = builder.buildDynamic();
             System.out.println(flowID + " a: " + a);
             System.out.println(flowID + " test: ");

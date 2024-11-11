@@ -33,7 +33,7 @@ public class TrainFlowInit implements IFlowInit {
                 .next(
                         Info.builder().include("age < 14").id("child_ticket").build(),
                         Info.builder().include("age >= 14").id("adult_tickt").build())
-                .result("ticket_result")
+                .next("ticket_result")
                 .build();
 
         flowEngine.builder().id("train_ticket_match")
@@ -41,7 +41,7 @@ public class TrainFlowInit implements IFlowInit {
                 .next(
                         Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14).id("child_ticket").build(),
                         Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14).id("adult_tickt").build())
-                .result("ticket_result")
+                .next("ticket_result")
                 .build();
 
         flowEngine.builder().id("train_ticket_input")
@@ -58,7 +58,7 @@ public class TrainFlowInit implements IFlowInit {
                 .next(
                         Info.builder().include("age < 14").id("child_ticket").build(),
                         Info.builder().include("age >= 14").id("adult_tickt").build())
-                .result("ticket_result")
+                .next("ticket_result")
                 .build();
     }
 }

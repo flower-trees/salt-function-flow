@@ -12,18 +12,24 @@
  * limitations under the License.
  */
 
-package org.salt.function.flow.demo.math.node;
+package org.salt.function.flow.test.stop.node;
 
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "demo_multiply")
-public class DemoMultiplyNode extends FlowNode<Integer, Integer> {
+@NodeIdentity
+public class BitAndNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer preResult) {
-        Integer result = preResult * 73;
-        System.out.println("DemoMultiplyNode: " + preResult + "*73=" + result);
-        return result;
+    public Integer doProcess(Integer num) {
+        if (num > 500) {
+            System.out.println("DemoBitAndNode: stop flow");
+            getContextBus().stopProcess();
+        } else {
+            Integer result = num & 256;
+            System.out.println("DemoBitAndNode: " + num + "&256=" + result);
+            return result;
+        }
+        return null;
     }
 }

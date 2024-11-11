@@ -34,9 +34,9 @@ public class FlowNodeConcurrent<P> extends FlowNodeStructure<P> {
         for (Info info : infoList) {
             theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
                 try {
-                    executeVoid(info.id);
+                    executeVoid(info.getId());
                 } catch (Exception e) {
-                    ((ContextBus) iContextBus).putPassException(info.id, e);
+                    ((ContextBus) iContextBus).putPassException(info.getId(), e);
                 } finally {
                     finalCountDownLatch.countDown();
                 }

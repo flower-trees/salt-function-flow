@@ -17,13 +17,13 @@ package org.salt.function.flow.demo.math.node;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "demo_reduce")
-public class DemoReduceNode extends FlowNode<Integer, Integer> {
+@NodeIdentity
+public class MultiplyNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer preResult) {
-        Integer result = preResult - 15;
-        System.out.println("DemoReduceNode: " + preResult + "-15=" + result) ;
+    public Integer doProcess(Integer num) {
+        Integer result = num * 73;
+        System.out.println("Multiply: " + num + "*73=" + result);
         return result;
     }
 }

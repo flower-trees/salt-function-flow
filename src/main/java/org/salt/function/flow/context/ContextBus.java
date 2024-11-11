@@ -187,17 +187,17 @@ public class ContextBus implements IContextBus {
         return null;
     }
 
-    public void copyNotify() {
+    public void copy() {
         ContextBus contextBus = ContextBus.builder()
                 .id("context-bus-" + UUID.randomUUID().toString().replaceAll("-", ""))
                 .param(param)
-                .conditionMap(conditionMap)
-                .passResultMap(passResultMap)
-                .passExceptionMap(passExceptionMap)
-                .transmitMap(transmitMap)
+                .conditionMap(new ConcurrentHashMap<>(conditionMap))
+                .passResultMap(new ConcurrentHashMap<>(passResultMap))
+                .passExceptionMap(new ConcurrentHashMap<>(passExceptionMap))
+                .transmitMap(new ConcurrentHashMap<>(transmitMap))
                 .runtimeId(runtimeId)
                 .rollbackList(new LinkedList<>())
-                .functionMap(functionMap)
+                .functionMap(new ConcurrentHashMap<>(functionMap))
                 .build();
         TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
     }
