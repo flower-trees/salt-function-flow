@@ -16,7 +16,6 @@ package org.salt.function.flow.node.structure.internal;
 
 import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.context.ContextBus;
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 @Slf4j
@@ -25,7 +24,7 @@ public class FlowNodeResult<P> extends FlowNodeStructure<P> {
     private String nodeIdResult;
 
     @Override
-    public P doProcess() {
+    public P doProcess(Object input) {
         ContextBus contextBus = (ContextBus) getContextBus();
         P result = flowNodeManager.execute(nodeIdResult);
         if (result != null) {

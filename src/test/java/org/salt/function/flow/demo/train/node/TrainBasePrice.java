@@ -14,17 +14,17 @@
 
 package org.salt.function.flow.demo.train.node;
 
-import org.salt.function.flow.demo.train.param.Station;
-import org.salt.function.flow.node.FlowNodeWithReturnAndInput;
+import org.salt.function.flow.demo.train.param.Passenger;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
 @NodeIdentity(nodeId = "base_price")
-public class TrainBasePrice extends FlowNodeWithReturnAndInput<Integer, Station> {
+public class TrainBasePrice extends FlowNode<Integer, Passenger> {
 
     @Override
-    public Integer doProcessWithInput(Station station) {
-        if (station != null) {
-            System.out.println("Passengers travel from " + station.getFrom() + " to " + station.getTo());
+    public Integer doProcess(Passenger passenger) {
+        if (passenger != null) {
+            System.out.println("Passengers travel from " + passenger.getFrom() + " to " + passenger.getTo());
         }
         System.out.println("Calculate the basic train ticket price 300");
         return 300;

@@ -12,18 +12,21 @@
  * limitations under the License.
  */
 
-package org.salt.function.flow.demo.math.node;
+package org.salt.function.flow.demo.train.node;
 
+import org.salt.function.flow.demo.train.param.Station;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "demo_division")
-public class DemoDivisionNode extends FlowNode<Integer, Integer> {
+@NodeIdentity(nodeId = "base_price_station")
+public class TrainBasePriceStation extends FlowNode<Integer, Station> {
 
     @Override
-    public Integer doProcess(Integer preResult) {
-        Integer result = preResult / 12;
-        System.out.println("DemoDivisionNode: " + preResult + "/12=" + result);
-        return result;
+    public Integer doProcess(Station station) {
+        if (station != null) {
+            System.out.println("Passengers travel from " + station.getFrom() + " to " + station.getTo());
+        }
+        System.out.println("Calculate the basic train ticket price 300");
+        return 300;
     }
 }

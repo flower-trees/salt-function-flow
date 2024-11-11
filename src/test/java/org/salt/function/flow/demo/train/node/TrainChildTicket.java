@@ -14,14 +14,13 @@
 
 package org.salt.function.flow.demo.train.node;
 
-import org.salt.function.flow.node.FlowNodeWithReturn;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
 @NodeIdentity(nodeId = "child_ticket")
-public class TrainChildTicket extends FlowNodeWithReturn<Integer> {
+public class TrainChildTicket extends FlowNode<Integer, Integer> {
     @Override
-    public Integer doProcess() {
-        int basePrice = getContextBus().getPassResult("base_price");
+    public Integer doProcess(Integer basePrice) {
         int childTicket = basePrice / 2;
         System.out.println("Issue child ticket " + childTicket);
         return childTicket;

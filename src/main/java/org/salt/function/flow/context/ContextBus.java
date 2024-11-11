@@ -42,13 +42,11 @@ public class ContextBus implements IContextBus {
     /**
      * Flow call parameters
      */
-    @Getter
     private Object param;
 
     /**
      * Flow call result
      */
-    @Getter
     private Object result;
 
     /**
@@ -94,6 +92,14 @@ public class ContextBus implements IContextBus {
      * Thread delivery cache
      */
     private ConcurrentMap<String, Function<IContextBus, ?>> functionMap;
+
+    public <P> P getParam() {
+        return (P) this.param;
+    }
+
+    public <P> P getResult() {
+        return (P) this.result;
+    }
 
 
     public <R> void setResult(R result) {

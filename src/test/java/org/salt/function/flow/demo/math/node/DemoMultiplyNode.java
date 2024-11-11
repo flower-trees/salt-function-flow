@@ -14,15 +14,14 @@
 
 package org.salt.function.flow.demo.math.node;
 
-import org.salt.function.flow.node.FlowNodeWithReturn;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
 @NodeIdentity(nodeId = "demo_multiply")
-public class DemoMultiplyNode extends FlowNodeWithReturn<Integer> {
+public class DemoMultiplyNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess() {
-        Integer preResult = (Integer) getContextBus().getPreResult();
+    public Integer doProcess(Integer preResult) {
         Integer result = preResult * 73;
         System.out.println("DemoMultiplyNode: " + preResult + "*73=" + result);
         return result;

@@ -29,10 +29,10 @@ public class FlowNodeNotify<P> extends FlowNodeStructure<P> {
         for (Info info : infoList) {
             theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
                 try {
+                    ((ContextBus) iContextBus).copyNotify();
                     if (isFlowNode(info.id)) {
                         flowNodeManager.executeVoidSingle(info.id);
                     } else {
-                        ((ContextBus) iContextBus).copyNotify();
                         flowEngine.executeBranchVoid(info.id);
                     }
                 } catch (Exception e) {

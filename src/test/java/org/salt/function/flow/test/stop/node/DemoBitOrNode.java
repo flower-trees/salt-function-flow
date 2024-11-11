@@ -14,15 +14,14 @@
 
 package org.salt.function.flow.test.stop.node;
 
-import org.salt.function.flow.node.FlowNodeWithReturn;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
 @NodeIdentity(nodeId = "demo_bit_or")
-public class DemoBitOrNode extends FlowNodeWithReturn<Integer> {
+public class DemoBitOrNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess() {
-        Integer preResult = (Integer) getContextBus().getPreResult();
+    public Integer doProcess(Integer preResult) {
         if (preResult > 500) {
             System.out.println("DemoBitOrNode: throw exception");
             throw new RuntimeException("DemoBitOrNode Exception!");

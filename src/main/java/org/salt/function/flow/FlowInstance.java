@@ -59,7 +59,7 @@ public class FlowInstance {
                     break;
                 }
             }
-            return (R) contextBus.getResult();
+            return contextBus.getResult();
         }
         throw new RuntimeException("processInstance node list is empty.");
     }

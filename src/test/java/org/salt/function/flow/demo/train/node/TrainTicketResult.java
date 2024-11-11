@@ -15,14 +15,13 @@
 package org.salt.function.flow.demo.train.node;
 
 import org.salt.function.flow.demo.train.param.Ticket;
-import org.salt.function.flow.node.FlowNodeWithReturn;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
 @NodeIdentity(nodeId = "ticket_result")
-public class TrainTicketResult extends FlowNodeWithReturn<Ticket> {
+public class TrainTicketResult extends FlowNode<Ticket, Integer> {
     @Override
-    public Ticket doProcess() {
-        int price = (int) getContextBus().getPreResult();
+    public Ticket doProcess(Integer price) {
         System.out.println("Issue ticket result, price " + price);
         return Ticket.builder().result(true).price(price).build();
     }

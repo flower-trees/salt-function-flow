@@ -18,14 +18,11 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.context.ContextBus;
-import org.salt.function.flow.node.FlowNodeWithReturn;
 import org.salt.function.flow.node.IFlowNode;
 import org.salt.function.flow.util.FlowUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Data
 @Slf4j
@@ -71,8 +68,9 @@ public class FlowNodeManager {
 
     public <R> R execute(String nodeId) {
         IFlowNode iFlowNode = flowNodeMap.get(nodeId);
-        if (iFlowNode != null && iFlowNode instanceof FlowNodeWithReturn) {
-            R result = (R) ((FlowNodeWithReturn) iFlowNode).doProcess();
+        if (iFlowNode != null) {
+            iFlowNode.process();
+            R result = ContextBus.get().getPreResult();
             ((ContextBus) ContextBus.get()).roolbackExec(iFlowNode);
             return result;
         }
@@ -94,18 +92,18 @@ public class FlowNodeManager {
         }
     }
 
-    public <R> R execute(String nodeId, Function<IFlowNode, R> exeFunction) {
-        IFlowNode iFlowNode = flowNodeMap.get(nodeId);
-        if (iFlowNode != null) {
-            return exeFunction.apply(iFlowNode);
-        }
-        return null;
-    }
-
-    public void executeVoid(String nodeId, Consumer<IFlowNode> exeFunction) {
-        IFlowNode IFlowNode = flowNodeMap.get(nodeId);
-        if (IFlowNode != null) {
-            exeFunction.accept(IFlowNode);
-        }
-    }
+//    public <R> R execute(String nodeId, Function<IFlowNode, R> exeFunction) {
+//        IFlowNode iFlowNode = flowNodeMap.get(nodeId);
+//        if (iFlowNode != null) {
+//            return exeFunction.apply(iFlowNode);
+//        }
+//        return null;
+//    }
+//
+//    public void executeVoid(String nodeId, Consumer<IFlowNode> exeFunction) {
+//        IFlowNode IFlowNode = flowNodeMap.get(nodeId);
+//        if (IFlowNode != null) {
+//            exeFunction.accept(IFlowNode);
+//        }
+//    }
 }

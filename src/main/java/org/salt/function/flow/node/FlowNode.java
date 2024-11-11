@@ -14,14 +14,19 @@
 
 package org.salt.function.flow.node;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.register.NodeIdentity;
+import org.salt.function.flow.util.FlowUtil;
 import org.springframework.beans.factory.InitializingBean;
 
+@Setter
 @Slf4j
-public abstract class FlowNode implements IFlowNode, InitializingBean {
+public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
 
     protected String nodeId;
 
@@ -38,11 +43,37 @@ public abstract class FlowNode implements IFlowNode, InitializingBean {
         return nodeId;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
     protected IContextBus getContextBus() {
         return ContextBus.get();
     }
+
+    public void process() {
+        ContextBus contextBus = ((ContextBus) getContextBus());
+        I input = getContextBus().getPreResult();
+        Info info = ContextBus.getNodeInfo(FlowUtil.getNodeInfoKey(nodeId));
+        if (info != null && info.input != null) {
+            input = (I) info.input.apply(contextBus);
+        }
+        O result = doProcess(input);
+        if (result != null) {
+            String idTmp = nodeId;
+            Object adapterResult = null;
+            if (info != null) {
+                if (info.output != null) {
+                    adapterResult = info.output.apply(contextBus, result);
+                }
+                if (StringUtils.isNotEmpty(info.idAlias)) {
+                    idTmp = info.idAlias;
+                }
+            }
+            if (adapterResult != null) {
+                contextBus.putPassResult(idTmp, adapterResult);
+            } else {
+                contextBus.putPassResult(idTmp, result);
+            }
+            ContextBus.putLastNodeId(idTmp);
+        }
+    }
+
+    public abstract O doProcess(I input);
 }

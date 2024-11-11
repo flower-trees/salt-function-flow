@@ -46,9 +46,9 @@ public class TrainFlowInit implements IFlowInit {
 
         flowEngine.builder().id("train_ticket_input")
                 .next(
-                        Info.builder().id("base_price")
+                        Info.builder().id("base_price_station")
                                 .input(iContextBus -> {
-                                    Passenger passenger = (Passenger) iContextBus.getParam();
+                                    Passenger passenger = iContextBus.getParam();
                                     return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
                                 })
                                 .output((iContextBus, result) -> {

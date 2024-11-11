@@ -14,21 +14,20 @@
 
 package org.salt.function.flow.test.thread.node;
 
-import org.salt.function.flow.node.FlowNodeWithReturn;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 import org.salt.function.flow.test.thread.TestThreadContent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @NodeIdentity(nodeId = "demo_bit_left")
-public class DemoBitLeftNode extends FlowNodeWithReturn<Integer> {
+public class DemoBitLeftNode extends FlowNode<Integer, Integer> {
 
     @Autowired
     TestThreadContent testThreadContent;
 
     @Override
-    public Integer doProcess() {
+    public Integer doProcess(Integer preResult) {
         System.out.println("TheadLocal: " + testThreadContent.get("test"));
-        Integer preResult = (Integer) getContextBus().getPreResult();
         Integer result = preResult << 1;
         System.out.println("DemoBitLeftNode: " + preResult + "<<1=" + result);
         return result;

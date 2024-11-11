@@ -14,12 +14,13 @@
 
 package org.salt.function.flow.node.structure;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
-import org.salt.function.flow.node.FlowNodeWithReturn;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.node.register.FlowNodeManager;
 import org.salt.function.flow.thread.TheadHelper;
@@ -30,43 +31,31 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class FlowNodeStructure<P> extends FlowNodeWithReturn<P> {
+public abstract class FlowNodeStructure<P> extends FlowNode<P, Object> {
 
+    @Setter
     protected FlowEngine flowEngine;
 
+    @Setter
     protected FlowNodeManager flowNodeManager;
 
+    @Setter
     protected IResult<P> result;
 
     protected List<Info<P, ?>> infoList;
 
+    @Setter
     protected TheadHelper theadHelper;
-
-    public void setFlowEngine(FlowEngine flowEngine) {
-        this.flowEngine = flowEngine;
-    }
-
-    public void setFlowNodeManager(FlowNodeManager flowNodeManager) {
-        this.flowNodeManager = flowNodeManager;
-    }
-
-    public void setResult(IResult<P> result) {
-        this.result = result;
-    }
 
     public void setNodeInfoList(List<Info<P, ?>> infoList) {
         this.infoList = infoList;
-    }
-
-    public void setTheadHelper(TheadHelper theadHelper) {
-        this.theadHelper = theadHelper;
     }
 
     protected boolean isFlowNode(String nodeId) {
         return flowNodeManager.getIFlowNode(nodeId) != null;
     }
 
-    public P doProcess() {
+    public P doProcess(Object input) {
         if (CollectionUtils.isEmpty(infoList)) {
             return null;
         }

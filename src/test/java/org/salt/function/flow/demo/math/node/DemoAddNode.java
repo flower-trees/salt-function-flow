@@ -14,15 +14,14 @@
 
 package org.salt.function.flow.demo.math.node;
 
-import org.salt.function.flow.node.FlowNodeWithReturn;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
 @NodeIdentity(nodeId = "demo_add")
-public class DemoAddNode extends FlowNodeWithReturn<Integer> {
+public class DemoAddNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess() {
-        Integer preResult = (Integer) getContextBus().getPreResult();
+    public Integer doProcess(Integer preResult) {
         Integer result = preResult + 123;
         System.out.println("DemoAddNode: " + preResult + "+123=" + result);
         return result;

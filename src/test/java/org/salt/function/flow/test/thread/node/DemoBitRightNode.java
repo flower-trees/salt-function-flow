@@ -14,20 +14,19 @@
 
 package org.salt.function.flow.test.thread.node;
 
-import org.salt.function.flow.node.FlowNodeWithReturn;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
 @NodeIdentity(nodeId = "demo_bit_right")
-public class DemoBitRightNode extends FlowNodeWithReturn<Integer> {
+public class DemoBitRightNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess() {
+    public Integer doProcess(Integer preResult) {
         try {
             Thread.sleep(15);
         } catch (InterruptedException e) {
         }
         System.out.println("CurrentThread: " + Thread.currentThread().getName());
-        Integer preResult = (Integer) getContextBus().getPreResult();
         Integer result = preResult >> 1;
         System.out.println("DemoBitRightNode: " + preResult + ">>1=" + result);
         return result;
