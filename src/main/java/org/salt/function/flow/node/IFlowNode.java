@@ -14,10 +14,8 @@
 
 package org.salt.function.flow.node;
 
-import org.salt.function.flow.context.IContextBus;
-
 public interface IFlowNode {
     String nodeId();
     void process();
-    default <T, R> void rollback(IContextBus<T, R> iContextBus) {}
+    default void rollback() {}
 }

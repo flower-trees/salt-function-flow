@@ -85,7 +85,7 @@ public abstract class FlowNodeStructure<P> extends FlowNodeWithReturn<P> {
         if (isFlowNode(id)) {
             return flowNodeManager.execute(id);
         } else {
-            return (P) flowEngine.executeBranch(id);
+            return flowEngine.executeBranch(id);
         }
     }
 

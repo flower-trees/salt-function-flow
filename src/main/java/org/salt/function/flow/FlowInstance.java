@@ -37,18 +37,16 @@ public class FlowInstance {
     }
 
     protected <T, R> R execute(T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap) {
-        ContextBus<T, R> contextBus = ContextBus.create(param, conditionMap);
+        ContextBus contextBus = ContextBus.create(param, conditionMap);
         if (transmitMap != null && !transmitMap.isEmpty()) {
-            transmitMap.forEach((k, v) -> {
-                contextBus.putTransmitInfo(k, v);
-            });
+            transmitMap.forEach(contextBus::putTransmitInfo);
         }
         return execute();
     }
 
-    protected <T, R> R execute() {
+    protected <R> R execute() {
         if (!CollectionUtils.isEmpty(nodeList)) {
-            ContextBus<T, R> contextBus = (ContextBus<T, R>) ContextBus.get();
+            ContextBus contextBus = (ContextBus) ContextBus.get();
             for (String nodeId : nodeList) {
                 flowEngine.flowNodeManager.executeVoidSingle(nodeId);
                 if (contextBus.isRollbackProcess()) {
@@ -61,7 +59,7 @@ public class FlowInstance {
                     break;
                 }
             }
-            return contextBus.getResult();
+            return (R) contextBus.getResult();
         }
         throw new RuntimeException("processInstance node list is empty.");
     }

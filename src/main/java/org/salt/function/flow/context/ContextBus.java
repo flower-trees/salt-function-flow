@@ -29,24 +29,27 @@ import java.util.function.Function;
 
 @Builder
 @Slf4j
-public class ContextBus<T, R> implements IContextBus<T, R> {
+public class ContextBus implements IContextBus {
 
+    /**
+     * ContextBus id
+     */
     @Getter
     private String id;
 
     private static String LAST_NODE_ID_KEY = "thead_last_node_id_key";
 
-    private static String CONTEXT_BUS_KEY = "thead_context_bus_key";
-
     /**
      * Flow call parameters
      */
-    private T param;
+    @Getter
+    private Object param;
 
     /**
      * Flow call result
      */
-    private R result;
+    @Getter
+    private Object result;
 
     /**
      * Store additional transmission context information
@@ -90,20 +93,10 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
     /**
      * Thread delivery cache
      */
-    private ConcurrentMap<String, Function<IContextBus<T, R>, ?>> functionMap;
+    private ConcurrentMap<String, Function<IContextBus, ?>> functionMap;
 
 
-    @Override
-    public T getParam() {
-        return param;
-    }
-
-    @Override
-    public R getResult() {
-        return result;
-    }
-
-    public void setResult(R result) {
+    public <R> void setResult(R result) {
         this.result = result;
     }
 
@@ -142,7 +135,7 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
         passResultMap.put(nodeId, result);
     }
 
-    public <P> void removePassResult(String nodeId) {
+    public void removePassResult(String nodeId) {
         passResultMap.remove(nodeId);
     }
 
@@ -189,8 +182,8 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
     }
 
     public void copyNotify() {
-        ContextBus<T, R> contextBus = ContextBus.<T, R>builder()
-                .id(UUID.randomUUID().toString())
+        ContextBus contextBus = ContextBus.builder()
+                .id("context-bus-" + UUID.randomUUID().toString().replaceAll("-", ""))
                 .param(param)
                 .conditionMap(conditionMap)
                 .passResultMap(passResultMap)
@@ -203,7 +196,7 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
         TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
     }
 
-    public static <T, R> ContextBus<T, R> create(T param, Map<String, Object> conditionMap) {
+    public static ContextBus create(Object param, Map<String, Object> conditionMap) {
         Map<String, Object> conditionTmp = conditionMap;
         if (conditionTmp == null) {
             try {
@@ -224,14 +217,13 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
                 throw new RuntimeException("param to conditionMap error");
             }
         }
-        ContextBus<T, R> contextBus = ContextBus.<T, R>builder()
-                .id(UUID.randomUUID().toString())
+        ContextBus contextBus = ContextBus.builder()
+                .id("context-bus-" + UUID.randomUUID().toString().replaceAll("-", ""))
                 .param(param)
                 .conditionMap(conditionTmp != null ? new ConcurrentHashMap<>(conditionTmp) : new ConcurrentHashMap<>())
                 .passResultMap(new ConcurrentHashMap<>())
                 .passExceptionMap(new ConcurrentHashMap<>())
                 .transmitMap(new ConcurrentHashMap<>())
-//                .flowId(flowId)
                 .runtimeId(UUID.randomUUID().toString().replaceAll("-", ""))
                 .rollbackList(new LinkedList<>())
                 .functionMap(new ConcurrentHashMap<>())
@@ -262,8 +254,9 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
         for(int i=rollbackList.size()-1; i>=0; i--) {
             IFlowNode execNode = rollbackList.pop();
             try {
-                execNode.rollback(this);
+                execNode.rollback();
             } catch (Exception e) {
+                log.warn("roolbackAll fail", e);
             }
         }
     }
@@ -271,7 +264,7 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
     public synchronized boolean roolbackExec(IFlowNode iFlowNode) {
         if (rollbackFlag) {
             try {
-                iFlowNode.rollback(this);
+                iFlowNode.rollback();
             } catch (Exception e) {
             }
             return true;

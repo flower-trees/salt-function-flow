@@ -21,7 +21,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class TrainChildTicket extends FlowNodeWithReturn<Integer> {
     @Override
     public Integer doProcess() {
-        int basePrice = (int) getContextBus().getPassResult("base_price");
+        int basePrice = getContextBus().getPassResult("base_price");
         int childTicket = basePrice / 2;
         System.out.println("Issue child ticket " + childTicket);
         return childTicket;

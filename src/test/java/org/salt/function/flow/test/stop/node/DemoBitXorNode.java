@@ -14,7 +14,6 @@
 
 package org.salt.function.flow.test.stop.node;
 
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNodeWithReturn;
 import org.salt.function.flow.node.register.NodeIdentity;
 
@@ -36,7 +35,7 @@ public class DemoBitXorNode extends FlowNodeWithReturn<Integer> {
     }
 
     @Override
-    public <T, R> void rollback(IContextBus<T, R> iContextBus) {
+    public void rollback() {
         System.out.println("DemoBitOrNode: rollback execute");
     }
 }

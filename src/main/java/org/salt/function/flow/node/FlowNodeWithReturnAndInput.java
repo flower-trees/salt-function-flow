@@ -24,7 +24,7 @@ public abstract class FlowNodeWithReturnAndInput<P, I> extends FlowNodeWithRetur
 
     @Override
     public P doProcess() {
-        ContextBus<Object, Object> contextBus = ((ContextBus<Object, Object>) getContextBus());
+        ContextBus contextBus = ((ContextBus) getContextBus());
         Info info = ContextBus.getNodeInfo(FlowUtil.getNodeInfoKey(nodeId));
         I input = null;
         if (info != null && info.input != null) {

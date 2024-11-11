@@ -16,22 +16,22 @@ package org.salt.function.flow.context;
 
 import java.util.Map;
 
-public interface IContextBus<T, R> {
+public interface IContextBus {
 
     /**
      * Get flow execution parameters
      */
-    T getParam();
+    <T> T getParam();
 
     /**
      * Get flow execution result
      */
-    R getResult();
+    <R> R getResult();
 
     /**
      * Set flow execution result
      */
-    void setResult(R result);
+    <R> void setResult(R result);
 
     /**
      * Put additional transmission context information

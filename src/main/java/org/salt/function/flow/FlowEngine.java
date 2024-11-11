@@ -90,7 +90,7 @@ public class FlowEngine implements InitializingBean {
         return flowInstance.execute(param, transmitMap, conditionMap);
     }
 
-    public <T, R> R execute(String flowId) {
+    public <R> R execute(String flowId) {
         FlowInstance flowInstance = processInstanceMap.get(flowId);
         if (flowInstance != null) {
             return flowInstance.execute();
@@ -98,7 +98,7 @@ public class FlowEngine implements InitializingBean {
         throw new RuntimeException("no have this process");
     }
 
-    public <T, R> R executeBranch(String flowId) {
+    public <R> R executeBranch(String flowId) {
         ContextBus contextBusChild = (ContextBus) ContextBus.get();
         R result = execute(flowId);
         if (contextBusChild.isRollbackProcess()) {
@@ -110,7 +110,7 @@ public class FlowEngine implements InitializingBean {
         return result;
     }
 
-    public <T, R> R executeBranchVoid(String id) {
+    public <R> R executeBranchVoid(String id) {
         R result = executeBranch(id);
         if (result != null) {
             ((ContextBus) ContextBus.get()).putPassResult(id, result);

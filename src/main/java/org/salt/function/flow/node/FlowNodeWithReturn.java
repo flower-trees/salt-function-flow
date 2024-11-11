@@ -24,7 +24,7 @@ import org.salt.function.flow.util.FlowUtil;
 public abstract class FlowNodeWithReturn<P> extends FlowNode {
 
     public void process() {
-        ContextBus<Object, Object> contextBus = ((ContextBus) getContextBus());
+        ContextBus contextBus = ((ContextBus) getContextBus());
         P result = doProcess();
         if (result != null) {
             String idTmp = nodeId;
