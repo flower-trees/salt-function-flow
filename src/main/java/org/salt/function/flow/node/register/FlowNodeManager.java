@@ -18,7 +18,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.context.ContextBus;
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNodeWithReturn;
 import org.salt.function.flow.node.IFlowNode;
 import org.salt.function.flow.util.FlowUtil;
@@ -70,28 +69,28 @@ public class FlowNodeManager {
         return target.getClass();
     }
 
-    public <R> R execute(IContextBus iContextBus, String nodeId) {
+    public <R> R execute(String nodeId) {
         IFlowNode iFlowNode = flowNodeMap.get(nodeId);
         if (iFlowNode != null && iFlowNode instanceof FlowNodeWithReturn) {
-            R result = (R) ((FlowNodeWithReturn) iFlowNode).doProcess(iContextBus);
-            ((ContextBus) iContextBus).roolbackExec(iFlowNode);
+            R result = (R) ((FlowNodeWithReturn) iFlowNode).doProcess();
+            ((ContextBus) ContextBus.get()).roolbackExec(iFlowNode);
             return result;
         }
         return null;
     }
 
-    public void executeVoid(IContextBus iContextBus, String nodeId) {
+    public void executeVoid(String nodeId) {
         IFlowNode iFlowNode = flowNodeMap.get(nodeId);
         if (iFlowNode != null) {
-            iFlowNode.process(iContextBus);
-            ((ContextBus) iContextBus).roolbackExec(iFlowNode);
+            iFlowNode.process();
+            ((ContextBus) ContextBus.get()).roolbackExec(iFlowNode);
         }
     }
 
-    public void executeVoidSingle(IContextBus iContextBus, String nodeId) {
+    public void executeVoidSingle(String nodeId) {
         IFlowNode iFlowNode = flowNodeMap.get(nodeId);
         if (iFlowNode != null) {
-            iFlowNode.process(iContextBus);
+            iFlowNode.process();
         }
     }
 

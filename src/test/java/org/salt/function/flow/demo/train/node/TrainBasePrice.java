@@ -14,7 +14,6 @@
 
 package org.salt.function.flow.demo.train.node;
 
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.demo.train.param.Station;
 import org.salt.function.flow.node.FlowNodeWithReturnAndInput;
 import org.salt.function.flow.node.register.NodeIdentity;
@@ -23,7 +22,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class TrainBasePrice extends FlowNodeWithReturnAndInput<Integer, Station> {
 
     @Override
-    public Integer doProcessWithInput(IContextBus iContextBus, Station station) {
+    public Integer doProcessWithInput(Station station) {
         if (station != null) {
             System.out.println("Passengers travel from " + station.getFrom() + " to " + station.getTo());
         }

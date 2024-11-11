@@ -14,7 +14,6 @@
 
 package org.salt.function.flow.demo.train.node;
 
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.demo.train.param.Ticket;
 import org.salt.function.flow.node.FlowNodeWithReturn;
 import org.salt.function.flow.node.register.NodeIdentity;
@@ -22,8 +21,8 @@ import org.salt.function.flow.node.register.NodeIdentity;
 @NodeIdentity(nodeId = "ticket_result")
 public class TrainTicketResult extends FlowNodeWithReturn<Ticket> {
     @Override
-    public Ticket doProcess(IContextBus iContextBus) {
-        int price = (int) iContextBus.getPreResult();
+    public Ticket doProcess() {
+        int price = (int) getContextBus().getPreResult();
         System.out.println("Issue ticket result, price " + price);
         return Ticket.builder().result(true).price(price).build();
     }

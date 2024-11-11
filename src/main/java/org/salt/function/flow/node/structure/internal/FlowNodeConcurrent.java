@@ -28,12 +28,13 @@ import java.util.concurrent.TimeUnit;
 public class FlowNodeConcurrent<P> extends FlowNodeStructure<P> {
 
     @Override
-    public P doProcessGateway(IContextBus iContextBus, List<Info> infoList) {
+    public P doProcessGateway(List<Info> infoList) {
+        IContextBus iContextBus = getContextBus();
         CountDownLatch finalCountDownLatch = new CountDownLatch(infoList.size());
         for (Info info : infoList) {
             theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
                 try {
-                    executeVoid(iContextBus, info.id);
+                    executeVoid(info.id);
                 } catch (Exception e) {
                     ((ContextBus) iContextBus).putPassException(info.id, e);
                 } finally {

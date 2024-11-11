@@ -14,7 +14,6 @@
 
 package org.salt.function.flow.test.thread.node;
 
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNodeWithReturn;
 import org.salt.function.flow.node.register.NodeIdentity;
 import org.salt.function.flow.test.thread.TestThreadContent;
@@ -27,9 +26,9 @@ public class DemoBitLeftNode extends FlowNodeWithReturn<Integer> {
     TestThreadContent testThreadContent;
 
     @Override
-    public Integer doProcess(IContextBus iContextBus) {
+    public Integer doProcess() {
         System.out.println("TheadLocal: " + testThreadContent.get("test"));
-        Integer preResult = (Integer) iContextBus.getPreResult();
+        Integer preResult = (Integer) getContextBus().getPreResult();
         Integer result = preResult << 1;
         System.out.println("DemoBitLeftNode: " + preResult + "<<1=" + result);
         return result;

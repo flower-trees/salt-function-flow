@@ -68,11 +68,6 @@ public interface IContextBus<T, R> {
     Exception getPassException(String nodeId);
 
     /**
-     * Get flow ID
-     */
-    String getFlowId();
-
-    /**
      * Get flow execution Instance ID
      */
     String getRuntimeId();

@@ -18,6 +18,6 @@ import org.salt.function.flow.context.IContextBus;
 
 public interface IFlowNode {
     String nodeId();
-    void process(IContextBus iContextBus);
+    void process();
     default <T, R> void rollback(IContextBus<T, R> iContextBus) {}
 }

@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.config.IFlowInit;
 import org.salt.function.flow.context.ContextBus;
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.node.register.FlowNodeManager;
@@ -91,30 +90,30 @@ public class FlowEngine implements InitializingBean {
         return flowInstance.execute(param, transmitMap, conditionMap);
     }
 
-    public <T, R> R execute(ContextBus<T, R> contextBus) {
-        FlowInstance flowInstance = processInstanceMap.get(contextBus.getFlowId());
+    public <T, R> R execute(String flowId) {
+        FlowInstance flowInstance = processInstanceMap.get(flowId);
         if (flowInstance != null) {
-            return flowInstance.execute(contextBus);
+            return flowInstance.execute();
         }
         throw new RuntimeException("no have this process");
     }
 
-    public <T, R> R executeBranch(IContextBus<T, R> iContextBus, String id) {
-        ContextBus contextBusChild = ((ContextBus) iContextBus).copy(id);
-        R result = (R) execute(contextBusChild);
+    public <T, R> R executeBranch(String flowId) {
+        ContextBus contextBusChild = (ContextBus) ContextBus.get();
+        R result = execute(flowId);
         if (contextBusChild.isRollbackProcess()) {
-            iContextBus.rollbackProcess();
+            ContextBus.get().rollbackProcess();
         }
         if (contextBusChild.isStopProcess()) {
-            iContextBus.stopProcess();
+            ContextBus.get().stopProcess();
         }
         return result;
     }
 
-    public <T, R> R executeBranchVoid(IContextBus<T, R> iContextBus, String id) {
-        R result = executeBranch(iContextBus, id);
+    public <T, R> R executeBranchVoid(String id) {
+        R result = executeBranch(id);
         if (result != null) {
-            ((ContextBus) iContextBus).putPassResult(id, result);
+            ((ContextBus) ContextBus.get()).putPassResult(id, result);
         }
         return result;
     }

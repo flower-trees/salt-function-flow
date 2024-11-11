@@ -15,6 +15,7 @@
 package org.salt.function.flow.context;
 
 import lombok.Builder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +31,12 @@ import java.util.function.Function;
 @Slf4j
 public class ContextBus<T, R> implements IContextBus<T, R> {
 
-    private static String LAST_NODE_ID_KEY = "last_node_id_key";
+    @Getter
+    private String id;
+
+    private static String LAST_NODE_ID_KEY = "thead_last_node_id_key";
+
+    private static String CONTEXT_BUS_KEY = "thead_context_bus_key";
 
     /**
      * Flow call parameters
@@ -61,11 +67,6 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
      * Store the parameters involved in condition judgment, initially flow param
      */
     private ConcurrentMap<String, Object> conditionMap;
-
-    /**
-     * Flow ID
-     */
-    private String flowId;
 
     /**
      * Flow execution instance ID
@@ -122,7 +123,7 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
             return;
         }
         if (conditionMap.containsKey(key)) {
-            log.warn("{} process addCondition param repeat. key:{}, value:{}, traceId:{}", flowId, key, value, runtimeId);
+            log.warn("process addCondition param repeat. key:{}, value:{}, traceId:{}", key, value, runtimeId);
         }
         conditionMap.put(key, value);
     }
@@ -173,11 +174,6 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
     }
 
     @Override
-    public String getFlowId() {
-        return flowId;
-    }
-
-    @Override
     public String getRuntimeId() {
         return runtimeId;
     }
@@ -186,43 +182,28 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
     public <P> P getPreResult() {
         String nodeId = TheadHelper.getThreadLocal(LAST_NODE_ID_KEY);
         if (StringUtils.isNotEmpty(nodeId)) {
-            log.debug("{} process getPreResult. nodeId:{}, traceId:{}", flowId, nodeId, runtimeId);
+            log.debug("process getPreResult. nodeId:{}, traceId:{}", nodeId, runtimeId);
             return (P) passResultMap.get(nodeId);
         }
         return null;
     }
 
-    public ContextBus<T, R> copy(String processId) {
+    public void copyNotify() {
         ContextBus<T, R> contextBus = ContextBus.<T, R>builder()
+                .id(UUID.randomUUID().toString())
                 .param(param)
                 .conditionMap(conditionMap)
                 .passResultMap(passResultMap)
                 .passExceptionMap(passExceptionMap)
                 .transmitMap(transmitMap)
-                .flowId(processId)
-                .runtimeId(runtimeId)
-                .rollbackList(rollbackList)
-                .functionMap(functionMap)
-                .build();
-        return contextBus;
-    }
-
-    public ContextBus<T, R> copyNotify(String processId) {
-        ContextBus<T, R> contextBus = ContextBus.<T, R>builder()
-                .param(param)
-                .conditionMap(conditionMap)
-                .passResultMap(passResultMap)
-                .passExceptionMap(passExceptionMap)
-                .transmitMap(transmitMap)
-                .flowId(processId)
                 .runtimeId(runtimeId)
                 .rollbackList(new LinkedList<>())
                 .functionMap(functionMap)
                 .build();
-        return contextBus;
+        TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
     }
 
-    public static <T, R> ContextBus<T, R> create(String flowId, T param, Map<String, Object> conditionMap) {
+    public static <T, R> ContextBus<T, R> create(T param, Map<String, Object> conditionMap) {
         Map<String, Object> conditionTmp = conditionMap;
         if (conditionTmp == null) {
             try {
@@ -244,19 +225,21 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
             }
         }
         ContextBus<T, R> contextBus = ContextBus.<T, R>builder()
+                .id(UUID.randomUUID().toString())
                 .param(param)
                 .conditionMap(conditionTmp != null ? new ConcurrentHashMap<>(conditionTmp) : new ConcurrentHashMap<>())
                 .passResultMap(new ConcurrentHashMap<>())
                 .passExceptionMap(new ConcurrentHashMap<>())
                 .transmitMap(new ConcurrentHashMap<>())
-                .flowId(flowId)
+//                .flowId(flowId)
                 .runtimeId(UUID.randomUUID().toString().replaceAll("-", ""))
                 .rollbackList(new LinkedList<>())
                 .functionMap(new ConcurrentHashMap<>())
                 .build();
-        contextBus.putPassResult(flowId, param);
+        contextBus.putPassResult(contextBus.id, param);
         ContextBus.clean();
-        ContextBus.putLastNodeId(flowId);
+        ContextBus.putLastNodeId(contextBus.id);
+        TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
         return contextBus;
     }
 
@@ -300,5 +283,9 @@ public class ContextBus<T, R> implements IContextBus<T, R> {
 
     public static Info getNodeInfo(String key) {
         return TheadHelper.getThreadLocal(key);
+    }
+
+    public static IContextBus get() {
+        return TheadHelper.getThreadLocal(IContextBus.class.getName());
     }
 }

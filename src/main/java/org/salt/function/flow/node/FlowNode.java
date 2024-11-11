@@ -15,6 +15,8 @@
 package org.salt.function.flow.node;
 
 import lombok.extern.slf4j.Slf4j;
+import org.salt.function.flow.context.ContextBus;
+import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.register.NodeIdentity;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -38,5 +40,9 @@ public abstract class FlowNode implements IFlowNode, InitializingBean {
 
     public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
+    }
+
+    protected IContextBus getContextBus() {
+        return ContextBus.get();
     }
 }

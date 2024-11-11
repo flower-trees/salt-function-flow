@@ -14,7 +14,6 @@
 
 package org.salt.function.flow.demo.math.node;
 
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNodeWithReturn;
 import org.salt.function.flow.node.register.NodeIdentity;
 
@@ -22,8 +21,8 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class DemoReduceNode extends FlowNodeWithReturn<Integer> {
 
     @Override
-    public Integer doProcess(IContextBus iContextBus) {
-        Integer preResult = (Integer) iContextBus.getPreResult();
+    public Integer doProcess() {
+        Integer preResult = (Integer) getContextBus().getPreResult();
         Integer result = preResult - 15;
         System.out.println("DemoReduceNode: " + preResult + "-15=" + result) ;
         return result;

@@ -66,34 +66,34 @@ public abstract class FlowNodeStructure<P> extends FlowNodeWithReturn<P> {
         return flowNodeManager.getIFlowNode(nodeId) != null;
     }
 
-    public P doProcess(IContextBus iContextBus) {
+    public P doProcess() {
         if (CollectionUtils.isEmpty(infoList)) {
             return null;
         }
-        List<Info> infoListExe = infoList.stream().filter(info -> FlowUtil.isExe(iContextBus, info)).collect(Collectors.toList());
+        List<Info> infoListExe = infoList.stream().filter(info -> FlowUtil.isExe(getContextBus(), info)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(infoListExe)) {
             return null;
         }
-        return doProcessGateway(iContextBus, infoListExe);
+        return doProcessGateway(infoListExe);
     }
 
-    protected P doProcessGateway(IContextBus iContextBus, List<Info> infoList) {
+    protected P doProcessGateway(List<Info> infoList) {
         return null;
     }
 
-    protected P execute(IContextBus iContextBus, String id) {
+    protected P execute(String id) {
         if (isFlowNode(id)) {
-            return flowNodeManager.execute(iContextBus, id);
+            return flowNodeManager.execute(id);
         } else {
-            return (P) flowEngine.executeBranch(iContextBus, id);
+            return (P) flowEngine.executeBranch(id);
         }
     }
 
-    protected void executeVoid(IContextBus iContextBus, String id) {
+    protected void executeVoid(String id) {
         if (isFlowNode(id)) {
-            flowNodeManager.executeVoid(iContextBus, id);
+            flowNodeManager.executeVoid(id);
         } else {
-            flowEngine.executeBranchVoid(iContextBus, id);
+            flowEngine.executeBranchVoid(id);
         }
     }
 

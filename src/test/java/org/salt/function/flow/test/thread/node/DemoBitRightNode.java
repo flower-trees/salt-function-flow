@@ -14,7 +14,6 @@
 
 package org.salt.function.flow.test.thread.node;
 
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNodeWithReturn;
 import org.salt.function.flow.node.register.NodeIdentity;
 
@@ -22,13 +21,13 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class DemoBitRightNode extends FlowNodeWithReturn<Integer> {
 
     @Override
-    public Integer doProcess(IContextBus iContextBus) {
+    public Integer doProcess() {
         try {
             Thread.sleep(15);
         } catch (InterruptedException e) {
         }
         System.out.println("CurrentThread: " + Thread.currentThread().getName());
-        Integer preResult = (Integer) iContextBus.getPreResult();
+        Integer preResult = (Integer) getContextBus().getPreResult();
         Integer result = preResult >> 1;
         System.out.println("DemoBitRightNode: " + preResult + ">>1=" + result);
         return result;

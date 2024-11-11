@@ -25,9 +25,9 @@ public class FlowNodeResult<P> extends FlowNodeStructure<P> {
     private String nodeIdResult;
 
     @Override
-    public P doProcess(IContextBus iContextBus) {
-        ContextBus contextBus = (ContextBus) iContextBus;
-        P result = flowNodeManager.execute(iContextBus, nodeIdResult);
+    public P doProcess() {
+        ContextBus contextBus = (ContextBus) getContextBus();
+        P result = flowNodeManager.execute(nodeIdResult);
         if (result != null) {
             contextBus.setResult(result);
         }

@@ -26,7 +26,8 @@ import java.util.List;
 public class FlowNodeWait<P> extends FlowNodeStructure<P> {
 
     @Override
-    public P doProcessGateway(IContextBus iContextBus, List<Info> infoList) {
+    public P doProcessGateway(List<Info> infoList) {
+        IContextBus iContextBus = getContextBus();
         long lastTimeout = theadHelper.getTimeout();
         for (Info info : infoList) {
             if (lastTimeout <= 0) {

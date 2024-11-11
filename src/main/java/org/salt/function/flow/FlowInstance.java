@@ -37,24 +37,27 @@ public class FlowInstance {
     }
 
     protected <T, R> R execute(T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap) {
-        ContextBus<T, R> contextBus = ContextBus.create(flowId, param, conditionMap);
+        ContextBus<T, R> contextBus = ContextBus.create(param, conditionMap);
         if (transmitMap != null && !transmitMap.isEmpty()) {
             transmitMap.forEach((k, v) -> {
                 contextBus.putTransmitInfo(k, v);
             });
         }
-        return execute(contextBus);
+        return execute();
     }
 
-    protected <T, R> R execute(ContextBus<T, R> contextBus) {
+    protected <T, R> R execute() {
         if (!CollectionUtils.isEmpty(nodeList)) {
+            ContextBus<T, R> contextBus = (ContextBus<T, R>) ContextBus.get();
             for (String nodeId : nodeList) {
-                flowEngine.flowNodeManager.executeVoidSingle(contextBus, nodeId);
+                flowEngine.flowNodeManager.executeVoidSingle(nodeId);
                 if (contextBus.isRollbackProcess()) {
                     contextBus.roolbackAll();
+                    contextBus.setResult(null);
                     break;
                 }
                 if (contextBus.isStopProcess()) {
+                    contextBus.setResult(null);
                     break;
                 }
             }

@@ -24,15 +24,16 @@ import java.util.List;
 public class FlowNodeNotify<P> extends FlowNodeStructure<P> {
 
     @Override
-    public P doProcessGateway(IContextBus iContextBus, List<Info> infoList) {
+    public P doProcessGateway(List<Info> infoList) {
+        IContextBus iContextBus = getContextBus();
         for (Info info : infoList) {
             theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
                 try {
                     if (isFlowNode(info.id)) {
-                        flowNodeManager.executeVoidSingle(iContextBus, info.id);
+                        flowNodeManager.executeVoidSingle(info.id);
                     } else {
-                        ContextBus contextBusChild = ((ContextBus) iContextBus).copyNotify(info.id);
-                        flowEngine.executeBranchVoid(contextBusChild, info.id);
+                        ((ContextBus) iContextBus).copyNotify();
+                        flowEngine.executeBranchVoid(info.id);
                     }
                 } catch (Exception e) {
                     ((ContextBus) iContextBus).putPassException(info.id, e);

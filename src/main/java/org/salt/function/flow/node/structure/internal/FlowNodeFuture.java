@@ -17,7 +17,6 @@ package org.salt.function.flow.node.structure.internal;
 import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.List;
@@ -27,17 +26,17 @@ import java.util.concurrent.Future;
 public class FlowNodeFuture<P> extends FlowNodeStructure<P> {
 
     @Override
-    public P doProcessGateway(IContextBus iContextBus, List<Info> infoList) {
+    public P doProcessGateway(List<Info> infoList) {
         for (Info info : infoList) {
             Future<?> future = theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
                 try {
-                    return execute(iContextBus, info.id);
+                    return execute(info.id);
                 } catch (Exception e) {
-                    ((ContextBus) iContextBus).putPassException(info.id, e);
+                    ((ContextBus) getContextBus()).putPassException(info.id, e);
                 }
                 return null;
             }, info));
-            ((ContextBus) iContextBus).putPassResult(info.id, future);
+            ((ContextBus) getContextBus()).putPassResult(info.id, future);
         }
         return null;
     }

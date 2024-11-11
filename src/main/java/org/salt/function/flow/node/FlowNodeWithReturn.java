@@ -18,15 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.util.FlowUtil;
 
 @Slf4j
 public abstract class FlowNodeWithReturn<P> extends FlowNode {
 
-    public void process(IContextBus iContextBus) {
-        ContextBus<Object, Object> contextBus = ((ContextBus) iContextBus);
-        P result = doProcess(iContextBus);
+    public void process() {
+        ContextBus<Object, Object> contextBus = ((ContextBus) getContextBus());
+        P result = doProcess();
         if (result != null) {
             String idTmp = nodeId;
             Object adapterResult = null;
@@ -48,5 +47,5 @@ public abstract class FlowNodeWithReturn<P> extends FlowNode {
         }
     }
 
-    public abstract P doProcess(IContextBus iContextBus);
+    public abstract P doProcess();
 }

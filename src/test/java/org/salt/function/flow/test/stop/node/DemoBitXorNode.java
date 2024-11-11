@@ -22,11 +22,11 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class DemoBitXorNode extends FlowNodeWithReturn<Integer> {
 
     @Override
-    public Integer doProcess(IContextBus iContextBus) {
-        Integer preResult = (Integer) iContextBus.getPreResult();
+    public Integer doProcess() {
+        Integer preResult = (Integer) getContextBus().getPreResult();
         if (preResult > 500) {
             System.out.println("DemoBitOrNode: rollback flow");
-            iContextBus.rollbackProcess();
+            getContextBus().rollbackProcess();
         } else {
             Integer result = preResult | 128;
             System.out.println("DemoBitOrNode: " + preResult + "|128=" + result);

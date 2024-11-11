@@ -17,22 +17,21 @@ package org.salt.function.flow.node;
 import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.util.FlowUtil;
 
 @Slf4j
 public abstract class FlowNodeWithReturnAndInput<P, I> extends FlowNodeWithReturn<P> {
 
     @Override
-    public P doProcess(IContextBus iContextBus) {
-        ContextBus<Object, Object> contextBus = ((ContextBus<Object, Object>) iContextBus);
+    public P doProcess() {
+        ContextBus<Object, Object> contextBus = ((ContextBus<Object, Object>) getContextBus());
         Info info = ContextBus.getNodeInfo(FlowUtil.getNodeInfoKey(nodeId));
         I input = null;
         if (info != null && info.input != null) {
             input = (I) info.input.apply(contextBus);
         }
-        return doProcessWithInput(contextBus, input);
+        return doProcessWithInput(input);
     }
 
-    public abstract P doProcessWithInput(IContextBus iContextBus, I input);
+    public abstract P doProcessWithInput(I input);
 }

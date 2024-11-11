@@ -6,7 +6,7 @@
 
     <groupId>cn.fenglingsoftware</groupId>
     <artifactId>salt-function-flow</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <licenses>
         <license>
@@ -101,6 +101,11 @@
             <artifactId>snakeyaml</artifactId>
             <version>1.26</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
         </dependency>
     </dependencies>
 
