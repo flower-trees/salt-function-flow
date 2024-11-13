@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.config.IFlowInit;
 import org.salt.function.flow.context.ContextBus;
+import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.node.register.FlowNodeManager;
@@ -33,6 +34,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -139,7 +141,7 @@ public class FlowEngine implements InitializingBean {
             return next(InitParam.builder().infos(infos).build());
         }
 
-        public Builder next(IResult result, Info... infos) {
+        public Builder next(IResult<?> result, Info... infos) {
             return next(InitParam.builder().infos(infos).result(result).build());
         }
 
@@ -157,11 +159,11 @@ public class FlowEngine implements InitializingBean {
             return all(toInfos(ids));
         }
 
-        public Builder all(IResult result, Class<?>... clazzs) {
+        public Builder all(IResult<?> result, Class<?>... clazzs) {
             return all(result, toInfos(Arrays.stream(clazzs).map(Class::getName).collect(Collectors.toList()).toArray(new String[clazzs.length])));
         }
 
-        public Builder all(IResult result, String... ids) {
+        public Builder all(IResult<?> result, String... ids) {
             return all(result, toInfos(ids));
         }
 
@@ -169,7 +171,7 @@ public class FlowEngine implements InitializingBean {
             return all(InitParam.builder().infos(infos).build());
         }
 
-        public Builder all(IResult result, Info... infos) {
+        public Builder all(IResult<?> result, Info... infos) {
             return all(InitParam.builder().infos(infos).result(result).build());
         }
 
@@ -195,35 +197,35 @@ public class FlowEngine implements InitializingBean {
             return concurrent(timeout, toInfos(ids));
         }
 
-        public Builder concurrent(IResult result, Class<?>... clazzs) {
+        public Builder concurrent(IResult<?> result, Class<?>... clazzs) {
             return concurrent(result, toInfos(Arrays.stream(clazzs).map(Class::getName).collect(Collectors.toList()).toArray(new String[clazzs.length])));
         }
 
-        public Builder concurrent(IResult result, String... ids) {
+        public Builder concurrent(IResult<?> result, String... ids) {
             return concurrent(result, toInfos(ids));
         }
 
-        public Builder concurrent(IResult result, long timeout, Class<?>... clazzs) {
+        public Builder concurrent(IResult<?> result, long timeout, Class<?>... clazzs) {
             return concurrent(result, timeout, toInfos(Arrays.stream(clazzs).map(Class::getName).collect(Collectors.toList()).toArray(new String[clazzs.length])));
         }
 
-        public Builder concurrent(IResult result, long timeout, String... ids) {
+        public Builder concurrent(IResult<?> result, long timeout, String... ids) {
             return concurrent(result, timeout, toInfos(ids));
         }
 
-        public Builder concurrent(IResult result, ExecutorService isolate, Class<?>... clazzs) {
+        public Builder concurrent(IResult<?> result, ExecutorService isolate, Class<?>... clazzs) {
             return concurrent(result, isolate, toInfos(Arrays.stream(clazzs).map(Class::getName).collect(Collectors.toList()).toArray(new String[clazzs.length])));
         }
 
-        public Builder concurrent(IResult result, ExecutorService isolate, String... ids) {
+        public Builder concurrent(IResult<?> result, ExecutorService isolate, String... ids) {
             return concurrent(result, isolate, toInfos(ids));
         }
 
-        public Builder concurrent(IResult result, long timeout, ExecutorService isolate, Class<?>... clazzs) {
+        public Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, Class<?>... clazzs) {
             return concurrent(result, timeout, isolate, toInfos(Arrays.stream(clazzs).map(Class::getName).collect(Collectors.toList()).toArray(new String[clazzs.length])));
         }
 
-        public Builder concurrent(IResult result, long timeout, ExecutorService isolate, String... ids) {
+        public Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, String... ids) {
             return concurrent(result, timeout, isolate, toInfos(ids));
         }
 
@@ -235,19 +237,19 @@ public class FlowEngine implements InitializingBean {
             return concurrent(InitParam.builder().infos(infos).timeout(timeout).build());
         }
 
-        public Builder concurrent(IResult result, Info... infos) {
+        public Builder concurrent(IResult<?> result, Info... infos) {
             return concurrent(InitParam.builder().infos(infos).result(result).build());
         }
 
-        public Builder concurrent(IResult result, long timeout, Info... infos) {
+        public Builder concurrent(IResult<?> result, long timeout, Info... infos) {
             return concurrent(InitParam.builder().infos(infos).result(result).timeout(timeout).build());
         }
 
-        public Builder concurrent(IResult result, ExecutorService isolate, Info... infos) {
+        public Builder concurrent(IResult<?> result, ExecutorService isolate, Info... infos) {
             return concurrent(InitParam.builder().infos(infos).result(result).isolate(isolate).build());
         }
 
-        public Builder concurrent(IResult result, long timeout, ExecutorService isolate, Info... infos) {
+        public Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, Info... infos) {
             return concurrent(InitParam.builder().infos(infos).result(result).timeout(timeout).isolate(isolate).build());
         }
 
@@ -326,11 +328,11 @@ public class FlowEngine implements InitializingBean {
             return wait(toInfos(ids));
         }
 
-        public Builder wait(IResult result, Class<?>... clazzs) {
+        public Builder wait(IResult<?> result, Class<?>... clazzs) {
             return wait(result, toInfos(Arrays.stream(clazzs).map(Class::getName).collect(Collectors.toList()).toArray(new String[clazzs.length])));
         }
 
-        public Builder wait(IResult result, String... ids) {
+        public Builder wait(IResult<?> result, String... ids) {
             return wait(result, toInfos(ids));
         }
 
@@ -342,11 +344,11 @@ public class FlowEngine implements InitializingBean {
             return wait(timeout, toInfos(ids));
         }
 
-        public Builder wait(IResult result, long timeout, Class<?>... clazzs) {
+        public Builder wait(IResult<?> result, long timeout, Class<?>... clazzs) {
             return wait(result, timeout, toInfos(Arrays.stream(clazzs).map(Class::getName).collect(Collectors.toList()).toArray(new String[clazzs.length])));
         }
 
-        public Builder wait(IResult result, long timeout, String... ids) {
+        public Builder wait(IResult<?> result, long timeout, String... ids) {
             return wait(result, timeout, toInfos(ids));
         }
 
@@ -354,7 +356,7 @@ public class FlowEngine implements InitializingBean {
             return wait(InitParam.builder().infos(infos).build());
         }
 
-        public Builder wait(IResult result, Info... infos) {
+        public Builder wait(IResult<?> result, Info... infos) {
             return wait(InitParam.builder().infos(infos).result(result).build());
         }
 
@@ -362,12 +364,30 @@ public class FlowEngine implements InitializingBean {
             return wait(InitParam.builder().infos(infos).timeout(timeout).build());
         }
 
-        public Builder wait(IResult result, long timeout, Info... infos) {
+        public Builder wait(IResult<?> result, long timeout, Info... infos) {
             return wait(InitParam.builder().infos(infos).result(result).timeout(timeout).build());
         }
 
         private Builder wait(InitParam initParam) {
             init(tempName("wait", initParam.idTmp), new FlowNodeWait<>(), initParam);
+            return this;
+        }
+
+        //loop
+        public Builder loop(Function<IContextBus, Boolean> loopCondition, Class<?>... clazzs) {
+            return loop(loopCondition, toInfos(Arrays.stream(clazzs).map(Class::getName).collect(Collectors.toList()).toArray(new String[clazzs.length])));
+        }
+
+        public Builder loop(Function<IContextBus, Boolean> loopCondition, String... ids) {
+            return loop(loopCondition, toInfos(ids));
+        }
+
+        public Builder loop(Function<IContextBus, Boolean> loopCondition, Info... infos) {
+            return loop(loopCondition, InitParam.builder().infos(infos).build());
+        }
+
+        private Builder loop(Function<IContextBus, Boolean> loopCondition, InitParam initParam) {
+            init(tempName("all", initParam.idTmp), new FlowNodeLoop<>(loopCondition), initParam);
             return this;
         }
 
@@ -409,11 +429,11 @@ public class FlowEngine implements InitializingBean {
                     .toArray(new Info[ids.length]);
         }
 
-        private void init(String id, FlowNode flowNode, InitParam initParam) {
+        private void init(String id, FlowNode<?,?> flowNode, InitParam initParam) {
 
             flowNode.setNodeId(id);
             if (flowNode instanceof FlowNodeStructure) {
-                FlowNodeStructure flowNodeStructure = (FlowNodeStructure) flowNode;
+                FlowNodeStructure<?> flowNodeStructure = (FlowNodeStructure) flowNode;
                 flowNodeStructure.setFlowEngine(flowEngine);
                 flowNodeStructure.setFlowNodeManager(flowEngine.flowNodeManager);
                 flowNodeStructure.setResult(initParam.result);

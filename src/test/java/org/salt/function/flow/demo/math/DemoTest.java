@@ -130,6 +130,17 @@ public class DemoTest {
     }
 
     /**
+     * loop flow exe
+     */
+    @Test
+    public void testLoopDemo() {
+        System.out.println("demo_flow_loop test: ");
+        Integer result = flowEngine.execute("demo_flow_loop", 39);
+        System.out.println("demo_flow_loop result: " + result);
+        Assert.assertTrue(result != null && result == 4758705);
+    }
+
+    /**
      * Single flow with branch exe
      */
     @Test

@@ -29,14 +29,14 @@ import java.util.concurrent.*;
 @Slf4j
 public class ContextBus implements IContextBus {
 
+    private static String LAST_RESULT_KEY = "thead_last_result_key";
+    private static String RESULT_KEY = "thead_result_key";
+
     /**
      * ContextBus id
      */
     @Getter
     private String id;
-
-    private static String LAST_RESULT_KEY = "thead_last_result_key";
-    private static String RESULT_KEY = "thead_result_key";
 
     /**
      * Flow call parameters
@@ -116,7 +116,7 @@ public class ContextBus implements IContextBus {
             return;
         }
         if (conditionMap.containsKey(key)) {
-            log.warn("process addCondition param repeat. key:{}, value:{}, traceId:{}", key, value, runtimeId);
+            log.warn("process addCondition param loop. key:{}, value:{}, traceId:{}", key, value, runtimeId);
         }
         conditionMap.put(key, value);
     }

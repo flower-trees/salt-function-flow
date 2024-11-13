@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class FlowNodeStructure<P> extends FlowNode<P, Object> {
+public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
 
     @Setter
     protected FlowEngine flowEngine;
@@ -40,7 +40,7 @@ public abstract class FlowNodeStructure<P> extends FlowNode<P, Object> {
     protected FlowNodeManager flowNodeManager;
 
     @Setter
-    protected IResult<P> result;
+    protected IResult<O> result;
 
     protected List<Info> infoList;
 
@@ -55,7 +55,7 @@ public abstract class FlowNodeStructure<P> extends FlowNode<P, Object> {
         return flowNodeManager.getIFlowNode(nodeId) != null;
     }
 
-    public P doProcess(Object input) {
+    public O doProcess(Object input) {
         if (CollectionUtils.isEmpty(infoList)) {
             return null;
         }
@@ -66,11 +66,11 @@ public abstract class FlowNodeStructure<P> extends FlowNode<P, Object> {
         return doProcessGateway(infoListExe);
     }
 
-    protected P doProcessGateway(List<Info> infoList) {
+    protected O doProcessGateway(List<Info> infoList) {
         return null;
     }
 
-    protected P execute(String id) {
+    protected O execute(String id) {
         if (isFlowNode(id)) {
             return flowNodeManager.execute(id);
         } else {

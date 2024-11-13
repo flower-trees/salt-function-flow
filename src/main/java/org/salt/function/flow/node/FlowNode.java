@@ -83,7 +83,6 @@ public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
             }
 
             contextBus.putPreResult(result);
-
             contextBus.setResult(result);
         }
     }

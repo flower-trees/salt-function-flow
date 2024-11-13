@@ -124,6 +124,15 @@ public class DemoFlowInit implements IFlowInit {
                 )
                 .next(DivisionNode.class).build();
 
+        /**
+         * loop flow construction
+         */
+        flowEngine.builder().id("demo_flow_loop")
+                .next(AddNode.class)
+                .loop(iContextBus -> (Integer) iContextBus.getPreResult() < 56000000, ReduceNode.class, MultiplyNode.class)
+                .next(DivisionNode.class)
+                .build();
+
         //branch
         flowEngine.builder().id("demo_branch_reduce").next(ReduceNode.class).next(RemainderNode.class).build();
         flowEngine.builder().id("demo_branch_multiply").next(MultiplyNode.class).next(RemainderNode.class).build();

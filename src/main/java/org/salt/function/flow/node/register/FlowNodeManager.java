@@ -35,7 +35,7 @@ public class FlowNodeManager {
             throw new RuntimeException("nodeId or extConfig must not be all null ");
         }
         if (flowNodeMap.containsKey(nodeId)) {
-            throw new RuntimeException("repeat node " + iFlowNode.nodeId());
+            throw new RuntimeException("loop node " + iFlowNode.nodeId());
         }
         flowNodeMap.put(nodeId, iFlowNode);
     }

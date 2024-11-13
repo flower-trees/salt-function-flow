@@ -16,6 +16,6 @@ package org.salt.function.flow.node;
 
 import org.salt.function.flow.context.IContextBus;
 
-public interface IResult<P> {
-    P handle(IContextBus iContextBus, boolean isTimeout);
+public interface IResult<O> {
+    O handle(IContextBus iContextBus, boolean isTimeout);
 }
