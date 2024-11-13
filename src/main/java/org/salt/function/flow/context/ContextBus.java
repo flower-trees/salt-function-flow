@@ -18,14 +18,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.node.IFlowNode;
 import org.salt.function.flow.thread.TheadHelper;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Function;
 
 @Builder
 @Slf4j
@@ -37,7 +35,8 @@ public class ContextBus implements IContextBus {
     @Getter
     private String id;
 
-    private static String LAST_NODE_ID_KEY = "thead_last_node_id_key";
+    private static String LAST_RESULT_KEY = "thead_last_result_key";
+    private static String RESULT_KEY = "thead_result_key";
 
     /**
      * Flow call parameters
@@ -88,22 +87,17 @@ public class ContextBus implements IContextBus {
      */
     private Deque<IFlowNode> rollbackList;
 
-    /**
-     * Thread delivery cache
-     */
-    private ConcurrentMap<String, Function<IContextBus, ?>> functionMap;
 
     public <P> P getParam() {
         return (P) this.param;
     }
 
     public <P> P getResult() {
-        return (P) this.result;
+        return TheadHelper.getThreadLocal(RESULT_KEY);
     }
 
-
     public <R> void setResult(R result) {
-        this.result = result;
+        TheadHelper.putThreadLocal(RESULT_KEY, result);
     }
 
     @Override
@@ -145,12 +139,6 @@ public class ContextBus implements IContextBus {
         passResultMap.remove(nodeId);
     }
 
-    public static void putLastNodeId(String nodeId) {
-        TheadHelper.putThreadLocal(LAST_NODE_ID_KEY, nodeId);
-    }
-    public static String getLastnodeId() {
-        return TheadHelper.getThreadLocal(LAST_NODE_ID_KEY);
-    }
     public static void clean() {
         TheadHelper.clean();
     }
@@ -177,14 +165,13 @@ public class ContextBus implements IContextBus {
         return runtimeId;
     }
 
+    public <P> void putPreResult(P result) {
+        TheadHelper.putThreadLocal(LAST_RESULT_KEY, result);
+    }
+
     @Override
     public <P> P getPreResult() {
-        String nodeId = TheadHelper.getThreadLocal(LAST_NODE_ID_KEY);
-        if (StringUtils.isNotEmpty(nodeId)) {
-            log.debug("process getPreResult. nodeId:{}, traceId:{}", nodeId, runtimeId);
-            return (P) passResultMap.get(nodeId);
-        }
-        return null;
+        return TheadHelper.getThreadLocal(LAST_RESULT_KEY);
     }
 
     public void copy() {
@@ -197,7 +184,6 @@ public class ContextBus implements IContextBus {
                 .transmitMap(new ConcurrentHashMap<>(transmitMap))
                 .runtimeId(runtimeId)
                 .rollbackList(new LinkedList<>())
-                .functionMap(new ConcurrentHashMap<>(functionMap))
                 .build();
         TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
     }
@@ -232,11 +218,9 @@ public class ContextBus implements IContextBus {
                 .transmitMap(new ConcurrentHashMap<>())
                 .runtimeId(UUID.randomUUID().toString().replaceAll("-", ""))
                 .rollbackList(new LinkedList<>())
-                .functionMap(new ConcurrentHashMap<>())
                 .build();
-        contextBus.putPassResult(contextBus.id, param);
         ContextBus.clean();
-        ContextBus.putLastNodeId(contextBus.id);
+        contextBus.putPreResult(param);
         TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
         return contextBus;
     }
