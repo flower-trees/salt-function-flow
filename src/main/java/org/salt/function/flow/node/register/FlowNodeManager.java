@@ -55,14 +55,6 @@ public class FlowNodeManager {
         return null;
     }
 
-    public void executeVoid(String nodeId) {
-        IFlowNode iFlowNode = flowNodeMap.get(nodeId);
-        if (iFlowNode != null) {
-            iFlowNode.process();
-            ((ContextBus) ContextBus.get()).roolbackExec(iFlowNode);
-        }
-    }
-
     public void executeVoidSingle(String nodeId) {
         IFlowNode iFlowNode = flowNodeMap.get(nodeId);
         if (iFlowNode != null) {

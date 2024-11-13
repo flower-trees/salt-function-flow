@@ -33,7 +33,7 @@ public class FlowNodeNotify<P> extends FlowNodeStructure<P> {
                     if (isFlowNode(info.getId())) {
                         flowNodeManager.executeVoidSingle(info.getId());
                     } else {
-                        flowEngine.executeBranchVoid(info.getId());
+                        flowEngine.execute(info.getId());
                     }
                 } catch (Exception e) {
                     ((ContextBus) iContextBus).putPassException(info.getId(), e);

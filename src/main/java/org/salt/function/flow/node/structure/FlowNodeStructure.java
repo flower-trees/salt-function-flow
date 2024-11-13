@@ -74,15 +74,7 @@ public abstract class FlowNodeStructure<P> extends FlowNode<P, Object> {
         if (isFlowNode(id)) {
             return flowNodeManager.execute(id);
         } else {
-            return flowEngine.executeBranch(id);
-        }
-    }
-
-    protected void executeVoid(String id) {
-        if (isFlowNode(id)) {
-            flowNodeManager.executeVoid(id);
-        } else {
-            flowEngine.executeBranchVoid(id);
+            return flowEngine.execute(id);
         }
     }
 

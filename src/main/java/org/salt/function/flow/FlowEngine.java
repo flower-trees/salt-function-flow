@@ -93,29 +93,13 @@ public class FlowEngine implements InitializingBean {
     public <R> R execute(String flowId) {
         FlowInstance flowInstance = processInstanceMap.get(flowId);
         if (flowInstance != null) {
-            return flowInstance.execute();
+            R result = flowInstance.execute();
+            if (result != null) {
+                ((ContextBus) ContextBus.get()).putPassResult(flowId, result);
+            }
+            return result;
         }
         throw new RuntimeException("no have this process");
-    }
-
-    public <R> R executeBranch(String flowId) {
-        ContextBus contextBusChild = (ContextBus) ContextBus.get();
-        R result = execute(flowId);
-        if (contextBusChild.isRollbackProcess()) {
-            ContextBus.get().rollbackProcess();
-        }
-        if (contextBusChild.isStopProcess()) {
-            ContextBus.get().stopProcess();
-        }
-        return result;
-    }
-
-    public <R> R executeBranchVoid(String id) {
-        R result = executeBranch(id);
-        if (result != null) {
-            ((ContextBus) ContextBus.get()).putPassResult(id, result);
-        }
-        return result;
     }
 
     public Builder builder() {

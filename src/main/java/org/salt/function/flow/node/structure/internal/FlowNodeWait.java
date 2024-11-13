@@ -36,7 +36,7 @@ public class FlowNodeWait<P> extends FlowNodeStructure<P> {
             }
             long start = System.currentTimeMillis();
             try {
-                P result = (P) ((ContextBus) iContextBus).getPassResult(info.getId(), lastTimeout);
+                P result = ((ContextBus) iContextBus).getPassResult(info.getId(), lastTimeout);
                 if (result != null) {
                     ((ContextBus) iContextBus).putPassResult(info.getId(), result);
                 } else {
