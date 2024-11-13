@@ -37,9 +37,12 @@ public class FlowInstance {
     }
 
     protected <T, R> R execute(T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap) {
-        ContextBus contextBus = ContextBus.create(param, conditionMap);
+        ContextBus contextBus = ContextBus.create(param);
         if (transmitMap != null && !transmitMap.isEmpty()) {
             transmitMap.forEach(contextBus::putTransmitInfo);
+        }
+        if (conditionMap != null && !conditionMap.isEmpty()) {
+            conditionMap.forEach(contextBus::addCondition);
         }
         return execute();
     }

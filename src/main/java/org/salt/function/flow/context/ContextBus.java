@@ -188,31 +188,30 @@ public class ContextBus implements IContextBus {
         TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
     }
 
-    public static ContextBus create(Object param, Map<String, Object> conditionMap) {
-        Map<String, Object> conditionTmp = conditionMap;
-        if (conditionTmp == null) {
-            try {
-                if (param.getClass().isPrimitive()
-                        || param instanceof Number
-                        || param instanceof Boolean
-                        || param instanceof String
-                        //|| param.getClass().isArray()
-                        //|| param instanceof Collection
-                ) {
-                    conditionTmp = new HashMap<>();
-                    conditionTmp.put("param", param);
-                } else {
-                    conditionTmp = BeanUtils.describe(param);
-                    conditionTmp.entrySet().removeIf(entry -> Objects.isNull(entry.getValue()));
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("param to conditionMap error");
+    public static ContextBus create(Object param) {
+        ConcurrentMap<String, Object> conditionMap;
+        try {
+            if (param.getClass().isPrimitive()
+                    || param instanceof Number
+                    || param instanceof Boolean
+                    || param instanceof String
+                //|| param.getClass().isArray()
+                //|| param instanceof Collection
+            ) {
+                conditionMap = new ConcurrentHashMap<>();
+                conditionMap.put("param", param);
+            } else {
+                Map<String, Object> conditionTmp = BeanUtils.describe(param);
+                conditionTmp.entrySet().removeIf(entry -> Objects.isNull(entry.getValue()));
+                conditionMap = new ConcurrentHashMap<>(conditionTmp);
             }
+        } catch (Exception e) {
+            throw new RuntimeException("param to conditionMap error");
         }
         ContextBus contextBus = ContextBus.builder()
                 .id("context-bus-" + UUID.randomUUID().toString().replaceAll("-", ""))
                 .param(param)
-                .conditionMap(conditionTmp != null ? new ConcurrentHashMap<>(conditionTmp) : new ConcurrentHashMap<>())
+                .conditionMap(conditionMap)
                 .passResultMap(new ConcurrentHashMap<>())
                 .passExceptionMap(new ConcurrentHashMap<>())
                 .transmitMap(new ConcurrentHashMap<>())
