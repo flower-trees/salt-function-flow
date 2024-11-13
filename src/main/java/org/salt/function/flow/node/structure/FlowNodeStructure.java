@@ -42,12 +42,12 @@ public abstract class FlowNodeStructure<P> extends FlowNode<P, Object> {
     @Setter
     protected IResult<P> result;
 
-    protected List<Info<P, ?>> infoList;
+    protected List<Info> infoList;
 
     @Setter
     protected TheadHelper theadHelper;
 
-    public void setNodeInfoList(List<Info<P, ?>> infoList) {
+    public void setNodeInfoList(List<Info> infoList) {
         this.infoList = infoList;
     }
 

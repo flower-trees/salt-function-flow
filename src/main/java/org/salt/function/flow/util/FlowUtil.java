@@ -48,7 +48,7 @@ public class FlowUtil {
         return String.format("node_info_%s", nodeId);
     }
 
-    public static <P> boolean isExe(IContextBus iContextBus, Info<P, ?> info) {
+    public static boolean isExe(IContextBus iContextBus, Info info) {
         ContextBus contextBus = ((ContextBus) iContextBus);
         return ((StringUtils.isEmpty(info.include)
                     && info.match == null)

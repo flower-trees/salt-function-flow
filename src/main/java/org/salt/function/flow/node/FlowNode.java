@@ -56,30 +56,34 @@ public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
     }
 
     public void process() {
+
         ContextBus contextBus = ((ContextBus) getContextBus());
+
         I input = contextBus.getPreResult();
         Info info = ContextBus.getNodeInfo(FlowUtil.getNodeInfoKey(nodeId));
-        if (info != null && info.input != null) {
-            input = (I) info.input.apply(contextBus);
+        if (info != null && info.getInput() != null) {
+            input = (I) info.getInput().apply(contextBus);
         }
+
         O result = doProcess(input);
+
         if (result != null) {
+
             String idTmp = nodeId;
-            Object adapterResult = null;
             if (info != null) {
-                if (info.output != null) {
-                    adapterResult = info.output.apply(contextBus, result);
-                }
                 if (StringUtils.isNotEmpty(info.getIdAlias())) {
                     idTmp = info.getIdAlias();
                 }
             }
-            if (adapterResult != null) {
-                contextBus.putPassResult(idTmp, adapterResult);
+
+            if (info != null && info.getOutput() != null) {
+                contextBus.putPassResult(idTmp, info.getOutput().apply(contextBus, result));
             } else {
                 contextBus.putPassResult(idTmp, result);
             }
+
             contextBus.putPreResult(result);
+
             contextBus.setResult(result);
         }
     }

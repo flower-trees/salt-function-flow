@@ -28,12 +28,12 @@ import java.util.function.Function;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Info<P, I> {
+public class Info {
     public String id;
     public String include;
     public Function<IContextBus, Boolean> match;
-    public Function<IContextBus, I> input;
-    public BiFunction<IContextBus, P, Object> output;
+    public Function<IContextBus, Object> input;
+    public BiFunction<IContextBus, Object, Object> output;
     public String idAlias;
     public Class<?> node;
 
@@ -42,12 +42,5 @@ public class Info<P, I> {
             return node.getName();
         }
         return id;
-    }
-
-    public void SetClass(Class<?> clazz) {
-        this.node = clazz;
-        if (StringUtils.isEmpty(id)) {
-            this.id = clazz.getName();
-        }
     }
 }
