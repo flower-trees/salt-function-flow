@@ -46,8 +46,8 @@ public class DemoFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_flow_extend")
                 .next(AddNode.class)
                 .next(
-                        Info.builder().include("param <= 30").node(ReduceNode.class).build(),
-                        Info.builder().include("param > 30").node(RemainderNode.class).build()
+                        Info.c("param <= 30", ReduceNode.class),
+                        Info.c("param > 30", RemainderNode.class)
                 )
                 .next(MultiplyNode.class)
                 .next(DivisionNode.class)
@@ -59,8 +59,8 @@ public class DemoFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_flow_exclusive")
                 .next(AddNode.class)
                 .next(
-                        Info.builder().include("param <= 30").node(ReduceNode.class).build(),
-                        Info.builder().include("param > 30").node(MultiplyNode.class).build()
+                        Info.c("param <= 30", ReduceNode.class),
+                        Info.c("param > 30", MultiplyNode.class)
                 )
                 .next(DivisionNode.class).build();
 
@@ -107,8 +107,8 @@ public class DemoFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_flow_inclusive")
                 .next(AddNode.class)
                 .all(
-                        Info.builder().include("param > 30").node(ReduceNode.class).build(),
-                        Info.builder().include("param < 50").node(MultiplyNode.class).build()
+                        Info.c("param > 30",ReduceNode.class),
+                        Info.c("param < 50", MultiplyNode.class)
                 )
                 .next(DivisionNode.class).build();
 
@@ -119,8 +119,8 @@ public class DemoFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .concurrent(
                         new AddResult(),
-                        Info.builder().include("param > 30").node(ReduceNode.class).build(),
-                        Info.builder().include("param < 50").node(MultiplyNode.class).build()
+                        Info.c("param > 30",ReduceNode.class),
+                        Info.c("param < 50", MultiplyNode.class)
                 )
                 .next(DivisionNode.class).build();
 
@@ -143,8 +143,8 @@ public class DemoFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_branch_exclusive")
                 .next(AddNode.class)
                 .next(
-                        Info.builder().include("param <= 30").id("demo_branch_reduce").build(),
-                        Info.builder().include("param > 30").id("demo_branch_multiply").build()
+                        Info.c("param <= 30", "demo_branch_reduce"),
+                        Info.c("param > 30", "demo_branch_multiply")
                 )
                 .next(DivisionNode.class)
                 .build();

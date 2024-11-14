@@ -32,33 +32,35 @@ public class TrainFlowInit implements IFlowInit {
         flowEngine.builder().id("train_ticket")
                 .next(TrainBasePrice.class)
                 .next(
-                        Info.builder().include("age < 14").node(TrainChildTicket.class).build(),
-                        Info.builder().include("age >= 14").node(TrainAdultTicket.class).build())
+                        Info.c("age < 14", TrainChildTicket.class),
+                        Info.c("age >= 14",TrainAdultTicket.class)
+                )
                 .next(TrainTicketResult.class)
                 .build();
 
         flowEngine.builder().id("train_ticket_match")
                 .next(TrainBasePrice.class)
                 .next(
-                        Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14).node(TrainChildTicket.class).build(),
-                        Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14).node(TrainAdultTicket.class).build())
+                        Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14, TrainChildTicket.class),
+                        Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14, TrainAdultTicket.class))
                 .next(TrainTicketResult.class)
                 .build();
 
         flowEngine.builder().id("train_ticket_input")
                 .next(
-                        Info.builder().node(TrainBasePriceStation.class)
-                                .input(iContextBus -> {
+                        Info.c(TrainBasePriceStation.class)
+                                .cInput(iContextBus -> {
                                     Passenger passenger = iContextBus.getParam();
                                     return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
                                 })
-                                .output((iContextBus, result) -> {
+                                .cOutput((iContextBus, result) -> {
                                     System.out.println("base_price return " + result);
                                     return result;
-                                }).build())
+                                }))
                 .next(
-                        Info.builder().include("age < 14").node(TrainChildTicket.class).build(),
-                        Info.builder().include("age >= 14").node(TrainAdultTicket.class).build())
+                        Info.c("age < 14", TrainChildTicket.class),
+                        Info.c("age >= 14", TrainAdultTicket.class)
+                )
                 .next(TrainTicketResult.class)
                 .build();
     }

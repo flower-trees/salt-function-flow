@@ -110,8 +110,8 @@ demo_flow result: 894
 flowEngine.builder().id("demo_flow_exclusive")
         .next(AddNode.class)
         .next(
-                Info.builder().include("param <= 30").node(ReduceNode.class).build(),
-                Info.builder().include("param > 30").node(MultiplyNode.class).build()
+                Info.c("param <= 30", ReduceNode.class),
+                Info.c("param > 30", MultiplyNode.class)
         )
         .next(DivisionNode.class)
         .build();
@@ -162,14 +162,14 @@ flowEngine.builder().id("demo_flow_notify")
 同步相容执行ReduceNode、MultiplyNode，满足条件都会执行。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/9e28c6b39a134cba9fc889d9c247382d.png)
 ```java
-flowEngine.builder()
-        .id("demo_flow_inclusive")
+flowEngine.builder().id("demo_flow_inclusive")
         .next(AddNode.class)
         .all(
-                Info.builder().include("param > 30").node(ReduceNode.class).build(),
-                Info.builder().include("param < 50").node(MultiplyNode.class).build()
+                Info.c("param > 30",ReduceNode.class),
+                Info.c("param < 50", MultiplyNode.class)
         )
-        .next(DivisionNode.class).build();
+        .next(DivisionNode.class)
+        .build();
 ```
 ### 循环执行
 循环执行ReduceNode、MultiplyNode，直到结果小于56000000。
@@ -258,8 +258,8 @@ flowEngine.builder().id("demo_branch_multiply").next("demo_multiply").result("de
 flowEngine.builder().id("demo_branch_exclusive")
         .next("demo_add")
         .next(
-                Info.builder().include("param <= 40").id("demo_branch_reduce").build(),
-                Info.builder().include("param > 40").id("demo_branch_multiply").build()
+                Info.c("param <= 30", "demo_branch_reduce"),
+                Info.c("param > 30", "demo_branch_multiply")
         )
         .result("demo_division")
         .build();
@@ -321,12 +321,12 @@ flowEngine.builder().id("demo_branch_nested")
 ### 匿名嵌套执行
 ```java
 flowEngine.builder().id("demo_branch_anonymous")
-                .next("demo_add")
-                .all(
-                        flowEngine.branch().next("demo_reduce").result("demo_remainder").build(),
-                        flowEngine.branch().next("demo_multiply").result("demo_remainder").build())
-                .result("demo_division")
-                .build();
+        .next("demo_add")
+        .all(
+                flowEngine.branch().next("demo_reduce").result("demo_remainder").build(),
+                flowEngine.branch().next("demo_multiply").result("demo_remainder").build())
+        .result("demo_division")
+        .build();
 ```
 ## 条件判断
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/7565eae3a50842eb9ea6f9ced7bbff81.png)
@@ -336,8 +336,8 @@ flowEngine.builder().id("demo_branch_anonymous")
 flowEngine.builder().id("train_ticket")
         .next("base_price")
         .next(
-                Info.builder().include("age < 14").id("child_ticket").build(),
-                Info.builder().include("age >= 14").id("adult_tickt").build())
+                Info.c("age < 14", TrainChildTicket.class),
+                Info.c("age >= 14",TrainAdultTicket.class)
         .result("ticket_result")
         .build();
 ```
@@ -349,18 +349,19 @@ Ticket ticket = flowEngine.execute("train_ticket", passenger);
 ### 嵌入函数判断
 可以使用嵌入函数进行条件判断:
 ```java
-flowEngine.builder().id("train_ticket_1")
-       .next("base_price")
-       .next(
-               Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14).id("child_ticket").build(),
-               Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14).id("adult_tickt").build())
-       .result("ticket_result")
-       .build();
+flowEngine.builder().id("train_ticket_match")
+        .next(TrainBasePrice.class)
+        .next(
+                Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14, TrainChildTicket.class),
+                Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14, TrainAdultTicket.class))
+        .next(TrainTicketResult.class)
+        .build();
 ```
 ### 自定义条件参数
 可以扩展条件判断参数，自定义传入：
 ```java
 Passenger passenger = Passenger.builder().name("jack").age(12).build();
+
 //自定义条件参数
 Map<String, Object> condition = new HashMap();
 condition.put("sex", "man");
@@ -392,18 +393,19 @@ public class TrainBasePriceStation extends FlowNode<Integer, Station> {
 ```java
 flowEngine.builder().id("train_ticket_input")
         .next(
-                Info.builder().node(TrainBasePriceStation.class)
-                        .input(iContextBus -> {
+                Info.c(TrainBasePriceStation.class)
+                        .cInput(iContextBus -> {
                             Passenger passenger = iContextBus.getParam();
                             return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
                         })
-                        .output((iContextBus, result) -> {
+                        .cOutput((iContextBus, result) -> {
                             System.out.println("base_price return " + result);
                             return result;
-                        }).build())
+                        }))
         .next(
-                Info.builder().include("age < 14").node(TrainChildTicket.class).build(),
-                Info.builder().include("age >= 14").node(TrainAdultTicket.class).build())
+                Info.c("age < 14", TrainChildTicket.class),
+                Info.c("age >= 14", TrainAdultTicket.class)
+        )
         .next(TrainTicketResult.class)
         .build();
 ```

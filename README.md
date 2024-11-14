@@ -125,8 +125,8 @@ Execute either `ReduceNode` or `MultiplyNode` based on the flow parameter:
 flowEngine.builder().id("demo_flow_exclusive")
         .next(AddNode.class)
         .next(
-                Info.builder().include("param <= 30").node(ReduceNode.class).build(),
-                Info.builder().include("param > 30").node(MultiplyNode.class).build()
+                Info.c("param <= 30", ReduceNode.class),
+                Info.c("param > 30", MultiplyNode.class)
         )
         .next(DivisionNode.class)
         .build();
@@ -184,14 +184,14 @@ flowEngine.builder().id("demo_flow_notify")
 Execute `ReduceNode` and `MultiplyNode` simultaneously if their conditions are satisfied:
 
 ```java
-flowEngine.builder()
-        .id("demo_flow_inclusive")
+flowEngine.builder().id("demo_flow_inclusive")
         .next(AddNode.class)
         .all(
-                Info.builder().include("param > 30").node(ReduceNode.class).build(),
-                Info.builder().include("param < 50").node(MultiplyNode.class).build()
+                Info.c("param > 30",ReduceNode.class),
+                Info.c("param < 50", MultiplyNode.class)
         )
-        .next(DivisionNode.class).build();
+        .next(DivisionNode.class)
+        .build();
 ```
 
 ### Loop Execution
@@ -291,8 +291,8 @@ Similar to regular node orchestration:
 flowEngine.builder().id("demo_branch_exclusive")
         .next("demo_add")
         .next(
-                Info.builder().include("param <= 40").id("demo_branch_reduce").build(),
-                Info.builder().include("param > 40").id("demo_branch_multiply").build()
+                Info.c("param <= 30", "demo_branch_reduce"),
+                Info.c("param > 30", "demo_branch_multiply")
         )
         .result("demo_division")
         .build();
@@ -368,12 +368,12 @@ flowEngine.builder().id("demo_branch_nested")
 
 ```java
 flowEngine.builder().id("demo_branch_anonymous")
-                .next("demo_add")
-                .all(
-                        flowEngine.branch().next("demo_reduce").result("demo_remainder").build(),
-                        flowEngine.branch().next("demo_multiply").result("demo_remainder").build())
-                .result("demo_division")
-                .build();
+        .next("demo_add")
+        .all(
+                flowEngine.branch().next("demo_reduce").result("demo_remainder").build(),
+                flowEngine.branch().next("demo_multiply").result("demo_remainder").build())
+        .result("demo_division")
+        .build();
 ```
 
 ### Condition Evaluation
@@ -386,8 +386,8 @@ Use rule scripts for evaluation. For example: issue a child ticket for age < 14 
 flowEngine.builder().id("train_ticket")
         .next("base_price")
         .next(
-                Info.builder().include("age < 14").id("child_ticket").build(),
-                Info.builder().include("age >= 14").id("adult_ticket").build())
+                Info.c("age < 14", TrainChildTicket.class),
+                Info.c("age >= 14",TrainAdultTicket.class)
         .result("ticket_result")
         .build();
 ```
@@ -404,13 +404,13 @@ Ticket ticket = flowEngine.execute("train_ticket", passenger);
 Use embedded functions for condition evaluation:
 
 ```java
-flowEngine.builder().id("train_ticket_1")
-       .next("base_price")
-       .next(
-               Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14).id("child_ticket").build(),
-               Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14).id("adult_ticket").build())
-       .result("ticket_result")
-       .build();
+flowEngine.builder().id("train_ticket_match")
+        .next(TrainBasePrice.class)
+        .next(
+                Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14, TrainChildTicket.class),
+                Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14, TrainAdultTicket.class))
+        .next(TrainTicketResult.class)
+        .build();
 ```
 
 #### Custom Condition Parameters
@@ -419,6 +419,7 @@ Custom condition parameters can be passed in during execution:
 
 ```java
 Passenger passenger = Passenger.builder().name("jack").age(12).build();
+
 // Custom condition parameters
 Map<String, Object> condition = new HashMap();
 condition.put("sex", "man");
@@ -457,21 +458,22 @@ When passing a `Passenger` as a parameter, convert it to a `Station` to be passe
 
 ```java
 flowEngine.builder().id("train_ticket_input")
-        .next(
-                Info.builder().node(TrainBasePriceStation.class)
-                        .input(iContextBus -> {
-                            Passenger passenger = iContextBus.getParam();
-                            return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
-                        })
-                        .output((iContextBus, result) -> {
-                            System.out.println("base_price return " + result);
-                            return result;
-                        }).build())
-        .next(
-                Info.builder().include("age < 14").node(TrainChildTicket.class).build(),
-                Info.builder().include("age >= 14").node(TrainAdultTicket.class).build())
-        .next(TrainTicketResult.class)
-        .build();
+            .next(
+                    Info.c(TrainBasePriceStation.class)
+                            .cInput(iContextBus -> {
+                                Passenger passenger = iContextBus.getParam();
+                                return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
+                            })
+                            .cOutput((iContextBus, result) -> {
+                                System.out.println("base_price return " + result);
+                                return result;
+                            }))
+            .next(
+                    Info.c("age < 14", TrainChildTicket.class),
+                    Info.c("age >= 14", TrainAdultTicket.class)
+            )
+            .next(TrainTicketResult.class)
+            .build();
 ```
 
 **Execution:**

@@ -43,4 +43,43 @@ public class Info {
         }
         return id;
     }
+
+    public static Info c(String id) {
+        return Info.builder().id(id).build();
+    }
+
+    public static Info c(String include, String id) {
+        return Info.builder().id(id).include(include).build();
+    }
+
+    public static Info c(Function<IContextBus, Boolean> match, String id) {
+        return Info.builder().id(id).match(match).build();
+    }
+
+    public static Info c(Class<?> node) {
+        return Info.builder().node(node).build();
+    }
+
+    public static Info c(String include, Class<?> node) {
+        return Info.builder().node(node).include(include).build();
+    }
+
+    public static Info c(Function<IContextBus, Boolean> match, Class<?> node) {
+        return Info.builder().node(node).match(match).build();
+    }
+
+    public Info cAlias(String id) {
+        this.idAlias = id;
+        return this;
+    }
+
+    public Info cInput(Function<IContextBus, Object> input) {
+        this.input = input;
+        return this;
+    }
+
+    public Info cOutput(BiFunction<IContextBus, Object, Object> output) {
+        this.output = output;
+        return this;
+    }
 }
