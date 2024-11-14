@@ -18,7 +18,7 @@ import org.salt.function.flow.demo.train.param.Ticket;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "ticket_result")
+@NodeIdentity
 public class TrainTicketResult extends FlowNode<Ticket, Integer> {
     @Override
     public Ticket doProcess(Integer price) {

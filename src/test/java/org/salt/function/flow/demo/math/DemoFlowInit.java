@@ -212,8 +212,8 @@ public class DemoFlowInit implements IFlowInit {
     private static class AddResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getPassResult(ReduceNode.class.getName()) : 0;
-            Integer demoMultiplyResult = iContextBus.getPassResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(MultiplyNode.class.getName()): 0;
+            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class) != null ?  (Integer) iContextBus.getPassResult(ReduceNode.class) : 0;
+            Integer demoMultiplyResult = iContextBus.getPassResult(MultiplyNode.class) != null ? (Integer) iContextBus.getPassResult(MultiplyNode.class): 0;
             Integer handleResult = demoReduceResult + demoMultiplyResult;
             System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "=" + handleResult);
             return handleResult;

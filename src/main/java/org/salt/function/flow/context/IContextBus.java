@@ -58,9 +58,14 @@ public interface IContextBus {
     <P> P getPreResult();
 
     /**
-     * Get the execution result of any node
+     * Get the execution result of any node by node ID
      */
     <P> P getPassResult(String nodeId);
+
+    /**
+     * Get the execution result of any node by node class
+     */
+    <P> P getPassResult(Class<?> clazz);
 
     /**
      * Get the execution exception of any node

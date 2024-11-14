@@ -18,7 +18,7 @@ import org.salt.function.flow.demo.train.param.Station;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "base_price_station")
+@NodeIdentity
 public class TrainBasePriceStation extends FlowNode<Integer, Station> {
 
     @Override

@@ -17,7 +17,7 @@ package org.salt.function.flow.demo.train.node;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
-@NodeIdentity(nodeId = "child_ticket")
+@NodeIdentity
 public class TrainChildTicket extends FlowNode<Integer, Integer> {
     @Override
     public Integer doProcess(Integer basePrice) {

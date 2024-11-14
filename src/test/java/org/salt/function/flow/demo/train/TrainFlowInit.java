@@ -17,6 +17,7 @@ package org.salt.function.flow.demo.train;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.config.IFlowInit;
+import org.salt.function.flow.demo.train.node.*;
 import org.salt.function.flow.demo.train.param.Passenger;
 import org.salt.function.flow.demo.train.param.Station;
 
@@ -29,24 +30,24 @@ public class TrainFlowInit implements IFlowInit {
     public void configure(FlowEngine flowEngine) {
 
         flowEngine.builder().id("train_ticket")
-                .next("base_price")
+                .next(TrainBasePrice.class)
                 .next(
-                        Info.builder().include("age < 14").id("child_ticket").build(),
-                        Info.builder().include("age >= 14").id("adult_tickt").build())
-                .next("ticket_result")
+                        Info.builder().include("age < 14").node(TrainChildTicket.class).build(),
+                        Info.builder().include("age >= 14").node(TrainAdultTicket.class).build())
+                .next(TrainTicketResult.class)
                 .build();
 
         flowEngine.builder().id("train_ticket_match")
-                .next("base_price")
+                .next(TrainBasePrice.class)
                 .next(
-                        Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14).id("child_ticket").build(),
-                        Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14).id("adult_tickt").build())
-                .next("ticket_result")
+                        Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14).node(TrainChildTicket.class).build(),
+                        Info.builder().match(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14).node(TrainAdultTicket.class).build())
+                .next(TrainTicketResult.class)
                 .build();
 
         flowEngine.builder().id("train_ticket_input")
                 .next(
-                        Info.builder().id("base_price_station")
+                        Info.builder().node(TrainBasePriceStation.class)
                                 .input(iContextBus -> {
                                     Passenger passenger = iContextBus.getParam();
                                     return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
@@ -56,9 +57,9 @@ public class TrainFlowInit implements IFlowInit {
                                     return result;
                                 }).build())
                 .next(
-                        Info.builder().include("age < 14").id("child_ticket").build(),
-                        Info.builder().include("age >= 14").id("adult_tickt").build())
-                .next("ticket_result")
+                        Info.builder().include("age < 14").node(TrainChildTicket.class).build(),
+                        Info.builder().include("age >= 14").node(TrainAdultTicket.class).build())
+                .next(TrainTicketResult.class)
                 .build();
     }
 }

@@ -131,6 +131,11 @@ public class ContextBus implements IContextBus {
         return (P) passResultMap.get(nodeId);
     }
 
+    @Override
+    public <P> P getPassResult(Class<?> clazz) {
+        return (P) passResultMap.get(clazz.getName());
+    }
+
     public <P> void putPassResult(String nodeId, P result) {
         passResultMap.put(nodeId, result);
     }
