@@ -68,7 +68,7 @@ public class DivisionNode extends FlowNode<Integer, Integer> {
 
 ### Orchestrating & Executing Flows
 Inject `FlowEngine` to use functional programming for orchestrating nodes in sequence:
-![sequence](https://img-blog.csdnimg.cn/eb3598ae4db145858e7e47a190235af6.png)
+![sequence](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-113715%402x.png)
 ```java
 @Autowired
 FlowEngine flowEngine;
@@ -123,7 +123,7 @@ System.out.println("demo_flow result: " + result);
 
 ## Complex Gateway Orchestration
 ### Exclusive Execution
-![image](https://img-blog.csdnimg.cn/585b8101369546fbb750e5ba6d0b85d1.png)
+![image](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-134336%402x.png)
 Execute `ReduceNode` or `MultiplyNode` based on input parameters:
 ```java
 flowEngine.builder().id("demo_flow_exclusive")
@@ -137,7 +137,7 @@ flowEngine.builder().id("demo_flow_exclusive")
 ```
 
 ### Parallel Execution
-![image](https://img-blog.csdnimg.cn/59d92327b03e4f56a1488e093129895f.png)
+![image](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-134654%402x.png)
 Execute `ReduceNode` and `MultiplyNode` concurrently (asynchronously) and sum their results.
 ```java
 flowEngine.builder().id("demo_flow_concurrent")
@@ -156,7 +156,7 @@ class AddResult implements IResult<Integer> {
 ```
 
 ### Asynchronous Execution
-![image](https://img-blog.csdnimg.cn/ce1d5d54fc3a48d18be054bbb2c114ff.png)
+![image](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-134857%402x.png)
 Execute `ReduceNode` asynchronously and `MultiplyNode` synchronously, then sum the results.
 ```java
 flowEngine.builder().id("demo_flow_future")
@@ -169,7 +169,7 @@ flowEngine.builder().id("demo_flow_future")
 ```
 
 ### Notify Execution
-![image](https://img-blog.csdnimg.cn/fe9c502ada5449fb8e5884c011041f89.png)
+![image](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-135300%402x.png)
 Execute `ReduceNode` asynchronously as a notification, which does not affect the final result.
 ```java
 flowEngine.builder().id("demo_flow_notify")
@@ -181,7 +181,7 @@ flowEngine.builder().id("demo_flow_notify")
 ```
 
 ### Inclusive Execution
-![image](https://img-blog.csdnimg.cn/9e28c6b39a134cba9fc889d9c247382d.png)
+![image](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-135739%402x.png)
 Execute both `ReduceNode` and `MultiplyNode` if conditions are met.
 ```java
 flowEngine.builder().id("demo_flow_inclusive")
@@ -361,6 +361,7 @@ flowEngine.builder().id("demo_branch_anonymous")
 ```
 
 ## Conditional Judgments
+![image](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-144441%402x.png) {width=600px height=400px}
 ### Rule-Based Script Judgments
 You can use rule-based scripts for condition evaluation. For example, issuing a child ticket if the age is less than 14, or an adult ticket if the age is 14 or older:
 ```java

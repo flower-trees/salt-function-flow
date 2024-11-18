@@ -67,7 +67,7 @@ public class DivisionNode extends FlowNode<Integer, Integer> {
 
 ### 编排&执行流程
 注入FlowEngine，使用函数式编排节点，顺序执行：
-![顺序执行](https://img-blog.csdnimg.cn/eb3598ae4db145858e7e47a190235af6.png)
+![顺序执行](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-113715%402x.png)
 
 ```java
 @Autowired
@@ -125,7 +125,7 @@ System.out.println("demo_flow result: " + result);
 ## 复杂网关编排
 ### 排他执行
 根据流程入参执行 ReduceNode 或 MultiplyNode 节点
-![在这里插入图片描述](https://img-blog.csdnimg.cn/585b8101369546fbb750e5ba6d0b85d1.png)
+![在这里插入图片描述](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-134336%402x.png)
 ```java
 flowEngine.builder().id("demo_flow_exclusive")
         .next(AddNode.class)
@@ -138,7 +138,7 @@ flowEngine.builder().id("demo_flow_exclusive")
 ```
 ### 并行执行
 并行（异步并发）执行 ReduceNode、MultiplyNode节点，并结果相加。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/59d92327b03e4f56a1488e093129895f.png)
+![在这里插入图片描述](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-134654%402x.png)
 ```java
 flowEngine.builder().id("demo_flow_concurrent")
         .next(AddNode.class)
@@ -157,7 +157,7 @@ class AddResult implements IResult<Integer> {
 ```
 ### 异步执行
 异步执行ReduceNode节点，同步执行MultiplyNode，并结果相加。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/ce1d5d54fc3a48d18be054bbb2c114ff.png)
+![在这里插入图片描述](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-134857%402x.png)
 ```java
 flowEngine.builder().id("demo_flow_future")
         .next(AddNode.class)
@@ -169,7 +169,7 @@ flowEngine.builder().id("demo_flow_future")
 ```
 ### 通知执行
 异步通知执行ReduceNode，ReduceNode将不影响最终结果。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/fe9c502ada5449fb8e5884c011041f89.png)
+![在这里插入图片描述](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-135300%402x.png)
 ```java
 flowEngine.builder().id("demo_flow_notify")
         .next(AddNode.class)
@@ -180,7 +180,7 @@ flowEngine.builder().id("demo_flow_notify")
 ```
 ### 相容执行
 同步相容执行ReduceNode、MultiplyNode，满足条件都会执行。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/9e28c6b39a134cba9fc889d9c247382d.png)
+![在这里插入图片描述](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-135739%402x.png)
 ```java
 flowEngine.builder().id("demo_flow_inclusive")
         .next(AddNode.class)
@@ -349,7 +349,7 @@ flowEngine.builder().id("demo_branch_anonymous")
         .register();
 ```
 ## 条件判断
-![在这里插入图片描述](https://img-blog.csdnimg.cn/7565eae3a50842eb9ea6f9ced7bbff81.png)
+![在这里插入图片描述](https://github.com/Jindou2018/image/raw/master/flow-image/WX20230109-140319%402x.png)
 ### 规则脚本判断
 可以使用规则脚本来判断，如：年龄<14岁签发儿童票，年龄>=14岁签发成人票:
 ```java
