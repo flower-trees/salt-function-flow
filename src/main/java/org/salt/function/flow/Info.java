@@ -29,16 +29,17 @@ import java.util.function.Function;
 @AllArgsConstructor
 @Builder
 public class Info {
-    public String id;
-    public String include;
-    public Function<IContextBus, Boolean> match;
-    public Function<IContextBus, Object> input;
-    public BiFunction<IContextBus, Object, Object> output;
-    public String idAlias;
-    public Class<?> node;
+    private String id;
+    private String include;
+    private Function<IContextBus, Boolean> match;
+    private Function<IContextBus, Object> input;
+    private BiFunction<IContextBus, Object, Object> output;
+    private String idAlias;
+    private Class<?> node;
+    private FlowInstance flow;
 
     public String getId() {
-        if (StringUtils.isEmpty(id) || node != null) {
+        if (StringUtils.isEmpty(id) && node != null) {
             return node.getName();
         }
         return id;
@@ -66,6 +67,18 @@ public class Info {
 
     public static Info c(Function<IContextBus, Boolean> match, Class<?> node) {
         return Info.builder().node(node).match(match).build();
+    }
+
+    public static Info c(FlowInstance flow) {
+        return Info.builder().flow(flow).build();
+    }
+
+    public static Info c(String include, FlowInstance flow) {
+        return Info.builder().flow(flow).include(include).build();
+    }
+
+    public static Info c(Function<IContextBus, Boolean> match, FlowInstance flow) {
+        return Info.builder().flow(flow).match(match).build();
     }
 
     public Info cAlias(String id) {

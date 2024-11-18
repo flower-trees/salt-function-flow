@@ -38,7 +38,7 @@ public class DemoFlowInit implements IFlowInit {
                 .next(ReduceNode.class)
                 .next(MultiplyNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Single flow with condition extend construction
@@ -51,7 +51,7 @@ public class DemoFlowInit implements IFlowInit {
                 )
                 .next(MultiplyNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Exclusive flow construction
@@ -62,7 +62,7 @@ public class DemoFlowInit implements IFlowInit {
                         Info.c("param <= 30", ReduceNode.class),
                         Info.c("param > 30", MultiplyNode.class)
                 )
-                .next(DivisionNode.class).build();
+                .next(DivisionNode.class).register();
 
         /**
          * Concurrent flow construction
@@ -71,7 +71,7 @@ public class DemoFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .concurrent(new AddResult(), ReduceNode.class, MultiplyNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Notify flow construction
@@ -81,7 +81,7 @@ public class DemoFlowInit implements IFlowInit {
                 .notify(ReduceNode.class)
                 .next(MultiplyNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Future/Wait flow construction
@@ -91,7 +91,7 @@ public class DemoFlowInit implements IFlowInit {
                 .future(ReduceNode.class, MultiplyNode.class)
                 .wait(new AddResult(), ReduceNode.class, MultiplyNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         flowEngine.builder().id("demo_flow_future_1")
                 .next(AddNode.class)
@@ -99,7 +99,7 @@ public class DemoFlowInit implements IFlowInit {
                 .next(MultiplyNode.class)
                 .wait(new AddResult(), ReduceNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Inclusive flow construction
@@ -110,7 +110,7 @@ public class DemoFlowInit implements IFlowInit {
                         Info.c("param > 30",ReduceNode.class),
                         Info.c("param < 50", MultiplyNode.class)
                 )
-                .next(DivisionNode.class).build();
+                .next(DivisionNode.class).register();
 
         /**
          * Inclusive concurrent flow construction
@@ -122,7 +122,7 @@ public class DemoFlowInit implements IFlowInit {
                         Info.c("param > 30",ReduceNode.class),
                         Info.c("param < 50", MultiplyNode.class)
                 )
-                .next(DivisionNode.class).build();
+                .next(DivisionNode.class).register();
 
         /**
          * loop flow construction
@@ -131,11 +131,11 @@ public class DemoFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .loop(iContextBus -> (Integer) iContextBus.getPreResult() < 56000000, ReduceNode.class, MultiplyNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         //branch
-        flowEngine.builder().id("demo_branch_reduce").next(ReduceNode.class).next(RemainderNode.class).build();
-        flowEngine.builder().id("demo_branch_multiply").next(MultiplyNode.class).next(RemainderNode.class).build();
+        flowEngine.builder().id("demo_branch_reduce").next(ReduceNode.class).next(RemainderNode.class).register();
+        flowEngine.builder().id("demo_branch_multiply").next(MultiplyNode.class).next(RemainderNode.class).register();
 
         /**
          * Exclusive branch flow construction
@@ -147,7 +147,7 @@ public class DemoFlowInit implements IFlowInit {
                         Info.c("param > 30", "demo_branch_multiply")
                 )
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Concurrent branch flow construction
@@ -156,7 +156,7 @@ public class DemoFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .concurrent(new AddBranchResult(), "demo_branch_reduce", "demo_branch_multiply")
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Notify branch flow construction
@@ -165,7 +165,7 @@ public class DemoFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .notify("demo_branch_reduce")
                 .next("demo_branch_multiply")
-                .next(DivisionNode.class).build();
+                .next(DivisionNode.class).register();
 
         /**
          * Future/Wait branch flow construction
@@ -175,7 +175,7 @@ public class DemoFlowInit implements IFlowInit {
                 .future("demo_branch_reduce")
                 .next("demo_branch_multiply")
                 .wait(new AddBranchResult(), "demo_branch_reduce")
-                .next(DivisionNode.class).build();
+                .next(DivisionNode.class).register();
 
         /**
          * Inclusive branch flow construction
@@ -184,7 +184,7 @@ public class DemoFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .all("demo_branch_reduce", "demo_branch_multiply")
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Nested branch flow construction
@@ -192,10 +192,10 @@ public class DemoFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_branch_nested")
                 .next(AddNode.class)
                 .all(
-                        flowEngine.builder().id("nested_1").next(ReduceNode.class).next(RemainderNode.class).build(),
-                        flowEngine.builder().id("nested_2").next(MultiplyNode.class).next(RemainderNode.class).build())
+                        flowEngine.builder().id("nested_1").next(ReduceNode.class).next(RemainderNode.class).register(),
+                        flowEngine.builder().id("nested_2").next(MultiplyNode.class).next(RemainderNode.class).register())
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         /**
          * Nested branch flow with anonymous branch construction
@@ -203,10 +203,10 @@ public class DemoFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_branch_anonymous")
                 .next(AddNode.class)
                 .all(
-                        flowEngine.branch().next(ReduceNode.class).next(RemainderNode.class).build(),
-                        flowEngine.branch().next(MultiplyNode.class).next(RemainderNode.class).build())
+                        flowEngine.builder().next(ReduceNode.class).next(RemainderNode.class).build(),
+                        flowEngine.builder().next(MultiplyNode.class).next(RemainderNode.class).build())
                 .next(DivisionNode.class)
-                .build();
+                .register();
     }
 
     private static class AddResult implements IResult<Integer> {

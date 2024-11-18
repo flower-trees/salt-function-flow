@@ -23,14 +23,14 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 @Slf4j
-public class FlowNodeFuture<P> extends FlowNodeStructure<P> {
+public class FlowNodeFuture extends FlowNodeStructure<Future<?>> {
 
     @Override
-    public P doProcessGateway(List<Info> infoList) {
+    public Future<?> doProcessGateway(List<Info> infoList) {
         for (Info info : infoList) {
             Future<?> future = theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
                 try {
-                    return execute(info.getId());
+                    return execute(info);
                 } catch (Exception e) {
                     ((ContextBus) getContextBus()).putPassException(info.getId(), e);
                 }

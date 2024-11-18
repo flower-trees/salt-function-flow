@@ -30,11 +30,7 @@ public class FlowNodeNotify<P> extends FlowNodeStructure<P> {
             theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
                 try {
                     ((ContextBus) iContextBus).copy();
-                    if (isFlowNode(info.getId())) {
-                        flowNodeManager.executeVoidSingle(info.getId());
-                    } else {
-                        flowEngine.execute(info.getId());
-                    }
+                    execute(info);
                 } catch (Exception e) {
                     ((ContextBus) iContextBus).putPassException(info.getId(), e);
                 }

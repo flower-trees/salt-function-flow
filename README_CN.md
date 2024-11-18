@@ -79,7 +79,7 @@ flowEngine.builder().id("demo_flow")
         .next(ReduceNode.class)
         .next(MultiplyNode.class)
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 
 ### 执行流程
@@ -114,7 +114,7 @@ flowEngine.builder().id("demo_flow_exclusive")
                 Info.c("param > 30", MultiplyNode.class)
         )
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 ### 并行执行
 并行（异步并发）执行 ReduceNode、MultiplyNode节点，并结果相加。
@@ -124,7 +124,7 @@ flowEngine.builder().id("demo_flow_concurrent")
         .next(AddNode.class)
         .concurrent(new AddResult(), ReduceNode.class, MultiplyNode.class)
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 ```java
 //结果相加handle
@@ -145,7 +145,7 @@ flowEngine.builder().id("demo_flow_future")
         .next(MultiplyNode.class) 
         .wait(new AddResult(), ReduceNode.class) //等待，合并结果
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 ### 通知执行
 异步通知执行ReduceNode，ReduceNode将不影响最终结果。
@@ -156,7 +156,7 @@ flowEngine.builder().id("demo_flow_notify")
         .notify(ReduceNode.class) //异步通知执行
         .next(MultiplyNode.class)
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 ### 相容执行
 同步相容执行ReduceNode、MultiplyNode，满足条件都会执行。
@@ -169,7 +169,7 @@ flowEngine.builder().id("demo_flow_inclusive")
                 Info.c("param < 50", MultiplyNode.class)
         )
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 ### 循环执行
 循环执行ReduceNode、MultiplyNode，直到结果小于56000000。
@@ -180,7 +180,7 @@ flowEngine.builder().id("demo_flow_loop")
                 iContextBus -> (Integer) iContextBus.getPreResult() < 56000000, 
                 ReduceNode.class, MultiplyNode.class)
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 
 ## 数据传递
@@ -262,7 +262,7 @@ flowEngine.builder().id("demo_branch_exclusive")
                 Info.c("param > 30", "demo_branch_multiply")
         )
         .result("demo_division")
-        .build();
+        .register();
 ```
 ### 并行执行
 ```java
@@ -270,7 +270,7 @@ flowEngine.builder().id("demo_branch_concurrent")
         .next("demo_add")
         .concurrent(new AddBranchResult(), "demo_branch_reduce", "demo_branch_multiply")
         .result("demo_division")
-        .build();
+        .register();
 ```
 ### 异步执行
 ```java
@@ -295,7 +295,7 @@ flowEngine.builder().id("demo_branch")
         .next("demo_add")
         .all("demo_branch_reduce", "demo_branch_multiply")
         .result("demo_division")
-        .build();
+        .register();
 ```
 ### 循环执行
 ```java
@@ -306,7 +306,7 @@ flowEngine.builder().id("demo_branch")
                 "demo_branch_reduce", "demo_branch_multiply"
         )
         .result("demo_division")
-        .build();
+        .register();
 ```
 ### 嵌套执行
 ```java
@@ -316,17 +316,17 @@ flowEngine.builder().id("demo_branch_nested")
                 flowEngine.builder().id("nested_1").next("demo_reduce").result("demo_remainder").build(),
                 flowEngine.builder().id("nested_2").next("demo_multiply").result("demo_remainder").build())
         .result("demo_division")
-        .build();
+        .register();
 ```
 ### 匿名嵌套执行
 ```java
 flowEngine.builder().id("demo_branch_anonymous")
         .next("demo_add")
         .all(
-                flowEngine.branch().next("demo_reduce").result("demo_remainder").build(),
-                flowEngine.branch().next("demo_multiply").result("demo_remainder").build())
+                flowEngine.builder().next("demo_reduce").result("demo_remainder").build(),
+                flowEngine.builder().next("demo_multiply").result("demo_remainder").build())
         .result("demo_division")
-        .build();
+        .register();
 ```
 ## 条件判断
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/7565eae3a50842eb9ea6f9ced7bbff81.png)
@@ -339,7 +339,7 @@ flowEngine.builder().id("train_ticket")
                 Info.c("age < 14", TrainChildTicket.class),
                 Info.c("age >= 14",TrainAdultTicket.class)
         .result("ticket_result")
-        .build();
+        .register();
 ```
 执行：
 ```java
@@ -355,7 +355,7 @@ flowEngine.builder().id("train_ticket_match")
                 Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14, TrainChildTicket.class),
                 Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14, TrainAdultTicket.class))
         .next(TrainTicketResult.class)
-        .build();
+        .register();
 ```
 ### 自定义条件参数
 可以扩展条件判断参数，自定义传入：
@@ -407,7 +407,7 @@ flowEngine.builder().id("train_ticket_input")
                 Info.c("age >= 14", TrainAdultTicket.class)
         )
         .next(TrainTicketResult.class)
-        .build();
+        .register();
 ```
 执行：
 ```java
@@ -488,7 +488,7 @@ flowEngine.builder().id("demo_flow_concurrent_timeout")
         .next("demo_add")
         .concurrent(new AddResult(), 10, "demo_reduce", "demo_bit_right")
         .result("demo_division")
-        .build();
+        .register();
 ```
 并行结果处理handle可接收isTimeout，判断是否有超时:
 ```java
@@ -539,7 +539,7 @@ flowEngine.builder().id("demo_flow_concurrent_isolate")
         .next("demo_add")
         .concurrent(new AddResult(), Executors.newFixedThreadPool(3), "demo_reduce", "demo_bit_right")
         .result("demo_division")
-        .build();
+        .register();
 ```
 ### ThreadLocal处理
 通过实现IThreadContent接口，将需要的ThreadLocal信息传递至异步线程。

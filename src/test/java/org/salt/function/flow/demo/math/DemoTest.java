@@ -204,7 +204,7 @@ public class DemoTest {
                 builder.next(MultiplyNode.class);
             }
             builder.next(DivisionNode.class);
-            FlowInstance flowInstance = builder.buildDynamic();
+            FlowInstance flowInstance = builder.build();
             System.out.println(flowID + " a: " + a);
             System.out.println(flowID + " test: ");
             Integer result = flowEngine.execute(flowInstance, 39);

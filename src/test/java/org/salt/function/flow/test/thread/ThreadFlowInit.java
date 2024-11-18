@@ -36,54 +36,54 @@ public class ThreadFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .concurrent(new AddResult(), 10, ReduceNode.class, BitRightNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         flowEngine.builder().id("demo_flow_future_timeout")
                 .next(AddNode.class)
                 .future(ReduceNode.class, BitRightNode.class)
                 .wait(new AddResult(), 10,ReduceNode.class, BitRightNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         flowEngine.builder().id("demo_flow_concurrent_isolate")
                 .next(AddNode.class)
                 .concurrent(new AddResult(), Executors.newFixedThreadPool(3), ReduceNode.class, BitRightNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         flowEngine.builder().id("demo_flow_concurrent_threadlocal")
                 .next(AddNode.class)
                 .concurrent(new ReduceResult(), ReduceNode.class, BitLeftNode.class)
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
-        flowEngine.builder().id("demo_branch_bit_right").next(ReduceNode.class).next(BitRightNode.class).build();
-        flowEngine.builder().id("demo_branch_bit_left").next(MultiplyNode.class).next(BitLeftNode.class).build();
+        flowEngine.builder().id("demo_branch_bit_right").next(ReduceNode.class).next(BitRightNode.class).register();
+        flowEngine.builder().id("demo_branch_bit_left").next(MultiplyNode.class).next(BitLeftNode.class).register();
 
         flowEngine.builder().id("demo_branch_flow_concurrent_timeout")
                 .next(AddNode.class)
                 .concurrent(new AddBranchResult(), 10, "demo_branch_bit_right", "demo_branch_bit_left")
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         flowEngine.builder().id("demo_branch_flow_future_timeout")
                 .next(AddNode.class)
                 .future("demo_branch_bit_right", "demo_branch_bit_left")
                 .wait(new AddBranchResult(), 20,"demo_branch_bit_right", "demo_branch_bit_left")
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         flowEngine.builder().id("demo_branch_flow_concurrent_isolate")
                 .next(AddNode.class)
                 .concurrent(new AddBranchResult(), Executors.newFixedThreadPool(3), "demo_branch_bit_right", "demo_branch_bit_left")
                 .next(DivisionNode.class)
-                .build();
+                .register();
 
         flowEngine.builder().id("demo_branch_flow_concurrent_threadlocal")
                 .next(AddNode.class)
                 .concurrent(new AddBranchResult(), "demo_branch_bit_right", "demo_branch_bit_left")
                 .next(DivisionNode.class)
-                .build();
+                .register();
     }
 
     private static class AddResult implements IResult<Integer> {

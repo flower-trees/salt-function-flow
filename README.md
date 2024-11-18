@@ -90,7 +90,7 @@ flowEngine.builder().id("demo_flow")
         .next(ReduceNode.class)
         .next(MultiplyNode.class)
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 
 ### Executing a Flow
@@ -129,7 +129,7 @@ flowEngine.builder().id("demo_flow_exclusive")
                 Info.c("param > 30", MultiplyNode.class)
         )
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 
 #### Concurrent Execution
@@ -141,7 +141,7 @@ flowEngine.builder().id("demo_flow_concurrent")
         .next(AddNode.class)
         .concurrent(new AddResult(), ReduceNode.class, MultiplyNode.class)
         .next(DivisionNode.class)
-        .build();
+        .register();
 
 // Result summation handler
 class AddResult implements IResult<Integer> {
@@ -163,7 +163,7 @@ flowEngine.builder().id("demo_flow_future")
         .next(MultiplyNode.class)
         .wait(new AddResult(), ReduceNode.class) // Wait and merge results
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 
 ### Notification Execution
@@ -176,7 +176,7 @@ flowEngine.builder().id("demo_flow_notify")
         .notify(ReduceNode.class) // Asynchronous notification
         .next(MultiplyNode.class)
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 
 ### Inclusive Execution
@@ -191,7 +191,7 @@ flowEngine.builder().id("demo_flow_inclusive")
                 Info.c("param < 50", MultiplyNode.class)
         )
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 
 ### Loop Execution
@@ -205,7 +205,7 @@ flowEngine.builder().id("demo_flow_loop")
                 iContextBus -> (Integer) iContextBus.getPreResult() < 56000000,
                 ReduceNode.class, MultiplyNode.class)
         .next(DivisionNode.class)
-        .build();
+        .register();
 ```
 
 ### Data Passing
@@ -295,7 +295,7 @@ flowEngine.builder().id("demo_branch_exclusive")
                 Info.c("param > 30", "demo_branch_multiply")
         )
         .result("demo_division")
-        .build();
+        .register();
 ```
 
 #### Concurrent Execution
@@ -305,7 +305,7 @@ flowEngine.builder().id("demo_branch_concurrent")
         .next("demo_add")
         .concurrent(new AddBranchResult(), "demo_branch_reduce", "demo_branch_multiply")
         .result("demo_division")
-        .build();
+        .register();
 ```
 
 #### Asynchronous Execution
@@ -336,7 +336,7 @@ flowEngine.builder().id("demo_branch")
         .next("demo_add")
         .all("demo_branch_reduce", "demo_branch_multiply")
         .result("demo_division")
-        .build();
+        .register();
 ```
 
 #### Loop Execution
@@ -349,7 +349,7 @@ flowEngine.builder().id("demo_branch")
                 "demo_branch_reduce", "demo_branch_multiply"
         )
         .result("demo_division")
-        .build();
+        .register();
 ```
 
 ### Nested Execution
@@ -361,7 +361,7 @@ flowEngine.builder().id("demo_branch_nested")
                 flowEngine.builder().id("nested_1").next("demo_reduce").result("demo_remainder").build(),
                 flowEngine.builder().id("nested_2").next("demo_multiply").result("demo_remainder").build())
         .result("demo_division")
-        .build();
+        .register();
 ```
 
 ### Anonymous Nested Execution
@@ -370,10 +370,10 @@ flowEngine.builder().id("demo_branch_nested")
 flowEngine.builder().id("demo_branch_anonymous")
         .next("demo_add")
         .all(
-                flowEngine.branch().next("demo_reduce").result("demo_remainder").build(),
-                flowEngine.branch().next("demo_multiply").result("demo_remainder").build())
+                flowEngine.builder().next("demo_reduce").result("demo_remainder").build(),
+                flowEngine.builder().next("demo_multiply").result("demo_remainder").build())
         .result("demo_division")
-        .build();
+        .register();
 ```
 
 ### Condition Evaluation
@@ -389,7 +389,7 @@ flowEngine.builder().id("train_ticket")
                 Info.c("age < 14", TrainChildTicket.class),
                 Info.c("age >= 14",TrainAdultTicket.class)
         .result("ticket_result")
-        .build();
+        .register();
 ```
 
 **Execution:**
@@ -410,7 +410,7 @@ flowEngine.builder().id("train_ticket_match")
                 Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14, TrainChildTicket.class),
                 Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14, TrainAdultTicket.class))
         .next(TrainTicketResult.class)
-        .build();
+        .register();
 ```
 
 #### Custom Condition Parameters
@@ -473,7 +473,7 @@ flowEngine.builder().id("train_ticket_input")
                     Info.c("age >= 14", TrainAdultTicket.class)
             )
             .next(TrainTicketResult.class)
-            .build();
+            .register();
 ```
 
 **Execution:**
@@ -569,7 +569,7 @@ flowEngine.builder().id("demo_flow_concurrent_timeout")
         .next("demo_add")
         .concurrent(new AddResult(), 10, "demo_reduce", "demo_bit_right")
         .result("demo_division")
-        .build();
+        .register();
 ```
 
 The `handle` method of the parallel result handler can receive the `isTimeout` parameter to determine if a timeout occurred:
@@ -630,7 +630,7 @@ flowEngine.builder().id("demo_flow_concurrent_isolate")
         .next("demo_add")
         .concurrent(new AddResult(), Executors.newFixedThreadPool(3), "demo_reduce", "demo_bit_right")
         .result("demo_division")
-        .build();
+        .register();
 ```
 
 #### ThreadLocal Handling

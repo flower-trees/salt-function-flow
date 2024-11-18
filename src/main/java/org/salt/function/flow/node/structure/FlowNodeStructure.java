@@ -16,6 +16,7 @@ package org.salt.function.flow.node.structure;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
@@ -52,6 +53,9 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
     }
 
     protected boolean isFlowNode(String nodeId) {
+        if (StringUtils.isEmpty(nodeId)) {
+            return false;
+        }
         return flowNodeManager.getIFlowNode(nodeId) != null;
     }
 
@@ -70,11 +74,14 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
         return null;
     }
 
-    protected O execute(String id) {
-        if (isFlowNode(id)) {
-            return flowNodeManager.execute(id);
+    protected O execute(Info info) {
+        if (isFlowNode(info.getId())) {
+            return flowNodeManager.execute(info.getId());
         } else {
-            return flowEngine.execute(id);
+            if (info.getFlow() != null) {
+                return flowEngine.execute(info.getFlow());
+            }
+            return flowEngine.execute(info.getId());
         }
     }
 

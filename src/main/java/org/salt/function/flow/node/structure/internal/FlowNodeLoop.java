@@ -39,7 +39,7 @@ public class FlowNodeLoop<O> extends FlowNodeStructure<O> {
             for (Info info : infoList) {
                 theadHelper.getDecoratorSync(() -> {
                     try {
-                        execute(info.getId());
+                        execute(info);
                     } catch (Exception e) {
                         ((ContextBus) iContextBus).putPassException(info.getId(), e);
                     }
