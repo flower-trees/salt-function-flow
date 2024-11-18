@@ -65,34 +65,28 @@ public class DivisionNode extends FlowNode<Integer, Integer> {
 }
 ```
 
-### 编排注册流程节点
-注入FlowEngine，注册 ID 为 demo_flow 流程，使用函数式编排节点，顺序执行：
+### 编排&执行流程
+注入FlowEngine，使用函数式编排节点，顺序执行：
 ![顺序执行](https://img-blog.csdnimg.cn/eb3598ae4db145858e7e47a190235af6.png)
 
 ```java
 @Autowired
 FlowEngine flowEngine;
 
-//节点顺序执行
-flowEngine.builder().id("demo_flow")
-        .next(AddNode.class)
-        .next(ReduceNode.class)
-        .next(MultiplyNode.class)
-        .next(DivisionNode.class)
-        .register();
-```
+......
 
-### 执行流程
-注入FlowEngine，执行流程 demo_flow，输入参数为39：
-```java
-@Autowired
-FlowEngine flowEngine;
+FlowInstance flowInstance = flowEngine.builder()
+                .next(AddNode.class)
+                .next(ReduceNode.class)
+                .next(MultiplyNode.class)
+                .next(DivisionNode.class)
+                .build(); //构建流程实例
 
-Integer result = flowEngine.execute("demo_flow", 39);
+Integer result = flowEngine.execute(flowInstance, 39);
 System.out.println("demo_flow result: " + result);
 ```
 
-### 执行结果
+执行结果
 
 ```
 DemoAddNode: 39+123=162
@@ -100,6 +94,32 @@ DemoReduceNode: 162-15=147
 DemoMultiplyNode: 147*73=10731
 DemoDivisionNode: 10731/12=894
 demo_flow result: 894
+```
+
+## 注册流程
+为防止重复创建流程或流程冲突，可以先统一注册流程，再执行具体业务中流程。
+### 注册
+```java
+@Autowired
+FlowEngine flowEngine;
+
+//节点顺序执行
+flowEngine.builder().id("demo_flow") //设置流程ID
+        .next(AddNode.class)
+        .next(ReduceNode.class)
+        .next(MultiplyNode.class)
+        .next(DivisionNode.class)
+        .register(); //注册流程实例
+```
+
+### 执行
+```java
+@Autowired
+FlowEngine flowEngine;
+
+//通过流程ID执行
+Integer result = flowEngine.execute("demo_flow", 39);
+System.out.println("demo_flow result: " + result);
 ```
 
 ## 复杂网关编排
@@ -570,7 +590,7 @@ public class TestThreadContent implements IThreadContent {
 通过builder.buildDynamic方法，动态构建流程，动态流程不注册，可多次重复构建。
 ```java
 int a = (new Random()).nextInt(20);
-FlowEngine.Builder builder = flowEngine.builder().id("demo_flow_dynamic");
+FlowEngine.Builder builder = flowEngine.builder();
 builder.next(AddNode.class);
 if (a < 10) {
     builder.next(ReduceNode.class);
@@ -578,6 +598,6 @@ if (a < 10) {
     builder.next(MultiplyNode.class);
 }
 builder.next(DivisionNode.class);
-FlowInstance flowInstance = builder.buildDynamic();
+FlowInstance flowInstance = builder.build();
 Integer result = flowEngine.execute(flowInstance, 39);
 ```

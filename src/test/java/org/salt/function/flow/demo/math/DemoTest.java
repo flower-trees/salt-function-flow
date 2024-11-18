@@ -196,7 +196,7 @@ public class DemoTest {
         for (int i=0; i<5; i++) {
             int a = (new Random()).nextInt(20);
             String flowID = "demo_flow_dynamic_" + i;
-            FlowEngine.Builder builder = flowEngine.builder().id(flowID);
+            FlowEngine.Builder builder = flowEngine.builder();
             builder.next(AddNode.class);
             if (a < 10) {
                 builder.next(ReduceNode.class);

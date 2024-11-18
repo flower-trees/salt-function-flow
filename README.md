@@ -1,13 +1,11 @@
-### Salt Function Flow
+# Salt Function Flow
 
-Salt Function Flow is a Spring Boot-based, ultra-lightweight, in-memory flow orchestration component that uses functional programming to perform node orchestration.
+Salt Function Flow is an ultra-lightweight, in-memory, SpringBoot-based flow orchestration component that uses functional programming to achieve node orchestration.
 
-### Quick Start
+## Quick Start
+Includes implementation of general function nodes, flow orchestration, and flow execution.
 
-Includes implementation of general-purpose function nodes, flow orchestration, and flow execution.
-
-#### Maven Dependency
-
+### Maven
 ```xml
 <dependency>
     <groupId>cn.fenglingsoftware</groupId>
@@ -16,12 +14,10 @@ Includes implementation of general-purpose function nodes, flow orchestration, a
 </dependency>
 ```
 
-#### Implementing Function Nodes
+### Implementing Flow Function Nodes
+Inherit from the `FlowNode` class, implement the `doProcess` method, and declare with `@NodeIdentity`. Below are four basic functional nodes (beans) for addition, subtraction, multiplication, and division:
 
-Extend the `FlowNode` class, implement the `doProcess` method, and annotate with `@NodeIdentity`. Below are four basic function nodes that perform addition, subtraction, multiplication, and division:
-
-##### AddNode: Adds 123 to the previous node's return value and returns it:
-
+- Gets the return value from the previous node, adds 123, and returns it:
 ```java
 @NodeIdentity
 public class AddNode extends FlowNode<Integer, Integer> {
@@ -33,9 +29,7 @@ public class AddNode extends FlowNode<Integer, Integer> {
     }
 }
 ```
-
-##### ReduceNode: Subtracts 15 from the previous node's return value and returns it:
-
+- Gets the return value from the previous node, subtracts 15, and returns it:
 ```java
 @NodeIdentity
 public class ReduceNode extends FlowNode<Integer, Integer> {
@@ -47,9 +41,7 @@ public class ReduceNode extends FlowNode<Integer, Integer> {
     }
 }
 ```
-
-##### MultiplyNode: Multiplies the previous node's return value by 73 and returns it:
-
+- Gets the return value from the previous node, multiplies by 73, and returns it:
 ```java
 @NodeIdentity
 public class MultiplyNode extends FlowNode<Integer, Integer> {
@@ -61,9 +53,7 @@ public class MultiplyNode extends FlowNode<Integer, Integer> {
     }
 }
 ```
-
-##### DivisionNode: Divides the previous node's return value by 12 and returns it:
-
+- Gets the return value from the previous node, divides by 12, and returns it:
 ```java
 @NodeIdentity
 public class DivisionNode extends FlowNode<Integer, Integer> {
@@ -76,51 +66,65 @@ public class DivisionNode extends FlowNode<Integer, Integer> {
 }
 ```
 
-### Orchestrating and Registering Flow Nodes
-
-Inject `FlowEngine` and register a flow with ID "demo_flow". Use functional programming to orchestrate nodes for sequential execution:
-
+### Orchestrating & Executing Flows
+Inject `FlowEngine` to use functional programming for orchestrating nodes in sequence:
+![sequence](https://img-blog.csdnimg.cn/eb3598ae4db145858e7e47a190235af6.png)
 ```java
 @Autowired
 FlowEngine flowEngine;
 
-// Sequential node execution
-flowEngine.builder().id("demo_flow")
+......
+
+FlowInstance flowInstance = flowEngine.builder()
+                .next(AddNode.class)
+                .next(ReduceNode.class)
+                .next(MultiplyNode.class)
+                .next(DivisionNode.class)
+                .build(); // Build flow instance
+
+Integer result = flowEngine.execute(flowInstance, 39);
+System.out.println("demo_flow result: " + result);
+```
+
+Execution Result:
+```
+Add: 39+123=162
+Reduce: 162-15=147
+Multiply: 147*73=10731
+Division: 10731/12=894
+demo_flow result: 894
+```
+
+## Registering Flows
+To avoid duplicate creation or conflicts, register flows first before executing.
+
+### Register
+```java
+@Autowired
+FlowEngine flowEngine;
+
+flowEngine.builder().id("demo_flow") //set flow id
         .next(AddNode.class)
         .next(ReduceNode.class)
         .next(MultiplyNode.class)
         .next(DivisionNode.class)
-        .register();
+        .register(); //Register flow instance
 ```
 
-### Executing a Flow
-
-Inject `FlowEngine` and execute the "demo_flow" flow with an input parameter of 39:
-
+### Execution
 ```java
 @Autowired
 FlowEngine flowEngine;
 
+//exe flow instance by id
 Integer result = flowEngine.execute("demo_flow", 39);
 System.out.println("demo_flow result: " + result);
 ```
 
-#### Execution Result
-
-```
-AddNode: 39 + 123 = 162
-ReduceNode: 162 - 15 = 147
-MultiplyNode: 147 * 73 = 10731
-DivisionNode: 10731 / 12 = 894
-demo_flow result: 894
-```
-
-### Complex Gateway Orchestration
-
-#### Exclusive Execution
-
-Execute either `ReduceNode` or `MultiplyNode` based on the flow parameter:
-
+## Complex Gateway Orchestration
+### Exclusive Execution
+![image](https://img-blog.csdnimg.cn/585b8101369546fbb750e5ba6d0b85d1.png)
+Execute `ReduceNode` or `MultiplyNode` based on input parameters:
 ```java
 flowEngine.builder().id("demo_flow_exclusive")
         .next(AddNode.class)
@@ -132,57 +136,53 @@ flowEngine.builder().id("demo_flow_exclusive")
         .register();
 ```
 
-#### Concurrent Execution
-
-Execute `ReduceNode` and `MultiplyNode` in parallel (asynchronously), and sum their results:
-
+### Parallel Execution
+![image](https://img-blog.csdnimg.cn/59d92327b03e4f56a1488e093129895f.png)
+Execute `ReduceNode` and `MultiplyNode` concurrently (asynchronously) and sum their results.
 ```java
 flowEngine.builder().id("demo_flow_concurrent")
         .next(AddNode.class)
         .concurrent(new AddResult(), ReduceNode.class, MultiplyNode.class)
         .next(DivisionNode.class)
         .register();
-
-// Result summation handler
+```
+```java
 class AddResult implements IResult<Integer> {
     @Override
     public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-        return iContextBus.getPassResult(ReduceNode.class) + iContextBus.getPassResult(MultiplyNode.class);
+        return iContextBus.getPassResult(ReduceNode.class) + iContextBus.getPassResult(ReduceNode.class);
     }
 }
 ```
 
 ### Asynchronous Execution
-
-Asynchronously execute `ReduceNode`, synchronously execute `MultiplyNode`, and sum the results:
-
+![image](https://img-blog.csdnimg.cn/ce1d5d54fc3a48d18be054bbb2c114ff.png)
+Execute `ReduceNode` asynchronously and `MultiplyNode` synchronously, then sum the results.
 ```java
 flowEngine.builder().id("demo_flow_future")
         .next(AddNode.class)
         .future(ReduceNode.class) // Asynchronous execution
-        .next(MultiplyNode.class)
+        .next(MultiplyNode.class) 
         .wait(new AddResult(), ReduceNode.class) // Wait and merge results
         .next(DivisionNode.class)
         .register();
 ```
 
-### Notification Execution
-
-Asynchronously notify the execution of `ReduceNode`, which will not affect the final result:
-
+### Notify Execution
+![image](https://img-blog.csdnimg.cn/fe9c502ada5449fb8e5884c011041f89.png)
+Execute `ReduceNode` asynchronously as a notification, which does not affect the final result.
 ```java
 flowEngine.builder().id("demo_flow_notify")
         .next(AddNode.class)
-        .notify(ReduceNode.class) // Asynchronous notification
+        .notify(ReduceNode.class) // Asynchronous notify execution
         .next(MultiplyNode.class)
         .next(DivisionNode.class)
         .register();
 ```
 
 ### Inclusive Execution
-
-Execute `ReduceNode` and `MultiplyNode` simultaneously if their conditions are satisfied:
-
+![image](https://img-blog.csdnimg.cn/9e28c6b39a134cba9fc889d9c247382d.png)
+Execute both `ReduceNode` and `MultiplyNode` if conditions are met.
 ```java
 flowEngine.builder().id("demo_flow_inclusive")
         .next(AddNode.class)
@@ -195,23 +195,19 @@ flowEngine.builder().id("demo_flow_inclusive")
 ```
 
 ### Loop Execution
-
-Loop the execution of `ReduceNode` and `MultiplyNode` until the result is less than 56,000,000:
-
+Loop through `ReduceNode` and `MultiplyNode` until the result is less than 56,000,000.
 ```java
 flowEngine.builder().id("demo_flow_loop")
         .next(AddNode.class)
         .loop(
-                iContextBus -> (Integer) iContextBus.getPreResult() < 56000000,
+                iContextBus -> (Integer) iContextBus.getPreResult() < 56000000, 
                 ReduceNode.class, MultiplyNode.class)
         .next(DivisionNode.class)
         .register();
 ```
 
-### Data Passing
-
-The flow execution instance can pass context information via the `IContextBus` interface:
-
+## Data Transfer
+Context information is passed using the `IContextBus` interface:
 ```java
 @NodeIdentity
 public class ResultNode extends FlowNode<Integer, Void> {
@@ -225,45 +221,44 @@ public class ResultNode extends FlowNode<Integer, Void> {
     }
 }
 ```
-
-#### `IContextBus` Interface
-
+The specific interface is as follows:
 ```java
 public interface IContextBus<T, R> {
-    // Get flow execution parameter
+
+    // Get the flow execution parameter
     T getParam();
 
-    // Get flow execution result
+    // Get the flow execution result
     R getResult();
 
-    // Set flow execution result
+    // Set the flow execution result
     void setResult(R result);
 
-    // Add additional context information for transmission
+    // Add additional transmission context information
     <P> void putTransmitInfo(String key, P content);
 
-    // Get additional context information for transmission
+    // Get additional transmission context information
     <P> P getTransmitInfo(String key);
 
-    // Get condition parameters for node evaluation
+    // Get the parameters for node condition judgment
     Map<String, Object> getConditionMap();
     
-    // Dynamically add condition parameters for nodes
+    // Dynamically add parameters for node condition judgment
     <P> void addCondition(String key, P value);
 
-    // Get the last node's execution result, may return null, thread-isolated
+   	// Get the result of the last node, which may return null; thread-isolated
     <P> P getPreResult();
 
-    // Get any node's execution result by ID
+    // Get the result of any node by ID
     <P> P getPassResult(String nodeId);
 
-    // Get any node's exception information by ID
+    // Get the exception information of any node by ID
     Exception getPassException(String nodeId);
 
-    // Get flow ID
+    // Get the flow ID
     String getFlowId();
 
-    // Get flow execution instance ID
+    // Get the flow execution instance ID
     String getRuntimeId();
 
     // Stop the flow
@@ -274,19 +269,15 @@ public interface IContextBus<T, R> {
 }
 ```
 
-### Sub-Flow Support
-
-#### Building Sub-Flows
-
+## Sub-flow Support
+Construct sub-flows:
 ```java
 flowEngine.builder().id("demo_branch_reduce").next("demo_reduce").result("demo_remainder").build();
 flowEngine.builder().id("demo_branch_multiply").next("demo_multiply").result("demo_remainder").build();
 ```
 
-#### Exclusive Execution
-
-Similar to regular node orchestration:
-
+### Exclusive Execution
+Similar to node orchestration.
 ```java
 flowEngine.builder().id("demo_branch_exclusive")
         .next("demo_add")
@@ -298,8 +289,7 @@ flowEngine.builder().id("demo_branch_exclusive")
         .register();
 ```
 
-#### Concurrent Execution
-
+### Parallel Execution
 ```java
 flowEngine.builder().id("demo_branch_concurrent")
         .next("demo_add")
@@ -308,8 +298,7 @@ flowEngine.builder().id("demo_branch_concurrent")
         .register();
 ```
 
-#### Asynchronous Execution
-
+### Asynchronous Execution
 ```java
 flowEngine.builder().id("demo_branch_future")
         .next("demo_add")
@@ -319,8 +308,7 @@ flowEngine.builder().id("demo_branch_future")
         .result("demo_division").build();
 ```
 
-#### Notification Execution
-
+### Notify Execution
 ```java
 flowEngine.builder().id("demo_branch_notify")
         .next("demo_add")
@@ -329,8 +317,7 @@ flowEngine.builder().id("demo_branch_notify")
         .result("demo_division").build();
 ```
 
-#### Inclusive Execution
-
+### Inclusive Execution
 ```java
 flowEngine.builder().id("demo_branch")
         .next("demo_add")
@@ -339,8 +326,7 @@ flowEngine.builder().id("demo_branch")
         .register();
 ```
 
-#### Loop Execution
-
+### Loop Execution
 ```java
 flowEngine.builder().id("demo_branch")
         .next("demo_add")
@@ -353,7 +339,6 @@ flowEngine.builder().id("demo_branch")
 ```
 
 ### Nested Execution
-
 ```java
 flowEngine.builder().id("demo_branch_nested")
         .next("demo_add")
@@ -365,7 +350,6 @@ flowEngine.builder().id("demo_branch_nested")
 ```
 
 ### Anonymous Nested Execution
-
 ```java
 flowEngine.builder().id("demo_branch_anonymous")
         .next("demo_add")
@@ -376,33 +360,26 @@ flowEngine.builder().id("demo_branch_anonymous")
         .register();
 ```
 
-### Condition Evaluation
-
-#### Rule Script Evaluation
-
-Use rule scripts for evaluation. For example: issue a child ticket for age < 14 and an adult ticket for age >= 14:
-
+## Conditional Judgments
+### Rule-Based Script Judgments
+You can use rule-based scripts for condition evaluation. For example, issuing a child ticket if the age is less than 14, or an adult ticket if the age is 14 or older:
 ```java
 flowEngine.builder().id("train_ticket")
         .next("base_price")
         .next(
                 Info.c("age < 14", TrainChildTicket.class),
-                Info.c("age >= 14",TrainAdultTicket.class)
+                Info.c("age >= 14", TrainAdultTicket.class)
         .result("ticket_result")
         .register();
 ```
-
-**Execution:**
-
+Execution:
 ```java
 Passenger passenger = Passenger.builder().name("jack").age(12).build();
 Ticket ticket = flowEngine.execute("train_ticket", passenger);
 ```
 
-#### Embedded Function Evaluation
-
-Use embedded functions for condition evaluation:
-
+### Embedded Function Judgments
+You can use embedded functions for conditional evaluation:
 ```java
 flowEngine.builder().id("train_ticket_match")
         .next(TrainBasePrice.class)
@@ -413,10 +390,8 @@ flowEngine.builder().id("train_ticket_match")
         .register();
 ```
 
-#### Custom Condition Parameters
-
-Custom condition parameters can be passed in during execution:
-
+### Custom Condition Parameters
+You can extend conditional parameters by customizing the input:
 ```java
 Passenger passenger = Passenger.builder().name("jack").age(12).build();
 
@@ -426,18 +401,13 @@ condition.put("sex", "man");
 
 Ticket ticket = flowEngine.execute("train_ticket", passenger, condition);
 ```
-
-You can also dynamically add conditions in the context:
-
+Or dynamically add them within the context:
 ```java
 icontextBus.addCondition("sex", "man");
 ```
 
-### Parameter and Return Value Adapters
-
-Nodes can have fixed input and return value types, and adapt functions can be embedded during orchestration.
-
-#### Example: TrainBasePriceStation Node
+## Node Input and Output Adaptation
+Nodes can have fixed input and output types. During orchestration, you can embed functions to adapt inputs and outputs.
 
 ```java
 @NodeIdentity
@@ -454,41 +424,38 @@ public class TrainBasePriceStation extends FlowNode<Integer, Station> {
 }
 ```
 
-When passing a `Passenger` as a parameter, convert it to a `Station` to be passed to the `TrainBasePriceStation` node:
-
+In this flow, the input parameter is `Passenger`, which is converted to `Station` and passed to the `TrainBasePriceStation` node:
 ```java
 flowEngine.builder().id("train_ticket_input")
-            .next(
-                    Info.c(TrainBasePriceStation.class)
-                            .cInput(iContextBus -> {
-                                Passenger passenger = iContextBus.getParam();
-                                return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
-                            })
-                            .cOutput((iContextBus, result) -> {
-                                System.out.println("base_price return " + result);
-                                return result;
-                            }))
-            .next(
-                    Info.c("age < 14", TrainChildTicket.class),
-                    Info.c("age >= 14", TrainAdultTicket.class)
-            )
-            .next(TrainTicketResult.class)
-            .register();
+        .next(
+                Info.c(TrainBasePriceStation.class)
+                        .cInput(iContextBus -> {
+                            Passenger passenger = iContextBus.getParam();
+                            return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
+                        })
+                        .cOutput((iContextBus, result) -> {
+                            System.out.println("base_price return " + result);
+                            return result;
+                        }))
+        .next(
+                Info.c("age < 14", TrainChildTicket.class),
+                Info.c("age >= 14", TrainAdultTicket.class)
+        )
+        .next(TrainTicketResult.class)
+        .register();
 ```
 
-**Execution:**
-
+Execution:
 ```java
 Passenger passenger = Passenger.builder().name("jack").age(12).build();
 Ticket ticket = flowEngine.execute("train_ticket", passenger);
 ```
 
-### Flow Termination
+## Process Termination
+### Normal Termination
+Terminate the entire process using the `
 
-#### Normal Termination
-
-Use the `stopProcess` method of the `IContextBus` interface to stop the entire flow:
-
+stopProcess` method in the `IContextBus` interface.
 ```java
 @NodeIdentity
 public class BitAndNode extends FlowNode<Integer, Integer> {
@@ -496,11 +463,11 @@ public class BitAndNode extends FlowNode<Integer, Integer> {
     @Override
     public Integer doProcess(Integer num) {
         if (num > 500) {
-            System.out.println("BitAndNode: stop flow");
+            System.out.println("DemoBitAndNode: stop flow");
             getContextBus().stopProcess();
         } else {
             Integer result = num & 256;
-            System.out.println("BitAndNode: " + num + "&256=" + result);
+            System.out.println("DemoBitAndNode: " + num + "&256=" + result);
             return result;
         }
         return null;
@@ -508,10 +475,8 @@ public class BitAndNode extends FlowNode<Integer, Integer> {
 }
 ```
 
-#### Exception Termination
-
-Throw an exception in a node to terminate the flow, but this only works for synchronous nodes:
-
+### Exception Termination
+You can terminate the process by throwing an exception within a node, which only applies to synchronously executed nodes.
 ```java
 @NodeIdentity
 public class BitOrNode extends FlowNode<Integer, Integer> {
@@ -519,21 +484,19 @@ public class BitOrNode extends FlowNode<Integer, Integer> {
     @Override
     public Integer doProcess(Integer num) {
         if (num > 500) {
-            System.out.println("BitOrNode: throw exception");
-            throw new RuntimeException("BitOrNode Exception!");
+            System.out.println("DemoBitOrNode: throw exception");
+            throw new RuntimeException("DemoBitOrNode Exception!");
         } else {
             Integer result = num | 128;
-            System.out.println("BitOrNode: " + num + "|128=" + result);
+            System.out.println("DemoBitOrNode: " + num + "|128=" + result);
             return result;
         }
     }
 }
 ```
 
-#### Flow Rollback
-
-Use the `rollbackProcess` method of the `IContextBus` interface to actively rollback the entire flow. This will trigger the rollback method of each executed node in reverse order. The `rollback` method is empty by default, but nodes can implement it selectively as needed:
-
+### Process Rollback
+Use the `rollbackProcess` method in the `IContextBus` interface to manually rollback the entire process. This will trigger the `rollback` method of each node in reverse order. By default, `rollback` is an empty method, which can be selectively implemented by nodes as needed.
 ```java
 @NodeIdentity
 public class BitXorNode extends FlowNode<Integer, Integer> {
@@ -541,11 +504,11 @@ public class BitXorNode extends FlowNode<Integer, Integer> {
     @Override
     public Integer doProcess(Integer num) {
         if (num > 500) {
-            System.out.println("BitXorNode: rollback flow");
+            System.out.println("DemoBitOrNode: rollback flow");
             getContextBus().rollbackProcess();
         } else {
-            Integer result = num ^ 128;
-            System.out.println("BitXorNode: " + num + "^128=" + result);
+            Integer result = num | 128;
+            System.out.println("DemoBitOrNode: " + num + "|128=" + result);
             return result;
         }
         return null;
@@ -553,17 +516,14 @@ public class BitXorNode extends FlowNode<Integer, Integer> {
 
     @Override
     public void rollback() {
-        System.out.println("BitXorNode: rollback execute");
+        System.out.println("DemoBitOrNode: rollback execute");
     }
 }
 ```
 
-### Thread Configuration
-
-#### Timeout
-
-For concurrent or wait asynchronous execution, you can set a maximum wait time (in milliseconds):
-
+## Threads
+### Timeout Settings
+For concurrent and `wait` asynchronous executions, you can set a maximum wait time in milliseconds using a timeout parameter:
 ```java
 flowEngine.builder().id("demo_flow_concurrent_timeout")
         .next("demo_add")
@@ -572,21 +532,18 @@ flowEngine.builder().id("demo_flow_concurrent_timeout")
         .register();
 ```
 
-The `handle` method of the parallel result handler can receive the `isTimeout` parameter to determine if a timeout occurred:
-
+The `handle` method of the parallel result processor can take `isTimeout` to determine if there was a timeout:
 ```java
 private static class AddResult implements IResult<Integer> {
-    @Override
-    public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-        System.out.println("AddResult handle isTimeout: " + isTimeout);
-    }
+        @Override
+        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
+            System.out.println("AddResult handle isTimeout: " + isTimeout);
+        }
 }
 ```
 
-#### Thread Pool Configuration
-
-Define thread pool configurations via the YAML file:
-
+### Thread Pool Configuration
+Define thread pool settings in the `yml` file:
 ```yaml
 salt:
   function:
@@ -598,10 +555,9 @@ salt:
         keepAlive: 30
 ```
 
-#### Custom Thread Pool
-
-Redefine the `flowThreadPool` bean:
-
+### Custom Thread Pool
+#### Redefine the Bean
+Redefine a thread pool Bean named `flowThreadPool`:
 ```java
 @Bean
 @ConditionalOnMissingBean(name = "flowThreadPool")
@@ -621,10 +577,8 @@ public ThreadPoolTaskExecutor flowThreadPool() {
 }
 ```
 
-#### Parameter-Specific Thread Pool
-
-Pass an independent thread pool via parameters:
-
+#### Passing Parameters
+Use an independent thread pool by passing it as a parameter:
 ```java
 flowEngine.builder().id("demo_flow_concurrent_isolate")
         .next("demo_add")
@@ -633,12 +587,10 @@ flowEngine.builder().id("demo_flow_concurrent_isolate")
         .register();
 ```
 
-#### ThreadLocal Handling
-
-By implementing the `IThreadContent` interface, you can pass the necessary `ThreadLocal` information to the asynchronous thread:
-
+### ThreadLocal Handling
+Use the `IThreadContent` interface to transfer `ThreadLocal` information to an asynchronous thread.
 ```java
-// Extend IThreadContent interface and define as a bean
+// Extend the IThreadContent interface and define it as a bean
 @Component
 public class TestThreadContent implements IThreadContent {
 
@@ -661,13 +613,11 @@ public class TestThreadContent implements IThreadContent {
 }
 ```
 
-### Dynamic Flow Construction
-
-Use the `buildDynamic` method of the builder to dynamically construct flows. Dynamic flows are not registered and can be constructed repeatedly.
-
+## Dynamic Flow Construction
+Use the `builder.buildDynamic` method to dynamically build flows. Dynamic flows are not registered and can be repeatedly built.
 ```java
 int a = (new Random()).nextInt(20);
-FlowEngine.Builder builder = flowEngine.builder().id("demo_flow_dynamic");
+FlowEngine.Builder builder = flowEngine.builder();
 builder.next(AddNode.class);
 if (a < 10) {
     builder.next(ReduceNode.class);
@@ -675,7 +625,6 @@ if (a < 10) {
     builder.next(MultiplyNode.class);
 }
 builder.next(DivisionNode.class);
-FlowInstance flowInstance = builder.buildDynamic();
+FlowInstance flowInstance = builder.build();
 Integer result = flowEngine.execute(flowInstance, 39);
 ```
-
