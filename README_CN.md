@@ -7,7 +7,7 @@ Salt Function Flow是一款基于SpringBoot、内存级别、超轻量级流编�
 ### Maven
 ```xml
 <dependency>
-    <groupId>cn.fenglingsoftware</groupId>
+    <groupId>io.github.flower-trees</groupId>
     <artifactId>salt-function-flow</artifactId>
     <version>1.1.0</version>
 </dependency>

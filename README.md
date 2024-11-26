@@ -8,7 +8,7 @@ Includes implementation of general function nodes, flow orchestration, and flow 
 ### Maven
 ```xml
 <dependency>
-    <groupId>cn.fenglingsoftware</groupId>
+    <groupId>io.github.flower-trees</groupId>
     <artifactId>salt-function-flow</artifactId>
     <version>1.1.0</version>
 </dependency>

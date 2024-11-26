@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cn.fenglingsoftware</groupId>
+    <groupId>io.github.flower-trees</groupId>
     <artifactId>salt-function-flow</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
 
     <licenses>
         <license>
@@ -17,14 +17,14 @@
     </licenses>
 
     <scm>
-        <connection>https://github.com/fenglingguitar/salt-function-flow.git</connection>
-        <url>https://github.com/fenglingguitar/salt-function-flow</url>
+        <connection>https://github.com/flower-trees/salt-function-flow.git</connection>
+        <url>https://github.com/flower-trees/salt-function-flow</url>
     </scm>
 
     <developers>
         <developer>
-            <name>fenglingguitar</name>
-            <email>fenglingguitar@163.com</email>
+            <name>huaqianshu_z</name>
+            <email>huaqianshu_z@163.com</email>
         </developer>
     </developers>
 
@@ -109,47 +109,25 @@
         </dependency>
     </dependencies>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>sonatype</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <extensions>true</extensions>
                 <configuration>
-                    <encoding>UTF-8</encoding>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18.1</version>
-                <configuration>
-                    <skipTests>true</skipTests>
+                    <publishingServerId>ossrh</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <attach>true</attach>
-                </configuration>
+                <version>2.2.1</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>attach-sources</id>
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
@@ -158,29 +136,17 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.7.1</version>
-            </plugin>
-            <!-- Javadoc -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <additionalJOptions>
-                        <additionalJOption>-Xdoclint:none</additionalJOption>
-                    </additionalJOptions>
-                </configuration>
+                <version>2.9.1</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-            <!-- Gpg Signature -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
