@@ -24,7 +24,6 @@ import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.node.register.FlowNodeManager;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 import org.salt.function.flow.node.structure.internal.*;
-import org.salt.function.flow.thread.IThreadContent;
 import org.salt.function.flow.thread.TheadHelper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -46,15 +45,12 @@ public class FlowEngine implements InitializingBean {
 
     protected ThreadPoolTaskExecutor flowThreadPool;
 
-    protected IThreadContent threadContent;
-
     private static ConcurrentMap<String, FlowInstance> processInstanceMap = new ConcurrentHashMap<>();
 
-    public FlowEngine(FlowNodeManager flowNodeManager, IFlowInit flowInit, ThreadPoolTaskExecutor flowThreadPool, IThreadContent threadContent) {
+    public FlowEngine(FlowNodeManager flowNodeManager, IFlowInit flowInit, ThreadPoolTaskExecutor flowThreadPool) {
         this.flowNodeManager = flowNodeManager;
         this.flowInit = flowInit;
         this.flowThreadPool = flowThreadPool;
-        this.threadContent = threadContent;
     }
 
     @Override
@@ -548,7 +544,6 @@ public class FlowEngine implements InitializingBean {
         private TheadHelper creatThreadHelper(InitParam initParam) {
             return TheadHelper.builder()
                         .timeout(initParam.timeout)
-                        .threadContent(flowEngine.threadContent)
                         .executor(
                                 initParam.isolate != null ?
                                         initParam.isolate :

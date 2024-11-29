@@ -16,20 +16,17 @@ package org.salt.function.flow.test.thread.node;
 
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
-import org.salt.function.flow.test.thread.TestThreadContent;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.salt.function.flow.test.thread.UserThreadUtil;
 
 @NodeIdentity
 public class BitLeftNode extends FlowNode<Integer, Integer> {
 
-    @Autowired
-    TestThreadContent testThreadContent;
-
     @Override
     public Integer doProcess(Integer num) {
-        System.out.println("TheadLocal: " + testThreadContent.get("test"));
-        Integer result = num << 1;
-        System.out.println("DemoBitLeftNode: " + num + "<<1=" + result);
+        System.out.println("TheadLocal: " + UserThreadUtil.get("test"));
+        Integer testNum = UserThreadUtil.get("test") == null ? 1 : (Integer) UserThreadUtil.get("test");
+        Integer result = num << testNum;
+        System.out.println("DemoBitLeftNode: " + num + "<<" + testNum + "=" + result);
         return result;
     }
 }

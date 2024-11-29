@@ -502,7 +502,7 @@ public class BitXorNode extends FlowNode<Integer, Integer> {
 ```
 ## 线程
 ### 超时时间
-concurrent、wait异步执行函数，可通过超时参数，设置最大等待时间，单位为毫秒:
+concurrent()、wait()异步执行函数，可通过超时参数，设置最大等待时间，单位为毫秒:
 ```java
 flowEngine.builder().id("demo_flow_concurrent_timeout")
         .next("demo_add")
@@ -510,7 +510,7 @@ flowEngine.builder().id("demo_flow_concurrent_timeout")
         .result("demo_division")
         .register();
 ```
-并行结果处理handle可接收isTimeout，判断是否有超时:
+并行结果处理handle()可接收isTimeout，判断是否有超时:
 ```java
 private static class AddResult implements IResult<Integer> {
         @Override
@@ -562,28 +562,32 @@ flowEngine.builder().id("demo_flow_concurrent_isolate")
         .register();
 ```
 ### ThreadLocal处理
-通过实现IThreadContent接口，将需要的ThreadLocal信息传递至异步线程。
+在多线程情况下，可以通过两种方式进行ThreadLocal数据继承处理：
+- 在自定ThreadPoolTaskExecutor时，实现TaskDecorator接口，在decorate方法中设置ThreadLocal。
+```java
+@Bean
+@ConditionalOnMissingBean(name = "flowThreadPool")
+public ThreadPoolTaskExecutor flowThreadPool() {
+    ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+    ......
+    threadPoolTaskExecutor.setTaskDecorator(runnable -> {
+            Map<String, Object> map = new HashMap<>(ThreadUtil.getAll());
+            return () -> {
+                try {
+                    ThreadUtil.putAll(map);
+                    runnable.run();
+                } finally {
+                    ThreadUtil.clean();
+                }
+            };
+        });
+    return threadPoolTaskExecutor;
+}
 ```
-//继承IThreadContent接口，并定义成bean
-@Component
-public class TestThreadContent implements IThreadContent {
-
-    private static ThreadLocal<Map<String, Object>> threadLocal = new ThreadLocal<>();
-
-    @Override
-    public Object getThreadContent() {
-        return threadLocal.get();
-    }
-
-    @Override
-    public void setThreadContent(Object content) {
-        threadLocal.set((Map<String, Object>) content);
-    }
-
-    @Override
-    public void cleanThreadContent() {
-        threadLocal.remove();
-    }
+- 通过ThreadHelper.initThreadLocal(ThreadLocal<?>... threadLocals)方法将用户自定义ThreadLocal，设置到框架中，通过框架处理。
+```java
+static {
+    TheadHelper.initThreadLocal(UserThreadUtil.getThreadLocal());
 }
 ```
 ## 动态构建流程

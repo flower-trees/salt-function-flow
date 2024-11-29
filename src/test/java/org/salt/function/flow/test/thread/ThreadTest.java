@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.TestApplication;
+import org.salt.function.flow.thread.TheadHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,10 @@ public class ThreadTest {
 
     @Autowired
     FlowEngine flowEngine;
+
+    static {
+        TheadHelper.initThreadLocal(UserThreadUtil.getThreadLocal());
+    }
 
     @Test
     public void testConcurrentTimeoutDemo() {
@@ -56,16 +61,13 @@ public class ThreadTest {
         Assert.assertTrue(result != null && result == 19);
     }
 
-    @Autowired
-    TestThreadContent testThreadContent;
-
     @Test
     public void testConcurrentLocalhostDemo() {
-        testThreadContent.put("test", 1314);
+        UserThreadUtil.put("test", 2);
         System.out.println("demo_flow_concurrent_threadlocal test: ");
         Integer result = flowEngine.execute("demo_flow_concurrent_threadlocal", 39);
         System.out.println("demo_flow_concurrent_threadlocal result: " + result);
-        Assert.assertTrue(result != null && result == -14);
+        Assert.assertTrue(result != null && result == -41);
     }
 
     @Test
@@ -78,6 +80,7 @@ public class ThreadTest {
 
     @Test
     public void testBranchFutureTimeoutDemo() {
+        UserThreadUtil.put("test", 1);
         System.out.println("demo_branch_flow_future_timeout test: ");
         Integer result = flowEngine.execute("demo_branch_flow_future_timeout", 39);
         System.out.println("demo_branch_flow_future_timeout result: " + result);
@@ -94,10 +97,10 @@ public class ThreadTest {
 
     @Test
     public void testBranchConcurrentLocalhostDemo() {
-        testThreadContent.put("test", 1314);
+        UserThreadUtil.put("test", 2);
         System.out.println("demo_branch_flow_concurrent_threadlocal test: ");
         Integer result = flowEngine.execute("demo_branch_flow_concurrent_threadlocal", 39);
         System.out.println("demo_branch_flow_concurrent_threadlocal result: " + result);
-        Assert.assertTrue(result != null && result == 1977);
+        Assert.assertTrue(result != null && result == 3948);
     }
 }

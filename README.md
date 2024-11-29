@@ -524,7 +524,7 @@ public class BitXorNode extends FlowNode<Integer, Integer> {
 
 ## Threads
 ### Timeout Settings
-For concurrent and `wait` asynchronous executions, you can set a maximum wait time in milliseconds using a timeout parameter:
+For `concurrent()` and `wait()` asynchronous executions, you can set a maximum wait time in milliseconds using a timeout parameter:
 ```java
 flowEngine.builder().id("demo_flow_concurrent_timeout")
         .next("demo_add")
@@ -533,7 +533,7 @@ flowEngine.builder().id("demo_flow_concurrent_timeout")
         .register();
 ```
 
-The `handle` method of the parallel result processor can take `isTimeout` to determine if there was a timeout:
+The `handle()` method of the parallel result processor can take `isTimeout` to determine if there was a timeout:
 ```java
 private static class AddResult implements IResult<Integer> {
         @Override
@@ -589,28 +589,36 @@ flowEngine.builder().id("demo_flow_concurrent_isolate")
 ```
 
 ### ThreadLocal Handling
-Use the `IThreadContent` interface to transfer `ThreadLocal` information to an asynchronous thread.
+In a multithreaded scenario, there are two ways to handle the inheritance of `ThreadLocal` data:
+
+- **Implementing the `TaskDecorator` interface when customizing `ThreadPoolTaskExecutor`**  
+   In the `decorate` method, set the `ThreadLocal`:
 ```java
-// Extend the IThreadContent interface and define it as a bean
-@Component
-public class TestThreadContent implements IThreadContent {
+@Bean
+@ConditionalOnMissingBean(name = "flowThreadPool")
+public ThreadPoolTaskExecutor flowThreadPool() {
+   ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+   ......
+   threadPoolTaskExecutor.setTaskDecorator(runnable -> {
+       Map<String, Object> map = new HashMap<>(ThreadUtil.getAll());
+       return () -> {
+           try {
+               ThreadUtil.putAll(map);
+               runnable.run();
+           } finally {
+               ThreadUtil.clean();
+           }
+       };
+   });
+   return threadPoolTaskExecutor;
+}
+```
 
-    private static ThreadLocal<Map<String, Object>> threadLocal = new ThreadLocal<>();
-
-    @Override
-    public Object getThreadContent() {
-        return threadLocal.get();
-    }
-
-    @Override
-    public void setThreadContent(Object content) {
-        threadLocal.set((Map<String, Object>) content);
-    }
-
-    @Override
-    public void cleanThreadContent() {
-        threadLocal.remove();
-    }
+- **Using the `ThreadHelper.initThreadLocal(ThreadLocal<?>... threadLocals)` method**  
+   Pass a custom `ThreadLocal` to the framework, which then handles it:
+```java
+static {
+   ThreadHelper.initThreadLocal(UserThreadUtil.getThreadLocal());
 }
 ```
 

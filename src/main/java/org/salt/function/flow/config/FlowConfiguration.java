@@ -18,13 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.node.register.FlowNodeManager;
 import org.salt.function.flow.node.register.FlowNodeScanner;
-import org.salt.function.flow.thread.IThreadContent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.ThreadPoolExecutor;
@@ -71,8 +72,9 @@ public class FlowConfiguration {
     }
 
     @Bean
+    @DependsOn({"extensionScanner", "flowThreadPool"})
     public FlowEngine flowEngine(FlowNodeManager flowNodeManager, @Autowired(required = false) IFlowInit flowInit,
-                                 ThreadPoolTaskExecutor flowThreadPool, @Autowired(required = false) IThreadContent threadContent) {
-        return new FlowEngine(flowNodeManager, flowInit, flowThreadPool, threadContent);
+                                 @Qualifier("flowThreadPool") ThreadPoolTaskExecutor flowThreadPool) {
+        return new FlowEngine(flowNodeManager, flowInit, flowThreadPool);
     }
 }

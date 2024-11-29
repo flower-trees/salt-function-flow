@@ -20,23 +20,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.util.FlowUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Data
 @Builder
 public class TheadHelper {
 
-    private IThreadContent threadContent;
-
     private ExecutorService executor;
 
     private long timeout;
 
     private static ThreadLocal<Map<String, Object>> threadLocal = new ThreadLocal<>();
+
+    private static List<ThreadLocal<?>> threadLocalUsers = new ArrayList<>();
+
+    public static void initThreadLocal(ThreadLocal<?>... threadLocals) {
+        threadLocalUsers = new ArrayList<>();
+        threadLocalUsers.addAll(Arrays.asList(threadLocals));
+    }
 
     public static <P> void putThreadLocal(String key, P value) {
         if (threadLocal.get() == null) {
@@ -68,53 +73,48 @@ public class TheadHelper {
     }
 
     public Runnable getDecoratorAsync(Runnable runnable, Info info) {
-        Map<String, Object> map = new HashMap<>(threadLocal.get());
-        final Object content = getThreadContent();
+        final Map<String, Object> map = new HashMap<>(threadLocal.get());
+        final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
         return () -> {
             threadLocal.set(map);
-            setThreadContent(content);
+            for (int i = 0; i < threadLocalUsers.size(); i++) {
+                @SuppressWarnings("unchecked")
+                ThreadLocal<Object> threadLocalUser = (ThreadLocal<Object>) threadLocalUsers.get(i);
+                threadLocalUser.set(results.get(i));
+            }
             putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()) , info);
             try {
                 runnable.run();
             } finally {
                 TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()), null);
-                cleanThreadContent();
-                threadLocal.set(null);
+                for (ThreadLocal<?> threadLocalUser : threadLocalUsers) {
+                    threadLocalUser.remove();
+                }
+                threadLocal.remove();
             }
         };
     }
 
     public Callable getDecoratorAsync(Callable callable, Info info) {
-        Map<String, Object> map = new HashMap<>(threadLocal.get());
-        final Object content = getThreadContent();
+        final Map<String, Object> map = new HashMap<>(threadLocal.get());
+        final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
         return () -> {
             threadLocal.set(map);
-            setThreadContent(content);
+            for (int i = 0; i < threadLocalUsers.size(); i++) {
+                @SuppressWarnings("unchecked")
+                ThreadLocal<Object> threadLocalUser = (ThreadLocal<Object>) threadLocalUsers.get(i);
+                threadLocalUser.set(results.get(i));
+            }
             putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()) , info);
             try {
                 return callable.call();
             } finally {
                 TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()), null);
-                cleanThreadContent();
-                threadLocal.set(null);
+                for (ThreadLocal<?> threadLocalUser : threadLocalUsers) {
+                    threadLocalUser.remove();
+                }
+                threadLocal.remove();
             }
         };
-    }
-
-    private Object getThreadContent() {
-        if (threadContent != null) {
-            return threadContent.getThreadContent();
-        }
-        return null;
-    }
-    private void setThreadContent(Object content) {
-        if (threadContent != null) {
-            threadContent.setThreadContent(content);
-        }
-    }
-    private void cleanThreadContent() {
-        if (threadContent != null) {
-            threadContent.cleanThreadContent();
-        }
     }
 }
