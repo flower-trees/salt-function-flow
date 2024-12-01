@@ -20,6 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.context.IContextBus;
+import org.salt.function.flow.node.FlowNode;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -37,6 +38,7 @@ public class Info {
     private String idAlias;
     private Class<?> node;
     private FlowInstance flow;
+    private FlowNode<?, ?> flowNode;
 
     public String getId() {
         if (StringUtils.isEmpty(id) && node != null) {
@@ -79,6 +81,18 @@ public class Info {
 
     public static Info c(Function<IContextBus, Boolean> match, FlowInstance flow) {
         return Info.builder().flow(flow).match(match).build();
+    }
+
+    public static Info c(FlowNode<?, ?> flowNode) {
+        return Info.builder().flowNode(flowNode).build();
+    }
+
+    public static Info c(String include, FlowNode<?, ?> flowNode) {
+        return Info.builder().flowNode(flowNode).include(include).build();
+    }
+
+    public static Info c(Function<IContextBus, Boolean> match, FlowNode<?, ?> flowNode) {
+        return Info.builder().flowNode(flowNode).match(match).build();
     }
 
     public Info cAlias(String id) {

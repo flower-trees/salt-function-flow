@@ -20,6 +20,7 @@ import org.salt.function.flow.config.IFlowInit;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNode;
+import org.salt.function.flow.node.IFlowNode;
 import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.node.register.FlowNodeManager;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
@@ -118,12 +119,12 @@ public class FlowEngine implements InitializingBean {
 
     public static class Builder {
         String flowId;
-        List<String> idList;
+        List<IFlowNode> nodeList;
         private FlowEngine flowEngine;
 
         public Builder(FlowEngine flowEngine) {
             this.flowEngine = flowEngine;
-            this.idList = new ArrayList<>();
+            this.nodeList = new ArrayList<>();
         }
 
         public Builder id(String flowId) {
@@ -142,6 +143,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder next(FlowInstance... flows) {
             return next(toInfos(flows));
+        }
+
+        public Builder next(FlowNode<?,?>... flowNodes) {
+            return next(toInfos(flowNodes));
         }
 
         public Builder next(Info... infos) {
@@ -170,6 +175,10 @@ public class FlowEngine implements InitializingBean {
             return all(toInfos(flows));
         }
 
+        public Builder all(FlowNode<?,?>... flowNodes) {
+            return all(toInfos(flowNodes));
+        }
+
         public Builder all(IResult<?> result, Class<?>... clazzs) {
             return all(result, toInfos(clazzs));
         }
@@ -180,6 +189,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder all(IResult<?> result, FlowInstance... flows) {
             return all(result, toInfos(flows));
+        }
+
+        public Builder all(IResult<?> result, FlowNode<?,?>... flowNodes) {
+            return all(result, toInfos(flowNodes));
         }
 
         public Builder all(Info... infos) {
@@ -208,6 +221,10 @@ public class FlowEngine implements InitializingBean {
             return concurrent(toInfos(flows));
         }
 
+        public Builder concurrent(FlowNode<?,?>... flowNodes) {
+            return concurrent(toInfos(flowNodes));
+        }
+
         public Builder concurrent(long timeout, Class<?>... clazzs) {
             return concurrent(timeout, toInfos(clazzs));
         }
@@ -218,6 +235,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder concurrent(long timeout, FlowInstance... flows) {
             return concurrent(timeout, toInfos(flows));
+        }
+
+        public Builder concurrent(long timeout, FlowNode<?,?>... flowNodes) {
+            return concurrent(timeout, toInfos(flowNodes));
         }
 
         public Builder concurrent(IResult<?> result, Class<?>... clazzs) {
@@ -232,6 +253,10 @@ public class FlowEngine implements InitializingBean {
             return concurrent(result, toInfos(flows));
         }
 
+        public Builder concurrent(IResult<?> result, FlowNode<?,?>... flowNodes) {
+            return concurrent(result, toInfos(flowNodes));
+        }
+
         public Builder concurrent(IResult<?> result, long timeout, Class<?>... clazzs) {
             return concurrent(result, timeout, toInfos(clazzs));
         }
@@ -242,6 +267,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder concurrent(IResult<?> result, long timeout, FlowInstance... flows) {
             return concurrent(result, timeout, toInfos(flows));
+        }
+
+        public Builder concurrent(IResult<?> result, long timeout, FlowNode<?,?>... flowNodes) {
+            return concurrent(result, timeout, toInfos(flowNodes));
         }
 
         public Builder concurrent(IResult<?> result, ExecutorService isolate, Class<?>... clazzs) {
@@ -256,6 +285,10 @@ public class FlowEngine implements InitializingBean {
             return concurrent(result, isolate, toInfos(flows));
         }
 
+        public Builder concurrent(IResult<?> result, ExecutorService isolate, FlowNode<?,?>... flowNodes) {
+            return concurrent(result, isolate, toInfos(flowNodes));
+        }
+
         public Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, Class<?>... clazzs) {
             return concurrent(result, timeout, isolate, toInfos(clazzs));
         }
@@ -266,6 +299,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, FlowInstance... flows) {
             return concurrent(result, timeout, isolate, toInfos(flows));
+        }
+
+        public Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, FlowNode<?,?>... flowNodes) {
+            return concurrent(result, timeout, isolate, toInfos(flowNodes));
         }
 
         public Builder concurrent(Info... infos) {
@@ -310,6 +347,10 @@ public class FlowEngine implements InitializingBean {
             return notify(toInfos(flows));
         }
 
+        public Builder notify(FlowNode<?,?>... flowNodes) {
+            return notify(toInfos(flowNodes));
+        }
+
         public Builder notify(ExecutorService isolate, Class<?>... clazzs) {
             return notify(isolate, toInfos(clazzs));
         }
@@ -320,6 +361,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder notify(ExecutorService isolate, FlowInstance... flows) {
             return notify(isolate, toInfos(flows));
+        }
+
+        public Builder notify(ExecutorService isolate, FlowNode<?,?>... flowNodes) {
+            return notify(isolate, toInfos(flowNodes));
         }
 
         public Builder notify(Info... infos) {
@@ -348,6 +393,10 @@ public class FlowEngine implements InitializingBean {
             return future(toInfos(flows));
         }
 
+        public Builder future(FlowNode<?,?>... flowNodes) {
+            return future(toInfos(flowNodes));
+        }
+
         public Builder future(ExecutorService isolate, Class<?>... clazzs) {
             return future(isolate, toInfos(clazzs));
         }
@@ -358,6 +407,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder future(ExecutorService isolate, FlowInstance... flows) {
             return future(isolate, toInfos(flows));
+        }
+
+        public Builder future(ExecutorService isolate, FlowNode<?,?>... flowNodes) {
+            return future(isolate, toInfos(flowNodes));
         }
 
         public Builder future(Info... infos) {
@@ -386,6 +439,10 @@ public class FlowEngine implements InitializingBean {
             return wait(toInfos(flows));
         }
 
+        public Builder wait(FlowNode<?,?>... flowNodes) {
+            return wait(toInfos(flowNodes));
+        }
+
         public Builder wait(IResult<?> result, Class<?>... clazzs) {
             return wait(result, toInfos(clazzs));
         }
@@ -396,6 +453,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder wait(IResult<?> result, FlowInstance... flows) {
             return wait(result, toInfos(flows));
+        }
+
+        public Builder wait(IResult<?> result, FlowNode<?,?>... flowNodes) {
+            return wait(result, toInfos(flowNodes));
         }
 
         public Builder wait(long timeout, Class<?>... clazzs) {
@@ -410,6 +471,10 @@ public class FlowEngine implements InitializingBean {
             return wait(timeout, toInfos(flows));
         }
 
+        public Builder wait(long timeout, FlowNode<?,?>... flowNodes) {
+            return wait(timeout, toInfos(flowNodes));
+        }
+
         public Builder wait(IResult<?> result, long timeout, Class<?>... clazzs) {
             return wait(result, timeout, toInfos(clazzs));
         }
@@ -420,6 +485,10 @@ public class FlowEngine implements InitializingBean {
 
         public Builder wait(IResult<?> result, long timeout, FlowInstance... flows) {
             return wait(result, timeout, toInfos(flows));
+        }
+
+        public Builder wait(IResult<?> result, long timeout, FlowNode<?,?>... flowNodes) {
+            return wait(result, timeout, toInfos(flowNodes));
         }
 
         public Builder wait(Info... infos) {
@@ -456,6 +525,10 @@ public class FlowEngine implements InitializingBean {
             return loop(loopCondition, toInfos(flows));
         }
 
+        public Builder loop(Function<IContextBus, Boolean> loopCondition, FlowNode<?,?>... flowNodes) {
+            return loop(loopCondition, toInfos(flowNodes));
+        }
+
         public Builder loop(Function<IContextBus, Boolean> loopCondition, Info... infos) {
             return loop(loopCondition, InitParam.builder().infos(infos).build());
         }
@@ -470,20 +543,20 @@ public class FlowEngine implements InitializingBean {
             if (processInstanceMap.containsKey(flowId)) {
                 throw new RuntimeException("flow already exists. flowId:" + flowId);
             }
-            processInstanceMap.put(flowId, new FlowInstance(flowId, idList, flowEngine));
+            processInstanceMap.put(flowId, new FlowInstance(flowId, nodeList));
             return flowId;
         }
 
         public FlowInstance build() {
             check();
-            return new FlowInstance(flowId, idList, flowEngine);
+            return new FlowInstance(flowId, nodeList);
         }
 
         private void check() {
             if (StringUtils.isEmpty(flowId)) {
                 throw new RuntimeException("flow flowId is empty.");
             }
-            if (CollectionUtils.isEmpty(idList)) {
+            if (CollectionUtils.isEmpty(nodeList)) {
                 throw new RuntimeException("flow node list is empty.");
             }
         }
@@ -517,6 +590,13 @@ public class FlowEngine implements InitializingBean {
                     .toArray(new Info[flows.length]);
         }
 
+        private Info[] toInfos(FlowNode<?,?>... flowNodes) {
+            return Arrays.stream(flowNodes)
+                    .map(flowNode -> Info.builder().flowNode(flowNode).build())
+                    .collect(Collectors.toList())
+                    .toArray(new Info[flowNodes.length]);
+        }
+
         private void init(String id, FlowNode<?,?> flowNode, InitParam initParam) {
 
             flowNode.setNodeId(id);
@@ -537,8 +617,7 @@ public class FlowEngine implements InitializingBean {
                     flowNodeStructure.setNodeInfoList(Arrays.asList(initParam.infos));
                 }
             }
-            flowEngine.flowNodeManager.doRegistration(flowNode);
-            idList.add(id);
+            nodeList.add(flowNode);
         }
 
         private TheadHelper creatThreadHelper(InitParam initParam) {

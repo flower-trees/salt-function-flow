@@ -24,6 +24,7 @@ import org.salt.function.flow.demo.math.node.AddNode;
 import org.salt.function.flow.demo.math.node.DivisionNode;
 import org.salt.function.flow.demo.math.node.MultiplyNode;
 import org.salt.function.flow.demo.math.node.ReduceNode;
+import org.salt.function.flow.node.FlowNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -189,6 +190,28 @@ public class DemoTest {
         Integer result = flowEngine.execute("demo_branch_anonymous", 39);
         System.out.println("demo_branch_anonymous result: " + result);
         Assert.assertTrue(result != null && result == 2);
+    }
+
+    @Test
+    public void testAnonymousDemo() {
+
+        FlowInstance flowInstance = flowEngine.builder()
+                .next(AddNode.class)
+                .next(ReduceNode.class)
+                .next(MultiplyNode.class)
+                .next(DivisionNode.class)
+                .next(new FlowNode<Integer, Integer>() {
+                    @Override
+                    public Integer doProcess(Integer input) {
+                        return input + 1;
+                    }
+                })
+                .build();
+
+        System.out.println("demo_flow test: ");
+        Integer result = flowEngine.execute(flowInstance, 39);
+        System.out.println("demo_flow result: " + result);
+        Assert.assertTrue(result != null && result == 895);
     }
 
     @Test

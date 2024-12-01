@@ -24,11 +24,13 @@ import org.salt.function.flow.node.register.NodeIdentity;
 import org.salt.function.flow.util.FlowUtil;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.util.UUID;
+
 @Setter
 @Slf4j
 public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
 
-    protected String nodeId;
+    protected String nodeId = UUID.randomUUID().toString().replaceAll("-", "");
 
     @Override
     public void afterPropertiesSet() {

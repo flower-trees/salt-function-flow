@@ -46,6 +46,10 @@ public class FlowNodeManager {
 
     public <R> R execute(String nodeId) {
         IFlowNode iFlowNode = flowNodeMap.get(nodeId);
+        return execute(iFlowNode);
+    }
+
+    public <R> R execute(IFlowNode iFlowNode) {
         if (iFlowNode != null) {
             iFlowNode.process();
             R result = ContextBus.get().getPreResult();
@@ -53,12 +57,5 @@ public class FlowNodeManager {
             return result;
         }
         return null;
-    }
-
-    public void executeVoidSingle(String nodeId) {
-        IFlowNode iFlowNode = flowNodeMap.get(nodeId);
-        if (iFlowNode != null) {
-            iFlowNode.process();
-        }
     }
 }
