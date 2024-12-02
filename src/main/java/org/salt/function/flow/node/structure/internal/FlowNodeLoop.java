@@ -21,33 +21,33 @@ import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 @Slf4j
 public class FlowNodeLoop extends FlowNodeStructure<Void> {
 
-    Function<IContextBus, Boolean> loopCondition;
+    BiFunction<IContextBus, Integer, Boolean> loopCondition;
 
-    public FlowNodeLoop(Function<IContextBus, Boolean> loopCondition) {
+    public FlowNodeLoop(BiFunction<IContextBus, Integer, Boolean> loopCondition) {
         this.loopCondition = loopCondition;
     }
 
     @Override
     public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
-        while(loopCondition.apply(iContextBus)) {
+        int i = 0;
+        while(loopCondition.apply(iContextBus, i)) {
             for (Info info : infoList) {
-                theadHelper.getDecoratorSync(() -> {
-                    try {
-                        execute(info);
-                    } catch (Exception e) {
-                        ((ContextBus) iContextBus).putPassException(info.getId(), e);
-                    }
-                }, info).run();
+                try {
+                    execute(info);
+                } catch (Exception e) {
+                    ((ContextBus) iContextBus).putPassException(info.getId(), e);
+                }
                 if (isSuspend(iContextBus)) {
                     return null;
                 }
             }
+            i++;
         }
         return null;
     }

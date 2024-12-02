@@ -18,7 +18,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.Info;
-import org.salt.function.flow.util.FlowUtil;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -61,17 +60,6 @@ public class TheadHelper {
         threadLocal.set(null);
     }
 
-    public Runnable getDecoratorSync(Runnable runnable, Info info) {
-        return () -> {
-            putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()) , info);
-            try {
-                runnable.run();
-            } finally {
-                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()), null);
-            }
-        };
-    }
-
     public Runnable getDecoratorAsync(Runnable runnable, Info info) {
         final Map<String, Object> map = new HashMap<>(threadLocal.get());
         final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
@@ -82,11 +70,9 @@ public class TheadHelper {
                 ThreadLocal<Object> threadLocalUser = (ThreadLocal<Object>) threadLocalUsers.get(i);
                 threadLocalUser.set(results.get(i));
             }
-            putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()) , info);
             try {
                 runnable.run();
             } finally {
-                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()), null);
                 for (ThreadLocal<?> threadLocalUser : threadLocalUsers) {
                     threadLocalUser.remove();
                 }
@@ -105,11 +91,9 @@ public class TheadHelper {
                 ThreadLocal<Object> threadLocalUser = (ThreadLocal<Object>) threadLocalUsers.get(i);
                 threadLocalUser.set(results.get(i));
             }
-            putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()) , info);
             try {
                 return callable.call();
             } finally {
-                TheadHelper.putThreadLocal(FlowUtil.getNodeInfoKey(info.getId()), null);
                 for (ThreadLocal<?> threadLocalUser : threadLocalUsers) {
                     threadLocalUser.remove();
                 }

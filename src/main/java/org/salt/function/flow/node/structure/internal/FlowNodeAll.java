@@ -28,13 +28,11 @@ public class FlowNodeAll extends FlowNodeStructure<Void> {
     public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         for (Info info : infoList) {
-            theadHelper.getDecoratorSync(() -> {
-                try {
-                    execute(info);
-                } catch (Exception e) {
-                    ((ContextBus) iContextBus).putPassException(info.getId(), e);
-                }
-            }, info).run();
+            try {
+                execute(info);
+            } catch (Exception e) {
+                ((ContextBus) iContextBus).putPassException(info.getId(), e);
+            }
             if (isSuspend(iContextBus)) {
                 return null;
             }

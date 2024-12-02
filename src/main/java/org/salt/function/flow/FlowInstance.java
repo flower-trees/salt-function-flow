@@ -17,7 +17,6 @@ package org.salt.function.flow;
 import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.node.FlowNode;
-import org.salt.function.flow.node.IFlowNode;
 import org.salt.function.flow.node.register.FlowNodeManager;
 import org.springframework.util.CollectionUtils;
 
@@ -27,13 +26,13 @@ import java.util.Map;
 @Slf4j
 public class FlowInstance {
     private String flowId;
-    private List<IFlowNode<?,?>> nodeList;
+    private List<FlowNode<?,?>> nodeList;
     private FlowNodeManager flowNodeManager;
 
     protected FlowInstance() {
     }
 
-    protected FlowInstance(String flowId, List<IFlowNode<?,?>> nodeList, FlowNodeManager flowNodeManager) {
+    protected FlowInstance(String flowId, List<FlowNode<?,?>> nodeList, FlowNodeManager flowNodeManager) {
         this.flowId = flowId;
         this.nodeList = nodeList;
         this.flowNodeManager = flowNodeManager;
@@ -53,8 +52,8 @@ public class FlowInstance {
     protected <R> R execute() {
         if (!CollectionUtils.isEmpty(nodeList)) {
             ContextBus contextBus = (ContextBus) ContextBus.get();
-            for (IFlowNode<?,?> iFlowNode : nodeList) {
-                flowNodeManager.execute((FlowNode<?, ?>) iFlowNode);
+            for (FlowNode<?,?> flowNode : nodeList) {
+                flowNodeManager.execute(flowNode);
                 if (contextBus.isRollbackProcess()) {
                     contextBus.roolbackAll();
                     contextBus.setResult(null);

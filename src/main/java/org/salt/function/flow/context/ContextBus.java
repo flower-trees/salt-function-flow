@@ -18,8 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
-import org.salt.function.flow.Info;
-import org.salt.function.flow.node.IFlowNode;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.thread.TheadHelper;
 
 import java.util.*;
@@ -85,7 +84,7 @@ public class ContextBus implements IContextBus {
     /**
      * Executed node list
      */
-    private Deque<IFlowNode> rollbackList;
+    private Deque<FlowNode<?,?>> rollbackList;
 
 
     public <P> P getParam() {
@@ -246,7 +245,7 @@ public class ContextBus implements IContextBus {
 
     public synchronized void roolbackAll() {
         for(int i=rollbackList.size()-1; i>=0; i--) {
-            IFlowNode execNode = rollbackList.pop();
+            FlowNode<?,?> execNode = rollbackList.pop();
             try {
                 execNode.rollback();
             } catch (Exception e) {
@@ -255,21 +254,17 @@ public class ContextBus implements IContextBus {
         }
     }
 
-    public synchronized boolean roolbackExec(IFlowNode iFlowNode) {
+    public synchronized boolean roolbackExec(FlowNode<?,?> flowNode) {
         if (rollbackFlag) {
             try {
-                iFlowNode.rollback();
+                flowNode.rollback();
             } catch (Exception e) {
             }
             return true;
         } else {
-            rollbackList.push(iFlowNode);
+            rollbackList.push(flowNode);
             return false;
         }
-    }
-
-    public static Info getNodeInfo(String key) {
-        return TheadHelper.getThreadLocal(key);
     }
 
     public static IContextBus get() {

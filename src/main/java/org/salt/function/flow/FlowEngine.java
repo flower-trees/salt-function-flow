@@ -20,7 +20,6 @@ import org.salt.function.flow.config.IFlowInit;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNode;
-import org.salt.function.flow.node.IFlowNode;
 import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.node.register.FlowNodeManager;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
@@ -35,7 +34,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -119,7 +118,7 @@ public class FlowEngine implements InitializingBean {
 
     public static class Builder {
         String flowId;
-        List<IFlowNode<?,?>> nodeList;
+        List<FlowNode<?,?>> nodeList;
         private final FlowEngine flowEngine;
         private final FlowNodeManager flowNodeManager;
 
@@ -515,27 +514,27 @@ public class FlowEngine implements InitializingBean {
         }
 
         //loop
-        public Builder loop(Function<IContextBus, Boolean> loopCondition, Class<?>... clazzs) {
+        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, Class<?>... clazzs) {
             return loop(loopCondition, toInfos(clazzs));
         }
 
-        public Builder loop(Function<IContextBus, Boolean> loopCondition, String... ids) {
+        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, String... ids) {
             return loop(loopCondition, toInfos(ids));
         }
 
-        public Builder loop(Function<IContextBus, Boolean> loopCondition, FlowInstance... flows) {
+        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, FlowInstance... flows) {
             return loop(loopCondition, toInfos(flows));
         }
 
-        public Builder loop(Function<IContextBus, Boolean> loopCondition, FlowNode<?,?>... flowNodes) {
+        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, FlowNode<?,?>... flowNodes) {
             return loop(loopCondition, toInfos(flowNodes));
         }
 
-        public Builder loop(Function<IContextBus, Boolean> loopCondition, Info... infos) {
+        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, Info... infos) {
             return loop(loopCondition, InitParam.builder().infos(infos).build());
         }
 
-        private Builder loop(Function<IContextBus, Boolean> loopCondition, InitParam initParam) {
+        private Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, InitParam initParam) {
             init(tempName("all", initParam.idTmp), new FlowNodeLoop(loopCondition), initParam);
             return this;
         }

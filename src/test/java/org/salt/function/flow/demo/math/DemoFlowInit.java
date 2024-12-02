@@ -129,7 +129,7 @@ public class DemoFlowInit implements IFlowInit {
          */
         flowEngine.builder().id("demo_flow_loop")
                 .next(AddNode.class)
-                .loop(iContextBus -> (Integer) iContextBus.getPreResult() < 56000000, ReduceNode.class, MultiplyNode.class)
+                .loop((iContextBus, i) -> (Integer) iContextBus.getPreResult() < 56000000, ReduceNode.class, MultiplyNode.class)
                 .next(DivisionNode.class)
                 .register();
 

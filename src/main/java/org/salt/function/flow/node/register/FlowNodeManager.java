@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.node.FlowNode;
-import org.salt.function.flow.node.IFlowNode;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.HashMap;
@@ -30,25 +29,26 @@ import java.util.Map;
 @Slf4j
 public class FlowNodeManager {
 
-    private Map<String, IFlowNode> flowNodeMap = new HashMap<>();
+    private Map<String, FlowNode<?,?>> flowNodeMap = new HashMap<>();
 
-    protected void doRegistration(IFlowNode iFlowNode, String nodeId) {
-        if (StringUtils.isEmpty(nodeId)) {
+    protected void doRegistration(FlowNode<?,?> flowNode) {
+        if (StringUtils.isEmpty(flowNode.getNodeId())) {
             throw new RuntimeException("nodeId or extConfig must not be all null ");
         }
-        if (flowNodeMap.containsKey(nodeId)) {
-            throw new RuntimeException("loop node " + nodeId);
+        if (flowNodeMap.containsKey(flowNode.getNodeId())) {
+            throw new RuntimeException("loop node " + flowNode.getNodeId());
         }
-        flowNodeMap.put(nodeId, iFlowNode);
+        flowNodeMap.put(flowNode.getNodeId(), flowNode);
     }
 
-    public IFlowNode getIFlowNode(String nodeId) {
+    public FlowNode<?,?> getIFlowNode(String nodeId) {
         return flowNodeMap.get(nodeId);
     }
 
+    //execute
     public <O, I> O execute(String nodeId, Info info) {
-        IFlowNode iFlowNode = flowNodeMap.get(nodeId);
-        return execute((FlowNode<O, I>) iFlowNode, info);
+        FlowNode<O, I> iFlowNode = (FlowNode<O, I>) flowNodeMap.get(nodeId);
+        return execute(iFlowNode, info);
     }
 
     public <O, I> O execute(FlowNode<O, I> flowNode) {

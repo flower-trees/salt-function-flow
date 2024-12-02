@@ -22,11 +22,14 @@ import org.salt.function.flow.util.FlowUtil;
 
 @Slf4j
 @Data
-public abstract class FlowNode<O, I> implements IFlowNode<O, I> {
+public abstract class FlowNode<O, I> {
 
     protected String nodeId = FlowUtil.id();
 
     protected IContextBus getContextBus() {
         return ContextBus.get();
     }
+
+    public abstract O doProcess(I input);
+    public void rollback() {}
 }
