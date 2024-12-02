@@ -22,7 +22,7 @@ import org.salt.function.flow.test.thread.UserThreadUtil;
 public class BitLeftNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer num) {
+    public Integer process(Integer num) {
         System.out.println("TheadLocal: " + UserThreadUtil.get("test"));
         Integer testNum = UserThreadUtil.get("test") == null ? 1 : (Integer) UserThreadUtil.get("test");
         Integer result = num << testNum;

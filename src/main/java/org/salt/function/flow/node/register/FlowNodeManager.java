@@ -65,7 +65,7 @@ public class FlowNodeManager {
                 input = (I) info.getInput().apply(ContextBus.get());
             }
 
-            O result = flowNode.doProcess(input);
+            O result = flowNode.process(input);
 
             if (result != null) {
 

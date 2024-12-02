@@ -59,7 +59,7 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
         return flowNodeManager.getIFlowNode(nodeId) != null;
     }
 
-    public O doProcess(Object input) {
+    public O process(Object input) {
         if (CollectionUtils.isEmpty(infoList)) {
             return null;
         }
@@ -70,9 +70,7 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
         return doProcessGateway(infoListExe);
     }
 
-    protected O doProcessGateway(List<Info> infoList) {
-        return null;
-    }
+    protected abstract O doProcessGateway(List<Info> infoList);
 
     protected O execute(Info info) {
         if (info.getFlowNode() != null) {

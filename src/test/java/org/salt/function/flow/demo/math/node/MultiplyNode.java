@@ -21,7 +21,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class MultiplyNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer num) {
+    public Integer process(Integer num) {
         Integer result = num * 73;
         System.out.println("Multiply: " + num + "*73=" + result);
         return result;

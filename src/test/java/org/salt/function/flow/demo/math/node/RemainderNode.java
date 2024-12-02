@@ -21,7 +21,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class RemainderNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer num) {
+    public Integer process(Integer num) {
         Integer result = num % 50;
         System.out.println("Remainder: " + num + "%50=" + result) ;
         return result;

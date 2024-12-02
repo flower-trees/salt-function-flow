@@ -21,7 +21,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 @NodeIdentity
 public class TrainTicketResult extends FlowNode<Ticket, Integer> {
     @Override
-    public Ticket doProcess(Integer price) {
+    public Ticket process(Integer price) {
         System.out.println("Issue ticket result, price " + price);
         return Ticket.builder().result(true).price(price).build();
     }

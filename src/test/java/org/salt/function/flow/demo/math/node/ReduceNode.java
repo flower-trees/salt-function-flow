@@ -21,7 +21,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class ReduceNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer num) {
+    public Integer process(Integer num) {
         Integer result = num - 15;
         System.out.println("Reduce: " + num + "-15=" + result) ;
         return result;

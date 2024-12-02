@@ -202,7 +202,7 @@ public class DemoTest {
                 .next(DivisionNode.class)
                 .next(new FlowNode<Integer, Integer>() {
                     @Override
-                    public Integer doProcess(Integer input) {
+                    public Integer process(Integer input) {
                         return input + 1;
                     }
                 })

@@ -21,7 +21,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class BitRightNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer num) {
+    public Integer process(Integer num) {
         try {
             Thread.sleep(15);
         } catch (InterruptedException e) {

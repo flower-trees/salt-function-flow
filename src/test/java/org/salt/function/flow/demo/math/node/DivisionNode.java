@@ -21,7 +21,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class DivisionNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer num) {
+    public Integer process(Integer num) {
         Integer result = num / 12;
         System.out.println("Division: " + num + "/12=" + result);
         return result;

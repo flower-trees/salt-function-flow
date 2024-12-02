@@ -21,7 +21,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class BitAndNode extends FlowNode<Integer, Integer> {
 
     @Override
-    public Integer doProcess(Integer num) {
+    public Integer process(Integer num) {
         if (num > 500) {
             System.out.println("DemoBitAndNode: stop flow");
             getContextBus().stopProcess();

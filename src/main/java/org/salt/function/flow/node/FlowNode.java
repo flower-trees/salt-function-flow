@@ -30,6 +30,6 @@ public abstract class FlowNode<O, I> {
         return ContextBus.get();
     }
 
-    public abstract O doProcess(I input);
+    public abstract O process(I input);
     public void rollback() {}
 }

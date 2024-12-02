@@ -22,7 +22,7 @@ import org.salt.function.flow.node.register.NodeIdentity;
 public class TrainBasePrice extends FlowNode<Integer, Passenger> {
 
     @Override
-    public Integer doProcess(Passenger passenger) {
+    public Integer process(Passenger passenger) {
         if (passenger != null) {
             System.out.println("Passengers travel from " + passenger.getFrom() + " to " + passenger.getTo());
         }
