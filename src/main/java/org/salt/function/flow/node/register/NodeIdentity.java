@@ -14,7 +14,6 @@
 
 package org.salt.function.flow.node.register;
 
-import org.salt.function.flow.node.IFlowNode;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +30,4 @@ public @interface NodeIdentity {
 
     @AliasFor("value")
     String nodeId() default "";
-
-    Class<? extends IFlowNode> nodeClass() default IFlowNode.class;
 }

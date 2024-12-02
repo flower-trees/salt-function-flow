@@ -24,6 +24,7 @@ import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 public class FlowUtil {
@@ -62,5 +63,9 @@ public class FlowUtil {
 
     public static <T> T fromJson(String json, Class<T> classOfT) {
         return gson.fromJson(json, classOfT);
+    }
+
+    public static String id() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
     }
 }

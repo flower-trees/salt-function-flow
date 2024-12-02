@@ -21,10 +21,10 @@ import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.List;
 
-public class FlowNodeNotify<P> extends FlowNodeStructure<P> {
+public class FlowNodeNotify extends FlowNodeStructure<Void> {
 
     @Override
-    public P doProcessGateway(List<Info> infoList) {
+    public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         for (Info info : infoList) {
             theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {

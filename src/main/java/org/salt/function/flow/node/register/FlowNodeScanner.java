@@ -15,6 +15,8 @@
 package org.salt.function.flow.node.register;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.IFlowNode;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -38,8 +40,27 @@ public class FlowNodeScanner implements ApplicationContextAware {
     public void init() {
         Map<String, Object> extensionBeans = applicationContext.getBeansWithAnnotation(NodeIdentity.class);
         extensionBeans.values().forEach(
-            object -> flowNodeManager.doRegistration((IFlowNode) object)
+            node -> {
+                String nodeId = getNodeId(node);
+                ((FlowNode<?,?>) node).setNodeId(nodeId);
+                flowNodeManager.doRegistration((IFlowNode) node, nodeId);
+            }
         );
+    }
+
+    private String getNodeId(Object node) {
+        String nodeId = null;
+        NodeIdentity nodeIdentity = node.getClass().getAnnotation(NodeIdentity.class);
+        if (nodeIdentity != null) {
+            if (StringUtils.isNotEmpty(nodeIdentity.value())) {
+                nodeId = nodeIdentity.value();
+            } else if(StringUtils.isNotEmpty(nodeIdentity.nodeId())) {
+                nodeId = nodeIdentity.nodeId();
+            } else {
+                nodeId = node.getClass().getName();
+            }
+        }
+        return nodeId;
     }
 
     @Override

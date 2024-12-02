@@ -17,8 +17,11 @@ package org.salt.function.flow.node.register;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
+import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.IFlowNode;
+import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,13 +32,12 @@ public class FlowNodeManager {
 
     private Map<String, IFlowNode> flowNodeMap = new HashMap<>();
 
-    public void doRegistration(IFlowNode iFlowNode) {
-        String nodeId = iFlowNode.nodeId();
+    protected void doRegistration(IFlowNode iFlowNode, String nodeId) {
         if (StringUtils.isEmpty(nodeId)) {
             throw new RuntimeException("nodeId or extConfig must not be all null ");
         }
         if (flowNodeMap.containsKey(nodeId)) {
-            throw new RuntimeException("loop node " + iFlowNode.nodeId());
+            throw new RuntimeException("loop node " + nodeId);
         }
         flowNodeMap.put(nodeId, iFlowNode);
     }
@@ -44,16 +46,49 @@ public class FlowNodeManager {
         return flowNodeMap.get(nodeId);
     }
 
-    public <R> R execute(String nodeId) {
+    public <O, I> O execute(String nodeId, Info info) {
         IFlowNode iFlowNode = flowNodeMap.get(nodeId);
-        return execute(iFlowNode);
+        return execute((FlowNode<O, I>) iFlowNode, info);
     }
 
-    public <R> R execute(IFlowNode iFlowNode) {
-        if (iFlowNode != null) {
-            iFlowNode.process();
-            R result = ContextBus.get().getPreResult();
-            ((ContextBus) ContextBus.get()).roolbackExec(iFlowNode);
+    public <O, I> O execute(FlowNode<O, I> flowNode) {
+        return execute(flowNode, null);
+    }
+
+    public <O, I> O execute(FlowNode<O, I> flowNode, Info info) {
+        if (flowNode != null) {
+
+            ContextBus contextBus = (ContextBus) ContextBus.get();
+
+            I input = ContextBus.get().getPreResult();
+            if (info != null && info.getInput() != null) {
+                input = (I) info.getInput().apply(ContextBus.get());
+            }
+
+            O result = flowNode.doProcess(input);
+
+            if (result != null) {
+
+                String idTmp = flowNode.getNodeId();
+
+                if (info != null && StringUtils.isNotEmpty(info.getIdAlias())) {
+                    idTmp = info.getIdAlias();
+                }
+
+                if (info != null && info.getOutput() != null) {
+                    contextBus.putPassResult(idTmp, info.getOutput().apply(contextBus, result));
+                } else {
+                    contextBus.putPassResult(idTmp, result);
+                }
+
+                contextBus.putPreResult(result);
+                contextBus.setResult(result);
+            }
+
+            if (!(flowNode instanceof FlowNodeStructure)) {
+                ((ContextBus) ContextBus.get()).roolbackExec(flowNode);
+            }
+
             return result;
         }
         return null;

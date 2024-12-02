@@ -26,6 +26,7 @@ import org.salt.function.flow.node.register.FlowNodeManager;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 import org.salt.function.flow.node.structure.internal.*;
 import org.salt.function.flow.thread.TheadHelper;
+import org.salt.function.flow.util.FlowUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
@@ -105,7 +106,7 @@ public class FlowEngine implements InitializingBean {
         if (flowInstance != null) {
             R result = flowInstance.execute();
             if (result != null) {
-                ((ContextBus) ContextBus.get()).putPassResult(flowInstance.flowId, result);
+                ((ContextBus) ContextBus.get()).putPassResult(flowInstance.getFlowId(), result);
             }
             return result;
         }
@@ -113,17 +114,18 @@ public class FlowEngine implements InitializingBean {
     }
 
     public Builder builder() {
-        String flowId = "branch-" + UUID.randomUUID().toString().replaceAll("-", "");
-        return new Builder(this).id(flowId);
+        return new Builder(this, flowNodeManager).id(FlowUtil.id());
     }
 
     public static class Builder {
         String flowId;
-        List<IFlowNode> nodeList;
-        private FlowEngine flowEngine;
+        List<IFlowNode<?,?>> nodeList;
+        private final FlowEngine flowEngine;
+        private final FlowNodeManager flowNodeManager;
 
-        public Builder(FlowEngine flowEngine) {
+        public Builder(FlowEngine flowEngine, FlowNodeManager flowNodeManager) {
             this.flowEngine = flowEngine;
+            this.flowNodeManager = flowNodeManager;
             this.nodeList = new ArrayList<>();
         }
 
@@ -158,7 +160,7 @@ public class FlowEngine implements InitializingBean {
         }
 
         private Builder next(InitParam initParam) {
-            init(tempName("next", initParam.idTmp), new FlowNodeNext<>(), initParam);
+            init(tempName("next", initParam.idTmp), new FlowNodeNext(), initParam);
             return this;
         }
 
@@ -204,7 +206,7 @@ public class FlowEngine implements InitializingBean {
         }
 
         private Builder all(InitParam initParam) {
-            init(tempName("all", initParam.idTmp), new FlowNodeAll<>(), initParam);
+            init(tempName("all", initParam.idTmp), new FlowNodeAll(), initParam);
             return this;
         }
 
@@ -376,7 +378,7 @@ public class FlowEngine implements InitializingBean {
         }
 
         private Builder notify(InitParam initParam) {
-            init(tempName("notify", initParam.idTmp), new FlowNodeNotify<>(), initParam);
+            init(tempName("notify", initParam.idTmp), new FlowNodeNotify(), initParam);
             return this;
         }
 
@@ -534,7 +536,7 @@ public class FlowEngine implements InitializingBean {
         }
 
         private Builder loop(Function<IContextBus, Boolean> loopCondition, InitParam initParam) {
-            init(tempName("all", initParam.idTmp), new FlowNodeLoop<>(loopCondition), initParam);
+            init(tempName("all", initParam.idTmp), new FlowNodeLoop(loopCondition), initParam);
             return this;
         }
 
@@ -543,13 +545,13 @@ public class FlowEngine implements InitializingBean {
             if (processInstanceMap.containsKey(flowId)) {
                 throw new RuntimeException("flow already exists. flowId:" + flowId);
             }
-            processInstanceMap.put(flowId, new FlowInstance(flowId, nodeList));
+            processInstanceMap.put(flowId, new FlowInstance(flowId, nodeList, flowNodeManager));
             return flowId;
         }
 
         public FlowInstance build() {
             check();
-            return new FlowInstance(flowId, nodeList);
+            return new FlowInstance(flowId, nodeList, flowNodeManager);
         }
 
         private void check() {

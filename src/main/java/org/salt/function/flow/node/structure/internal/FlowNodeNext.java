@@ -23,10 +23,10 @@ import org.salt.function.flow.node.structure.FlowNodeStructure;
 import java.util.List;
 
 @Slf4j
-public class FlowNodeNext<P> extends FlowNodeStructure<P> {
+public class FlowNodeNext extends FlowNodeStructure<Void> {
 
     @Override
-    public P doProcessGateway(List<Info> infoList) {
+    public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         for (Info info : infoList) {
             theadHelper.getDecoratorSync(() -> {

@@ -23,10 +23,10 @@ import org.salt.function.flow.node.structure.FlowNodeStructure;
 import java.util.List;
 
 @Slf4j
-public class FlowNodeWait<P> extends FlowNodeStructure<P> {
+public class FlowNodeWait<O> extends FlowNodeStructure<O> {
 
     @Override
-    public P doProcessGateway(List<Info> infoList) {
+    public O doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         long lastTimeout = theadHelper.getTimeout();
         for (Info info : infoList) {
@@ -36,7 +36,7 @@ public class FlowNodeWait<P> extends FlowNodeStructure<P> {
             }
             long start = System.currentTimeMillis();
             try {
-                P result = ((ContextBus) iContextBus).getPassResult(info.getId(), lastTimeout);
+                O result = ((ContextBus) iContextBus).getPassResult(info.getId(), lastTimeout);
                 if (result != null) {
                     ((ContextBus) iContextBus).putPassResult(info.getId(), result);
                 } else {
@@ -53,7 +53,7 @@ public class FlowNodeWait<P> extends FlowNodeStructure<P> {
         return result(iContextBus, lastTimeout <= 0);
     }
 
-    public P result(IContextBus iContextBus, boolean isTimeout) {
+    public O result(IContextBus iContextBus, boolean isTimeout) {
         if (result != null) {
             return result.handle(iContextBus, isTimeout);
         }

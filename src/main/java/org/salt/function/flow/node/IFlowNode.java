@@ -14,8 +14,8 @@
 
 package org.salt.function.flow.node;
 
-public interface IFlowNode {
-    String nodeId();
-    void process();
+public interface IFlowNode<O, I> {
+
+    O doProcess(I input);
     default void rollback() {}
 }

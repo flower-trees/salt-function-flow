@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Slf4j
-public class FlowNodeLoop<O> extends FlowNodeStructure<O> {
+public class FlowNodeLoop extends FlowNodeStructure<Void> {
 
     Function<IContextBus, Boolean> loopCondition;
 
@@ -33,7 +33,7 @@ public class FlowNodeLoop<O> extends FlowNodeStructure<O> {
     }
 
     @Override
-    public O doProcessGateway(List<Info> infoList) {
+    public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         while(loopCondition.apply(iContextBus)) {
             for (Info info : infoList) {

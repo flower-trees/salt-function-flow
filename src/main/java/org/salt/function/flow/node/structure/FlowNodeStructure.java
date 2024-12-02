@@ -76,9 +76,9 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
 
     protected O execute(Info info) {
         if (info.getFlowNode() != null) {
-            return flowNodeManager.execute(info.getFlowNode());
+            return flowNodeManager.execute((FlowNode<O, ?>) info.getFlowNode(), info);
         } else if (isFlowNode(info.getId())) {
-            return flowNodeManager.execute(info.getId());
+            return flowNodeManager.execute(info.getId(), info);
         } else {
             if (info.getFlow() != null) {
                 return flowEngine.execute(info.getFlow());

@@ -25,10 +25,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class FlowNodeConcurrent<P> extends FlowNodeStructure<P> {
+public class FlowNodeConcurrent<O> extends FlowNodeStructure<O> {
 
     @Override
-    public P doProcessGateway(List<Info> infoList) {
+    public O doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         CountDownLatch finalCountDownLatch = new CountDownLatch(infoList.size());
         for (Info info : infoList) {

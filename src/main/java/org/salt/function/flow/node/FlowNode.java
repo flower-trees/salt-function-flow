@@ -14,80 +14,19 @@
 
 package org.salt.function.flow.node;
 
-import lombok.Setter;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
-import org.salt.function.flow.node.register.NodeIdentity;
 import org.salt.function.flow.util.FlowUtil;
-import org.springframework.beans.factory.InitializingBean;
 
-import java.util.UUID;
-
-@Setter
 @Slf4j
-public abstract class FlowNode<O, I> implements IFlowNode, InitializingBean {
+@Data
+public abstract class FlowNode<O, I> implements IFlowNode<O, I> {
 
-    protected String nodeId = UUID.randomUUID().toString().replaceAll("-", "");
-
-    @Override
-    public void afterPropertiesSet() {
-        NodeIdentity nodeIdentity = this.getClass().getAnnotation(NodeIdentity.class);
-        if (nodeIdentity != null) {
-            if (StringUtils.isNotEmpty(nodeIdentity.value())) {
-                nodeId = nodeIdentity.value();
-            } else if(StringUtils.isNotEmpty(nodeIdentity.nodeId())) {
-                nodeId = nodeIdentity.nodeId();
-            } else if (nodeIdentity.nodeClass() != IFlowNode.class) {
-                nodeId = nodeIdentity.nodeClass().getName();
-            } else {
-                nodeId = this.getClass().getName();
-            }
-        }
-    }
-
-    @Override
-    public String nodeId() {
-        return nodeId;
-    }
+    protected String nodeId = FlowUtil.id();
 
     protected IContextBus getContextBus() {
         return ContextBus.get();
     }
-
-    public void process() {
-
-        ContextBus contextBus = ((ContextBus) getContextBus());
-
-        I input = contextBus.getPreResult();
-        Info info = ContextBus.getNodeInfo(FlowUtil.getNodeInfoKey(nodeId));
-        if (info != null && info.getInput() != null) {
-            input = (I) info.getInput().apply(contextBus);
-        }
-
-        O result = doProcess(input);
-
-        if (result != null) {
-
-            String idTmp = nodeId;
-            if (info != null) {
-                if (StringUtils.isNotEmpty(info.getIdAlias())) {
-                    idTmp = info.getIdAlias();
-                }
-            }
-
-            if (info != null && info.getOutput() != null) {
-                contextBus.putPassResult(idTmp, info.getOutput().apply(contextBus, result));
-            } else {
-                contextBus.putPassResult(idTmp, result);
-            }
-
-            contextBus.putPreResult(result);
-            contextBus.setResult(result);
-        }
-    }
-
-    public abstract O doProcess(I input);
 }
