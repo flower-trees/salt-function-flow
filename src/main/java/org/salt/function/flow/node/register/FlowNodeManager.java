@@ -76,13 +76,13 @@ public class FlowNodeManager {
                 }
 
                 if (info != null && info.getOutput() != null) {
-                    contextBus.putPassResult(idTmp, info.getOutput().apply(contextBus, result));
+                    contextBus.putResult(idTmp, info.getOutput().apply(contextBus, result));
                 } else {
-                    contextBus.putPassResult(idTmp, result);
+                    contextBus.putResult(idTmp, result);
                 }
 
                 contextBus.putPreResult(result);
-                contextBus.setResult(result);
+                contextBus.setFlowResult(result);
             }
 
             if (!(flowNode instanceof FlowNodeStructure)) {

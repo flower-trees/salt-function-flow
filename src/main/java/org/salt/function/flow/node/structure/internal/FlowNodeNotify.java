@@ -32,7 +32,7 @@ public class FlowNodeNotify extends FlowNodeStructure<Void> {
                     ((ContextBus) iContextBus).copy();
                     execute(info);
                 } catch (Exception e) {
-                    ((ContextBus) iContextBus).putPassException(info.getId(), e);
+                    ((ContextBus) iContextBus).putException(info.getId(), e);
                 }
             }, info));
         }

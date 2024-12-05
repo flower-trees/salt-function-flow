@@ -41,7 +41,7 @@ public class FlowInstance {
     protected <T, R> R execute(T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap) {
         ContextBus contextBus = ContextBus.create(param);
         if (transmitMap != null && !transmitMap.isEmpty()) {
-            transmitMap.forEach(contextBus::putTransmitInfo);
+            transmitMap.forEach(contextBus::putTransmit);
         }
         if (conditionMap != null && !conditionMap.isEmpty()) {
             conditionMap.forEach(contextBus::addCondition);
@@ -56,15 +56,15 @@ public class FlowInstance {
                 flowNodeManager.execute(flowNode);
                 if (contextBus.isRollbackProcess()) {
                     contextBus.roolbackAll();
-                    contextBus.setResult(null);
+                    contextBus.setFlowResult(null);
                     break;
                 }
                 if (contextBus.isStopProcess()) {
-                    contextBus.setResult(null);
+                    contextBus.setFlowResult(null);
                     break;
                 }
             }
-            return contextBus.getResult();
+            return contextBus.getFlowResult();
         }
         throw new RuntimeException("processInstance node list is empty.");
     }

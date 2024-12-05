@@ -31,7 +31,7 @@ public class FlowNodeAll extends FlowNodeStructure<Void> {
             try {
                 execute(info);
             } catch (Exception e) {
-                ((ContextBus) iContextBus).putPassException(info.getId(), e);
+                ((ContextBus) iContextBus).putException(info.getId(), e);
             }
             if (isSuspend(iContextBus)) {
                 return null;

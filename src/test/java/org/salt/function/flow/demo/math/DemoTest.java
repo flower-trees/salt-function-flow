@@ -14,17 +14,17 @@
 
 package org.salt.function.flow.demo.math;
 
+import lombok.val;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.FlowInstance;
 import org.salt.function.flow.TestApplication;
-import org.salt.function.flow.demo.math.node.AddNode;
-import org.salt.function.flow.demo.math.node.DivisionNode;
-import org.salt.function.flow.demo.math.node.MultiplyNode;
-import org.salt.function.flow.demo.math.node.ReduceNode;
+import org.salt.function.flow.context.IContextBus;
+import org.salt.function.flow.demo.math.node.*;
 import org.salt.function.flow.node.FlowNode;
+import org.salt.function.flow.node.IResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -177,6 +177,33 @@ public class DemoTest {
     }
 
     @Test
+    public void testBranchFutureDemo_1() {
+
+        FlowInstance flowInstance = flowEngine.builder()
+                .next(AddNode.class)
+                .future(flowEngine.builder().id("demo_branch_reduce").next(ReduceNode.class).next(RemainderNode.class).build())
+                .next(flowEngine.builder().next(MultiplyNode.class).next(RemainderNode.class).build())
+                .wait(new AddBranchResult(), "demo_branch_reduce")
+                .next(DivisionNode.class).build();
+
+        System.out.println("demo_branch_future_1 test: ");
+        Integer result = flowEngine.execute(flowInstance, 39);
+        System.out.println("demo_branch_future_1 result: " + result);
+        Assert.assertTrue(result != null && result == 6);
+    }
+
+    protected static class AddBranchResult implements IResult<Integer> {
+        @Override
+        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
+            Integer branchReduce = iContextBus.getResult("demo_branch_reduce");
+            Integer branchMultiply = iContextBus.getPreResult();
+            Integer handleResult = branchReduce + branchMultiply;
+            System.out.println("AddBranchresult " + branchReduce + "+" + branchMultiply + "=" + handleResult);
+            return handleResult;
+        }
+    }
+
+    @Test
     public void testBranchNestedDemo() {
         System.out.println("demo_branch_nested test: ");
         Integer result = flowEngine.execute("demo_branch_nested", 39);
@@ -195,7 +222,7 @@ public class DemoTest {
     @Test
     public void testAnonymousDemo() {
 
-        FlowInstance flowInstance = flowEngine.builder()
+        val flowInstance = flowEngine.builder()
                 .next(AddNode.class)
                 .next(ReduceNode.class)
                 .next(MultiplyNode.class)

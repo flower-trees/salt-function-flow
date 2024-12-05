@@ -209,22 +209,22 @@ public class DemoFlowInit implements IFlowInit {
                 .register();
     }
 
-    private static class AddResult implements IResult<Integer> {
+    protected static class AddResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class) != null ?  (Integer) iContextBus.getPassResult(ReduceNode.class) : 0;
-            Integer demoMultiplyResult = iContextBus.getPassResult(MultiplyNode.class) != null ? (Integer) iContextBus.getPassResult(MultiplyNode.class): 0;
+            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class) != null ?  (Integer) iContextBus.getResult(ReduceNode.class) : 0;
+            Integer demoMultiplyResult = iContextBus.getResult(MultiplyNode.class) != null ? (Integer) iContextBus.getResult(MultiplyNode.class): 0;
             Integer handleResult = demoReduceResult + demoMultiplyResult;
             System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "=" + handleResult);
             return handleResult;
         }
     }
 
-    private static class AddBranchResult implements IResult<Integer> {
+    protected static class AddBranchResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer branchReduce = iContextBus.getPassResult("demo_branch_reduce") != null ? (Integer) iContextBus.getPassResult("demo_branch_reduce") : 0;
-            Integer branchMultiply = iContextBus.getPassResult("demo_branch_multiply") != null ? (Integer) iContextBus.getPassResult("demo_branch_multiply") : 0;
+            Integer branchReduce = iContextBus.getResult("demo_branch_reduce") != null ? (Integer) iContextBus.getResult("demo_branch_reduce") : 0;
+            Integer branchMultiply = iContextBus.getResult("demo_branch_multiply") != null ? (Integer) iContextBus.getResult("demo_branch_multiply") : 0;
             Integer handleResult = branchReduce + branchMultiply;
             System.out.println("AddBranchresult " + branchReduce + "+" + branchMultiply + "=" + handleResult);
             return handleResult;

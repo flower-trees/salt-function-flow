@@ -94,7 +94,7 @@ public class FlowEngine implements InitializingBean {
         if (flowInstance != null) {
             R result = flowInstance.execute();
             if (result != null) {
-                ((ContextBus) ContextBus.get()).putPassResult(flowId, result);
+                ((ContextBus) ContextBus.get()).putResult(flowId, result);
             }
             return result;
         }
@@ -105,7 +105,7 @@ public class FlowEngine implements InitializingBean {
         if (flowInstance != null) {
             R result = flowInstance.execute();
             if (result != null) {
-                ((ContextBus) ContextBus.get()).putPassResult(flowInstance.getFlowId(), result);
+                ((ContextBus) ContextBus.get()).putResult(flowInstance.getFlowId(), result);
             }
             return result;
         }
@@ -113,18 +113,16 @@ public class FlowEngine implements InitializingBean {
     }
 
     public Builder builder() {
-        return new Builder(this, flowNodeManager).id(FlowUtil.id());
+        return new Builder(this).id(FlowUtil.id());
     }
 
     public static class Builder {
         String flowId;
         List<FlowNode<?,?>> nodeList;
         private final FlowEngine flowEngine;
-        private final FlowNodeManager flowNodeManager;
 
-        public Builder(FlowEngine flowEngine, FlowNodeManager flowNodeManager) {
+        public Builder(FlowEngine flowEngine) {
             this.flowEngine = flowEngine;
-            this.flowNodeManager = flowNodeManager;
             this.nodeList = new ArrayList<>();
         }
 
@@ -544,13 +542,13 @@ public class FlowEngine implements InitializingBean {
             if (processInstanceMap.containsKey(flowId)) {
                 throw new RuntimeException("flow already exists. flowId:" + flowId);
             }
-            processInstanceMap.put(flowId, new FlowInstance(flowId, nodeList, flowNodeManager));
+            processInstanceMap.put(flowId, new FlowInstance(flowId, nodeList, flowEngine.flowNodeManager));
             return flowId;
         }
 
         public FlowInstance build() {
             check();
-            return new FlowInstance(flowId, nodeList, flowNodeManager);
+            return new FlowInstance(flowId, nodeList, flowEngine.flowNodeManager);
         }
 
         private void check() {
@@ -608,13 +606,6 @@ public class FlowEngine implements InitializingBean {
                 flowNodeStructure.setResult(initParam.result);
                 flowNodeStructure.setTheadHelper(creatThreadHelper(initParam));
                 if (initParam.infos != null) {
-                    Arrays.stream(initParam.infos).forEach(
-                            info -> {
-                                if (info.getId() != null && flowEngine.flowNodeManager.getIFlowNode(info.getId()) == null
-                                    && processInstanceMap.get(info.getId()) == null) {
-                                    throw new RuntimeException("flow node not exists. id:" + info.getId());
-                                }
-                            });
                     flowNodeStructure.setNodeInfoList(Arrays.asList(initParam.infos));
                 }
             }

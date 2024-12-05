@@ -36,7 +36,7 @@ public class FlowNodeConcurrent<O> extends FlowNodeStructure<O> {
                 try {
                     execute(info);
                 } catch (Exception e) {
-                    ((ContextBus) iContextBus).putPassException(info.getId(), e);
+                    ((ContextBus) iContextBus).putException(info.getId(), e);
                 } finally {
                     finalCountDownLatch.countDown();
                 }
@@ -51,7 +51,7 @@ public class FlowNodeConcurrent<O> extends FlowNodeStructure<O> {
                 return result.handle(iContextBus, !isTimeout);
             }
         } catch (InterruptedException e) {
-            ((ContextBus) iContextBus).putPassException(nodeId, e);
+            ((ContextBus) iContextBus).putException(nodeId, e);
         }
         return null;
     }

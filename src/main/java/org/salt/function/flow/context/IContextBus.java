@@ -14,39 +14,28 @@
 
 package org.salt.function.flow.context;
 
-import java.util.Map;
-
 public interface IContextBus {
 
     /**
      * Get flow execution parameters
      */
-    <T> T getParam();
+    <T> T getFlowParam();
 
     /**
      * Get flow execution result
      */
-    <R> R getResult();
-
-    /**
-     * Set flow execution result
-     */
-    <R> void setResult(R result);
+    <R> R getFlowResult();
 
     /**
      * Put additional transmission context information
      */
-    <P> void putTransmitInfo(String key, P content);
+    <P> void putTransmit(String key, P content);
 
     /**
      * Get additional transmission context information
      */
-    <P> P getTransmitInfo(String key);
+    <P> P getTransmit(String key);
 
-    /**
-     * Get the parameters of node condition judgment
-     */
-    Map<String, Object> getConditionMap();
     /**
      * Add the parameters of node condition judgment
      */
@@ -60,17 +49,23 @@ public interface IContextBus {
     /**
      * Get the execution result of any node by node ID
      */
-    <P> P getPassResult(String nodeId);
+    <P> P getResult(String nodeId);
 
     /**
      * Get the execution result of any node by node class
      */
-    <P> P getPassResult(Class<?> clazz);
+    <P> P getResult(Class<?> clazz);
 
     /**
-     * Get the execution exception of any node
+     * Get the execution exception of any node by node ID
      */
-    Exception getPassException(String nodeId);
+    Exception getException(String nodeId);
+
+
+    /**
+     * Get the execution exception of any node by node class
+     */
+    Exception getException(Class<?> clazz);
 
     /**
      * Get flow execution Instance ID

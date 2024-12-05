@@ -238,9 +238,9 @@ public class StopFlowInit implements IFlowInit {
     private static class AddBitAndResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getPassResult(ReduceNode.class.getName()) : 0;
-            Integer demoMultiplyResult = iContextBus.getPassResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(MultiplyNode.class.getName()): 0;
-            Integer demoBitAndResult = iContextBus.getPassResult(BitAndNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(BitAndNode.class.getName()): 0;
+            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getResult(ReduceNode.class.getName()) : 0;
+            Integer demoMultiplyResult = iContextBus.getResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getResult(MultiplyNode.class.getName()): 0;
+            Integer demoBitAndResult = iContextBus.getResult(BitAndNode.class.getName()) != null ? (Integer) iContextBus.getResult(BitAndNode.class.getName()): 0;
             Integer handleResult = demoReduceResult + demoMultiplyResult + demoBitAndResult;
             System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "+" + demoBitAndResult + "=" + handleResult);
             return handleResult;
@@ -250,9 +250,9 @@ public class StopFlowInit implements IFlowInit {
     private static class AddBitOrResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getPassResult(ReduceNode.class.getName()) : 0;
-            Integer demoMultiplyResult = iContextBus.getPassResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(MultiplyNode.class.getName()): 0;
-            Integer demoBitAndResult = iContextBus.getPassResult(BitOrNode.class.getName()) != null ? (Integer) iContextBus.getPassResult(BitOrNode.class.getName()): 0;
+            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getResult(ReduceNode.class.getName()) : 0;
+            Integer demoMultiplyResult = iContextBus.getResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getResult(MultiplyNode.class.getName()): 0;
+            Integer demoBitAndResult = iContextBus.getResult(BitOrNode.class.getName()) != null ? (Integer) iContextBus.getResult(BitOrNode.class.getName()): 0;
             Integer handleResult = demoReduceResult + demoMultiplyResult + demoBitAndResult;
             System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "+" + demoBitAndResult + "=" + handleResult);
             return handleResult;
@@ -262,8 +262,8 @@ public class StopFlowInit implements IFlowInit {
     private static class AddBranchBitAndResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer branchReduce = iContextBus.getPassResult("demo_branch_bit_and_reduce") != null ? (Integer) iContextBus.getPassResult("demo_branch_bit_and_reduce") : 0;
-            Integer branchMultiply = iContextBus.getPassResult("demo_branch_bit_and_multiply") != null ? (Integer) iContextBus.getPassResult("demo_branch_bit_and_multiply") : 0;
+            Integer branchReduce = iContextBus.getResult("demo_branch_bit_and_reduce") != null ? (Integer) iContextBus.getResult("demo_branch_bit_and_reduce") : 0;
+            Integer branchMultiply = iContextBus.getResult("demo_branch_bit_and_multiply") != null ? (Integer) iContextBus.getResult("demo_branch_bit_and_multiply") : 0;
             Integer handleResult = branchReduce + branchMultiply;
             System.out.println("AddBranchresult " + branchReduce + "+" + branchMultiply + "=" + handleResult);
             return handleResult;
@@ -272,8 +272,8 @@ public class StopFlowInit implements IFlowInit {
     private static class AddBranchBitOrResult implements IResult<Integer> {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer branchReduce = iContextBus.getPassResult("demo_branch_bit_or_reduce") != null ? (Integer) iContextBus.getPassResult("demo_branch_bit_or_reduce") : 0;
-            Integer branchMultiply = iContextBus.getPassResult("demo_branch_bit_or_multiply") != null ? (Integer) iContextBus.getPassResult("demo_branch_bit_or_multiply") : 0;
+            Integer branchReduce = iContextBus.getResult("demo_branch_bit_or_reduce") != null ? (Integer) iContextBus.getResult("demo_branch_bit_or_reduce") : 0;
+            Integer branchMultiply = iContextBus.getResult("demo_branch_bit_or_multiply") != null ? (Integer) iContextBus.getResult("demo_branch_bit_or_multiply") : 0;
             Integer handleResult = branchReduce + branchMultiply;
             System.out.println("AddBranchresult " + branchReduce + "+" + branchMultiply + "=" + handleResult);
             return handleResult;

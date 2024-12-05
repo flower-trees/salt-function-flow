@@ -41,10 +41,19 @@ public class Info {
     private FlowNode<?, ?> flowNode;
 
     public String getId() {
-        if (StringUtils.isEmpty(id) && node != null) {
+        if (StringUtils.isNotEmpty(id)) {
+            return id;
+        }
+        if (node != null) {
             return node.getName();
         }
-        return id;
+        if (flow != null) {
+            return flow.getFlowId();
+        }
+        if (flowNode != null) {
+            return flowNode.getNodeId();
+        }
+        throw new RuntimeException("id is empty");
     }
 
     public static Info c(String id) {

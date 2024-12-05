@@ -41,8 +41,8 @@ public class TrainFlowInit implements IFlowInit {
         flowEngine.builder().id("train_ticket_match")
                 .next(TrainBasePrice.class)
                 .next(
-                        Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() < 14, TrainChildTicket.class),
-                        Info.c(iContextBus -> ((Passenger) iContextBus.getParam()).getAge() >= 14, TrainAdultTicket.class))
+                        Info.c(iContextBus -> ((Passenger) iContextBus.getFlowParam()).getAge() < 14, TrainChildTicket.class),
+                        Info.c(iContextBus -> ((Passenger) iContextBus.getFlowParam()).getAge() >= 14, TrainAdultTicket.class))
                 .next(TrainTicketResult.class)
                 .register();
 
@@ -50,7 +50,7 @@ public class TrainFlowInit implements IFlowInit {
                 .next(
                         Info.c(TrainBasePriceStation.class)
                                 .cInput(iContextBus -> {
-                                    Passenger passenger = iContextBus.getParam();
+                                    Passenger passenger = iContextBus.getFlowParam();
                                     return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
                                 })
                                 .cOutput((iContextBus, result) -> {

@@ -55,12 +55,12 @@ public class ContextBus implements IContextBus {
     /**
      * Store the returned results of execution nodes
      */
-    private ConcurrentMap<String, Object> passResultMap;
+    private ConcurrentMap<String, Object> nodeResultMap;
 
     /**
      * Store the exception information of each node (asynchronous execution node)
      */
-    private ConcurrentMap<String, Exception> passExceptionMap;
+    private ConcurrentMap<String, Exception> nodeExceptionMap;
 
     /**
      * Store the parameters involved in condition judgment, initially flow param
@@ -87,25 +87,25 @@ public class ContextBus implements IContextBus {
     private Deque<FlowNode<?,?>> rollbackList;
 
 
-    public <P> P getParam() {
+    public <P> P getFlowParam() {
         return (P) this.param;
     }
 
-    public <P> P getResult() {
+    public <P> P getFlowResult() {
         return TheadHelper.getThreadLocal(RESULT_KEY);
     }
 
-    public <R> void setResult(R result) {
+    public <R> void setFlowResult(R result) {
         TheadHelper.putThreadLocal(RESULT_KEY, result);
     }
 
     @Override
-    public <P> void putTransmitInfo(String key, P content) {
+    public <P> void putTransmit(String key, P content) {
         transmitMap.put(key, content);
     }
 
     @Override
-    public <P> P getTransmitInfo(String key) {
+    public <P> P getTransmit(String key) {
         return (P) transmitMap.get(key);
     }
 
@@ -120,35 +120,34 @@ public class ContextBus implements IContextBus {
         conditionMap.put(key, value);
     }
 
-    @Override
     public Map<String, Object> getConditionMap() {
         return conditionMap;
     }
 
     @Override
-    public <P> P getPassResult(String nodeId) {
-        return (P) passResultMap.get(nodeId);
+    public <P> P getResult(String nodeId) {
+        return (P) nodeResultMap.get(nodeId);
     }
 
     @Override
-    public <P> P getPassResult(Class<?> clazz) {
-        return (P) passResultMap.get(clazz.getName());
+    public <P> P getResult(Class<?> clazz) {
+        return (P) nodeResultMap.get(clazz.getName());
     }
 
-    public <P> void putPassResult(String nodeId, P result) {
-        passResultMap.put(nodeId, result);
+    public <P> void putResult(String nodeId, P result) {
+        nodeResultMap.put(nodeId, result);
     }
 
-    public void removePassResult(String nodeId) {
-        passResultMap.remove(nodeId);
+    public void removeResult(String nodeId) {
+        nodeResultMap.remove(nodeId);
     }
 
     public static void clean() {
         TheadHelper.clean();
     }
 
-    public <P> P getPassResult(String nodeId, long timeout) throws InterruptedException, ExecutionException, TimeoutException {
-        Object result = passResultMap.get(nodeId);
+    public <P> P getResult(String nodeId, long timeout) throws InterruptedException, ExecutionException, TimeoutException {
+        Object result = nodeResultMap.get(nodeId);
         if (result != null && result instanceof Future) {
             return ((Future<P>) result).get(timeout, TimeUnit.MILLISECONDS);
         }
@@ -156,12 +155,17 @@ public class ContextBus implements IContextBus {
     }
 
     @Override
-    public Exception getPassException(String nodeId) {
-        return passExceptionMap.get(nodeId);
+    public Exception getException(String nodeId) {
+        return nodeExceptionMap.get(nodeId);
     }
 
-    public void putPassException(String nodeId, Exception e) {
-        passExceptionMap.put(nodeId, e);
+    @Override
+    public Exception getException(Class<?> clazz) {
+        return nodeExceptionMap.get(clazz.getName());
+    }
+
+    public void putException(String nodeId, Exception e) {
+        nodeExceptionMap.put(nodeId, e);
     }
 
     @Override
@@ -183,8 +187,8 @@ public class ContextBus implements IContextBus {
                 .id("context-bus-" + UUID.randomUUID().toString().replaceAll("-", ""))
                 .param(param)
                 .conditionMap(new ConcurrentHashMap<>(conditionMap))
-                .passResultMap(new ConcurrentHashMap<>(passResultMap))
-                .passExceptionMap(new ConcurrentHashMap<>(passExceptionMap))
+                .nodeResultMap(new ConcurrentHashMap<>(nodeResultMap))
+                .nodeExceptionMap(new ConcurrentHashMap<>(nodeExceptionMap))
                 .transmitMap(new ConcurrentHashMap<>(transmitMap))
                 .runtimeId(runtimeId)
                 .rollbackList(new LinkedList<>())
@@ -216,8 +220,8 @@ public class ContextBus implements IContextBus {
                 .id("context-bus-" + UUID.randomUUID().toString().replaceAll("-", ""))
                 .param(param)
                 .conditionMap(conditionMap)
-                .passResultMap(new ConcurrentHashMap<>())
-                .passExceptionMap(new ConcurrentHashMap<>())
+                .nodeResultMap(new ConcurrentHashMap<>())
+                .nodeExceptionMap(new ConcurrentHashMap<>())
                 .transmitMap(new ConcurrentHashMap<>())
                 .runtimeId(UUID.randomUUID().toString().replaceAll("-", ""))
                 .rollbackList(new LinkedList<>())

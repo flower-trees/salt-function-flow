@@ -90,8 +90,8 @@ public class ThreadFlowInit implements IFlowInit {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
             System.out.println("AddResult handle isTimeout: " + isTimeout);
-            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class.getName()) != null && iContextBus.getPassResult(ReduceNode.class.getName()) instanceof Integer ?  (Integer) iContextBus.getPassResult(ReduceNode.class.getName()) : 0;
-            Integer demoBitRightResult = iContextBus.getPassResult(BitRightNode.class.getName()) != null && iContextBus.getPassResult(BitRightNode.class.getName()) instanceof Integer ? (Integer) iContextBus.getPassResult(BitRightNode.class.getName()): 0;
+            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class.getName()) != null && iContextBus.getResult(ReduceNode.class.getName()) instanceof Integer ?  (Integer) iContextBus.getResult(ReduceNode.class.getName()) : 0;
+            Integer demoBitRightResult = iContextBus.getResult(BitRightNode.class.getName()) != null && iContextBus.getResult(BitRightNode.class.getName()) instanceof Integer ? (Integer) iContextBus.getResult(BitRightNode.class.getName()): 0;
             Integer handleResult = demoReduceResult + demoBitRightResult;
             System.out.println("Addresult " + demoReduceResult + "+" + demoBitRightResult + "=" + handleResult);
             return handleResult;
@@ -102,8 +102,8 @@ public class ThreadFlowInit implements IFlowInit {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
             System.out.println("AddResult handle isTimeout: " + isTimeout);
-            Integer demoReduceResult = iContextBus.getPassResult(ReduceNode.class.getName()) != null && iContextBus.getPassResult(ReduceNode.class.getName()) instanceof Integer ?  (Integer) iContextBus.getPassResult(ReduceNode.class.getName()) : 0;
-            Integer demoBitRightResult = iContextBus.getPassResult(BitLeftNode.class.getName()) != null && iContextBus.getPassResult(BitLeftNode.class.getName()) instanceof Integer ? (Integer) iContextBus.getPassResult(BitLeftNode.class.getName()): 0;
+            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class.getName()) != null && iContextBus.getResult(ReduceNode.class.getName()) instanceof Integer ?  (Integer) iContextBus.getResult(ReduceNode.class.getName()) : 0;
+            Integer demoBitRightResult = iContextBus.getResult(BitLeftNode.class.getName()) != null && iContextBus.getResult(BitLeftNode.class.getName()) instanceof Integer ? (Integer) iContextBus.getResult(BitLeftNode.class.getName()): 0;
             Integer handleResult = demoReduceResult - demoBitRightResult;
             System.out.println("ReduceResult " + demoReduceResult + "-" + demoBitRightResult + "=" + handleResult);
             return handleResult;
@@ -114,8 +114,8 @@ public class ThreadFlowInit implements IFlowInit {
         @Override
         public Integer handle(IContextBus iContextBus, boolean isTimeout) {
             System.out.println("AddBranchResult handle isTimeout: " + isTimeout);
-            Integer demoBitRightResult = iContextBus.getPassResult("demo_branch_bit_right") != null && iContextBus.getPassResult("demo_branch_bit_right") instanceof Integer ?  (Integer) iContextBus.getPassResult("demo_branch_bit_right") : 0;
-            Integer demoBitLeftResult = iContextBus.getPassResult("demo_branch_bit_left") != null && iContextBus.getPassResult("demo_branch_bit_left") instanceof Integer ? (Integer) iContextBus.getPassResult("demo_branch_bit_left"): 0;
+            Integer demoBitRightResult = iContextBus.getResult("demo_branch_bit_right") != null && iContextBus.getResult("demo_branch_bit_right") instanceof Integer ?  (Integer) iContextBus.getResult("demo_branch_bit_right") : 0;
+            Integer demoBitLeftResult = iContextBus.getResult("demo_branch_bit_left") != null && iContextBus.getResult("demo_branch_bit_left") instanceof Integer ? (Integer) iContextBus.getResult("demo_branch_bit_left"): 0;
             Integer handleResult = demoBitRightResult + demoBitLeftResult;
             System.out.println("AddBranchResult " + demoBitRightResult + "+" + demoBitLeftResult + "=" + handleResult);
             return handleResult;
