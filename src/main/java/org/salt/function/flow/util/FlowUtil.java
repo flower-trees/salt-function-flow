@@ -22,7 +22,10 @@ import org.apache.commons.lang.StringUtils;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
+import org.springframework.aop.framework.AdvisedSupport;
+import org.springframework.aop.framework.AopProxy;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.UUID;
 
@@ -67,5 +70,41 @@ public class FlowUtil {
 
     public static String id() {
         return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+
+    public static Object getTarget(Object proxy) throws Exception {
+
+        if (!org.springframework.aop.support.AopUtils.isAopProxy(proxy)) {
+            return proxy;
+        }
+
+        if (org.springframework.aop.support.AopUtils.isJdkDynamicProxy(proxy)) {
+            return getJdkDynamicProxyTargetObject(proxy);
+        } else {
+            return getCglibProxyTargetObject(proxy);
+        }
+
+    }
+
+    public static Object getCglibProxyTargetObject(Object proxy) {
+        try {
+            Field h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+            h.setAccessible(true);
+            Object dynamicAdvisedInterceptor = h.get(proxy);
+            Field advised = dynamicAdvisedInterceptor.getClass().getDeclaredField("advised");
+            advised.setAccessible(true);
+            return ((AdvisedSupport) advised.get(dynamicAdvisedInterceptor)).getTargetSource().getTarget();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Object getJdkDynamicProxyTargetObject(Object proxy) throws Exception {
+        Field h = proxy.getClass().getSuperclass().getDeclaredField("h");
+        h.setAccessible(true);
+        AopProxy aopProxy = (AopProxy) h.get(proxy);
+        Field advised = aopProxy.getClass().getDeclaredField("advised");
+        advised.setAccessible(true);
+        return ((AdvisedSupport) advised.get(aopProxy)).getTargetSource().getTarget();
     }
 }
