@@ -14,6 +14,11 @@ This guide covers implementing general-purpose flow nodes, flow orchestration, a
 </dependency>
 ```
 
+### Gradle
+```groovy
+implementation 'io.github.flower-trees:salt-function-flow:1.1.0'
+```
+
 ### Implementing Functional Nodes
 Extend the `FlowNode` class, implement the `process` method, and annotate the class with `@NodeIdentity`. Below are examples of four basic functional nodes: addition, subtraction, multiplication, and division.
 

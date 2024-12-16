@@ -15,6 +15,7 @@
 package org.salt.function.flow.util;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.ql.util.express.DefaultContext;
 import com.ql.util.express.ExpressRunner;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.UUID;
 
@@ -66,6 +68,12 @@ public class FlowUtil {
 
     public static <T> T fromJson(String json, Class<T> classOfT) {
         return gson.fromJson(json, classOfT);
+    }
+
+    public static Map<String, Object> toMap(Object o) {
+        String json = gson.toJson(o);
+        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+        return gson.fromJson(json, mapType);
     }
 
     public static String id() {

@@ -17,11 +17,14 @@ package org.salt.function.flow.context;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.thread.TheadHelper;
+import org.salt.function.flow.util.FlowUtil;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 @Builder
@@ -209,11 +212,10 @@ public class ContextBus implements IContextBus {
                 conditionMap = new ConcurrentHashMap<>();
                 conditionMap.put("param", param);
             } else {
-                Map<String, Object> conditionTmp = BeanUtils.describe(param);
-                conditionTmp.entrySet().removeIf(entry -> Objects.isNull(entry.getValue()));
-                conditionMap = new ConcurrentHashMap<>(conditionTmp);
+                conditionMap = new ConcurrentHashMap<>(FlowUtil.toMap(param));
             }
         } catch (Exception e) {
+            log.error("param to conditionMap error", e);
             throw new RuntimeException("param to conditionMap error");
         }
         ContextBus contextBus = ContextBus.builder()

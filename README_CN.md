@@ -12,6 +12,10 @@ Salt Function Flow是一款基于SpringBoot、内存级别、超轻量级流编�
     <version>1.1.1</version>
 </dependency>
 ```
+### Gradle
+```groovy
+implementation 'io.github.flower-trees:salt-function-flow:1.1.0'
+```
 
 ### 实现流程功能节点
 继承FlowNode类，实现process方法，并声明@NodeIdentity，下面实现四个基本功能节点Bean，分别实现加、减、乘、除运算：
