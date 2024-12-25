@@ -107,6 +107,12 @@ implementation 'io.github.flower-trees:salt-function-flow:1.1.0'
                     })
                     .build();
     ```
+- `.next()` 函数也可以直接传入lambda表达式，如：
+    ```java
+    FlowInstance flowInstance = flowEngine.builder()
+                   .next((num) -> num + 1)
+                   .build();
+    ```
 
 ## 注册流程
 如果是可复用流程，可注册全局流程，在具体业务中通过ID执行。

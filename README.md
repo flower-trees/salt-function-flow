@@ -107,6 +107,12 @@ Inject `FlowEngine` and use functional programming to orchestrate and execute no
                     })
                     .build();
     ```
+- `.next()` also supports lambda expressions:
+    ```java
+    FlowInstance flowInstance = flowEngine.builder()
+                   .next((num) -> num + 1)
+                   .build();
+    ```
 
 ## Registering Flows
 For reusable flows, register a global flow that can be executed by its ID in specific scenarios.
