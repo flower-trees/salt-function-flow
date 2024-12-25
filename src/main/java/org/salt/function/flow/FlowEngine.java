@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @Slf4j
 public class FlowEngine implements InitializingBean {
@@ -148,6 +148,11 @@ public class FlowEngine implements InitializingBean {
             return next(toInfos(flowNodes));
         }
 
+        @SafeVarargs
+        public final Builder next(Function<Object, ?>... funNodes) {
+            return next(toInfos(funNodes));
+        }
+
         public Builder next(Info... infos) {
             return next(InitParam.builder().infos(infos).build());
         }
@@ -178,6 +183,11 @@ public class FlowEngine implements InitializingBean {
             return all(toInfos(flowNodes));
         }
 
+        @SafeVarargs
+        public final Builder all(Function<Object, ?>... funNodes) {
+            return all(toInfos(funNodes));
+        }
+
         public Builder all(IResult<?> result, Class<?>... clazzs) {
             return all(result, toInfos(clazzs));
         }
@@ -192,6 +202,11 @@ public class FlowEngine implements InitializingBean {
 
         public Builder all(IResult<?> result, FlowNode<?,?>... flowNodes) {
             return all(result, toInfos(flowNodes));
+        }
+
+        @SafeVarargs
+        public final Builder all(IResult<?> result, Function<Object, ?>... funNodes) {
+            return all(toInfos(funNodes));
         }
 
         public Builder all(Info... infos) {
@@ -224,6 +239,11 @@ public class FlowEngine implements InitializingBean {
             return concurrent(toInfos(flowNodes));
         }
 
+        @SafeVarargs
+        public final Builder concurrent(Function<Object, ?>... funNodes) {
+            return concurrent(toInfos(funNodes));
+        }
+
         public Builder concurrent(long timeout, Class<?>... clazzs) {
             return concurrent(timeout, toInfos(clazzs));
         }
@@ -238,6 +258,11 @@ public class FlowEngine implements InitializingBean {
 
         public Builder concurrent(long timeout, FlowNode<?,?>... flowNodes) {
             return concurrent(timeout, toInfos(flowNodes));
+        }
+
+        @SafeVarargs
+        public final Builder concurrent(long timeout, Function<Object, ?>... funNodes) {
+            return concurrent(timeout, toInfos(funNodes));
         }
 
         public Builder concurrent(IResult<?> result, Class<?>... clazzs) {
@@ -256,6 +281,11 @@ public class FlowEngine implements InitializingBean {
             return concurrent(result, toInfos(flowNodes));
         }
 
+        @SafeVarargs
+        public final Builder concurrent(IResult<?> result, Function<Object, ?>... funNodes) {
+            return concurrent(result, toInfos(funNodes));
+        }
+
         public Builder concurrent(IResult<?> result, long timeout, Class<?>... clazzs) {
             return concurrent(result, timeout, toInfos(clazzs));
         }
@@ -270,6 +300,11 @@ public class FlowEngine implements InitializingBean {
 
         public Builder concurrent(IResult<?> result, long timeout, FlowNode<?,?>... flowNodes) {
             return concurrent(result, timeout, toInfos(flowNodes));
+        }
+
+        @SafeVarargs
+        public final Builder concurrent(IResult<?> result, long timeout, Function<Object, ?>... funNodes) {
+            return concurrent(result, timeout, toInfos(funNodes));
         }
 
         public Builder concurrent(IResult<?> result, ExecutorService isolate, Class<?>... clazzs) {
@@ -288,6 +323,11 @@ public class FlowEngine implements InitializingBean {
             return concurrent(result, isolate, toInfos(flowNodes));
         }
 
+        @SafeVarargs
+        public final Builder concurrent(IResult<?> result, ExecutorService isolate, Function<Object, ?>... funNodes) {
+            return concurrent(result, isolate, toInfos(funNodes));
+        }
+
         public Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, Class<?>... clazzs) {
             return concurrent(result, timeout, isolate, toInfos(clazzs));
         }
@@ -302,6 +342,11 @@ public class FlowEngine implements InitializingBean {
 
         public Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, FlowNode<?,?>... flowNodes) {
             return concurrent(result, timeout, isolate, toInfos(flowNodes));
+        }
+
+        @SafeVarargs
+        public final Builder concurrent(IResult<?> result, long timeout, ExecutorService isolate, Function<Object, ?>... funNodes) {
+            return concurrent(result, timeout, isolate, toInfos(funNodes));
         }
 
         public Builder concurrent(Info... infos) {
@@ -350,6 +395,11 @@ public class FlowEngine implements InitializingBean {
             return notify(toInfos(flowNodes));
         }
 
+        @SafeVarargs
+        public final Builder notify(Function<Object, ?>... funNodes) {
+            return notify(toInfos(funNodes));
+        }
+
         public Builder notify(ExecutorService isolate, Class<?>... clazzs) {
             return notify(isolate, toInfos(clazzs));
         }
@@ -364,6 +414,11 @@ public class FlowEngine implements InitializingBean {
 
         public Builder notify(ExecutorService isolate, FlowNode<?,?>... flowNodes) {
             return notify(isolate, toInfos(flowNodes));
+        }
+
+        @SafeVarargs
+        public final Builder notify(ExecutorService isolate, Function<Object, ?>... funNodes) {
+            return notify(isolate, toInfos(funNodes));
         }
 
         public Builder notify(Info... infos) {
@@ -528,6 +583,11 @@ public class FlowEngine implements InitializingBean {
             return loop(loopCondition, toInfos(flowNodes));
         }
 
+        @SafeVarargs
+        public final Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, Function<Object, ?>... funNodes) {
+            return loop(loopCondition, toInfos(funNodes));
+        }
+
         public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, Info... infos) {
             return loop(loopCondition, InitParam.builder().infos(infos).build());
         }
@@ -571,29 +631,37 @@ public class FlowEngine implements InitializingBean {
         private Info[] toInfos(String... ids) {
             return Arrays.stream(ids)
                     .map(id -> Info.builder().id(id).build())
-                    .collect(Collectors.toList())
+                    .toList()
                     .toArray(new Info[ids.length]);
         }
 
         private Info[] toInfos(Class<?>... clazzs) {
             return Arrays.stream(clazzs)
                     .map(clazz -> Info.builder().node(clazz).build())
-                    .collect(Collectors.toList())
+                    .toList()
                     .toArray(new Info[clazzs.length]);
         }
 
         private Info[] toInfos(FlowInstance... flows) {
             return Arrays.stream(flows)
                     .map(flow -> Info.builder().flow(flow).build())
-                    .collect(Collectors.toList())
+                    .toList()
                     .toArray(new Info[flows.length]);
         }
 
         private Info[] toInfos(FlowNode<?,?>... flowNodes) {
             return Arrays.stream(flowNodes)
                     .map(flowNode -> Info.builder().flowNode(flowNode).build())
-                    .collect(Collectors.toList())
+                    .toList()
                     .toArray(new Info[flowNodes.length]);
+        }
+
+        @SafeVarargs
+        private Info[] toInfos(Function<Object,?>... funNodes) {
+            return Arrays.stream(funNodes)
+                    .map(funNode -> Info.builder().funNode(funNode).build())
+                    .toList()
+                    .toArray(new Info[funNodes.length]);
         }
 
         private void init(String id, FlowNode<?,?> flowNode, InitParam initParam) {

@@ -39,6 +39,7 @@ public class Info {
     private Class<?> node;
     private FlowInstance flow;
     private FlowNode<?, ?> flowNode;
+    private Function<Object, ?> funNode;
 
     public String getId() {
         if (StringUtils.isNotEmpty(id)) {
@@ -102,6 +103,18 @@ public class Info {
 
     public static Info c(Function<IContextBus, Boolean> match, FlowNode<?, ?> flowNode) {
         return Info.builder().flowNode(flowNode).match(match).build();
+    }
+
+    public static Info c(Function<Object, ?> funNode) {
+        return Info.builder().funNode(funNode).build();
+    }
+
+    public static Info c(String include, Function<Object, ?> funNode) {
+        return Info.builder().funNode(funNode).include(include).build();
+    }
+
+    public static Info c(Function<IContextBus, Boolean> match, Function<Object, ?> funNode) {
+        return Info.builder().funNode(funNode).match(match).build();
     }
 
     public Info cAlias(String id) {

@@ -6,3 +6,5 @@ salt:
         maxSize: 150
         queueCapacity: 256
         keepAlive: 30
+      node:
+        resultToConditionType: [Map, Object, Ticket, Integer]

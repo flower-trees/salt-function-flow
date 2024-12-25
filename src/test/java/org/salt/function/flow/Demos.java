@@ -52,4 +52,21 @@ public class Demos {
         System.out.println("demo_flow result: " + result);
         Assert.assertTrue(result != null && result == 894);
     }
+
+    @Test
+    public void funNodeDemo() {
+
+        FlowInstance flowInstance = flowEngine.builder()
+                .next(AddNode.class)
+                .next(input -> (Integer)input + 1)
+                .next(ReduceNode.class)
+                .next(MultiplyNode.class)
+                .next(DivisionNode.class)
+                .build();
+
+        System.out.println("demo_flow test: ");
+        Integer result = flowEngine.execute(flowInstance, 39);
+        System.out.println("demo_flow result: " + result);
+        Assert.assertTrue(result != null && result == 900);
+    }
 }

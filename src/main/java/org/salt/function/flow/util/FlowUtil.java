@@ -15,10 +15,10 @@
 package org.salt.function.flow.util;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.ql.util.express.DefaultContext;
 import com.ql.util.express.ExpressRunner;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.lang.StringUtils;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
@@ -27,7 +27,7 @@ import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,9 +71,10 @@ public class FlowUtil {
     }
 
     public static Map<String, Object> toMap(Object o) {
-        String json = gson.toJson(o);
-        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
-        return gson.fromJson(json, mapType);
+        Map<String, Object> map = new HashMap<>();
+        (new BeanMap(o)).forEach((key, value) -> map.put(key.toString(), value));
+        map.remove("class");
+        return map;
     }
 
     public static String id() {
@@ -114,5 +115,38 @@ public class FlowUtil {
         Field advised = aopProxy.getClass().getDeclaredField("advised");
         advised.setAccessible(true);
         return ((AdvisedSupport) advised.get(aopProxy)).getTargetSource().getTarget();
+    }
+
+    public static boolean isPlainObject(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        Class<?> clazz = obj.getClass();
+        return !clazz.equals(Boolean.class) &&
+                !clazz.equals(Character.class) &&
+                !clazz.equals(Byte.class) &&
+                !clazz.equals(Short.class) &&
+                !clazz.equals(Integer.class) &&
+                !clazz.equals(Long.class) &&
+                !clazz.equals(Float.class) &&
+                !clazz.equals(Double.class) &&
+                !clazz.isArray() &&
+                !clazz.equals(String.class);
+    }
+
+    public static boolean isBaseType(Object obj) {
+        if (obj == null) {
+            return false; // 或者根据需求返回 true
+        }
+        Class<?> clazz = obj.getClass();
+        return clazz.equals(Boolean.class) ||
+                clazz.equals(Character.class) ||
+                clazz.equals(Byte.class) ||
+                clazz.equals(Short.class) ||
+                clazz.equals(Integer.class) ||
+                clazz.equals(Long.class) ||
+                clazz.equals(Float.class) ||
+                clazz.equals(Double.class) ||
+                clazz.equals(String.class);
     }
 }

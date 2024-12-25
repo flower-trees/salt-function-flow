@@ -14,6 +14,7 @@
 
 package org.salt.function.flow;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.node.FlowNode;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 @Slf4j
 public class FlowInstance {
+    @Getter
     private String flowId;
     private List<FlowNode<?,?>> nodeList;
     private FlowNodeManager flowNodeManager;
@@ -36,6 +38,14 @@ public class FlowInstance {
         this.flowId = flowId;
         this.nodeList = nodeList;
         this.flowNodeManager = flowNodeManager;
+    }
+
+    protected <T, R> R execute(T param) {
+        return execute(param, null, null);
+    }
+
+    protected <T, R> R execute(T param, Map<String, Object> transmitMap) {
+        return execute(param, transmitMap, null);
     }
 
     protected <T, R> R execute(T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap) {
@@ -67,9 +77,5 @@ public class FlowInstance {
             return contextBus.getFlowResult();
         }
         throw new RuntimeException("processInstance node list is empty.");
-    }
-
-    protected String getFlowId() {
-        return flowId;
     }
 }

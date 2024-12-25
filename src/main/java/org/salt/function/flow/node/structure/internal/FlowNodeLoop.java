@@ -42,6 +42,7 @@ public class FlowNodeLoop extends FlowNodeStructure<Void> {
                     execute(info);
                 } catch (Exception e) {
                     ((ContextBus) iContextBus).putException(info.getId(), e);
+                    throw e;
                 }
                 if (isSuspend(iContextBus)) {
                     return null;

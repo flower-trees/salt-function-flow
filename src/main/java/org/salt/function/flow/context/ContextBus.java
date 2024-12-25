@@ -21,10 +21,7 @@ import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.thread.TheadHelper;
 import org.salt.function.flow.util.FlowUtil;
 
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 
 @Builder
@@ -118,7 +115,7 @@ public class ContextBus implements IContextBus {
             return;
         }
         if (conditionMap.containsKey(key)) {
-            log.warn("process addCondition param loop. key:{}, value:{}, traceId:{}", key, value, runtimeId);
+            log.debug("process addCondition param loop. key:{}, value:{}, traceId:{}", key, value, runtimeId);
         }
         conditionMap.put(key, value);
     }
@@ -200,19 +197,18 @@ public class ContextBus implements IContextBus {
     }
 
     public static ContextBus create(Object param) {
-        ConcurrentMap<String, Object> conditionMap;
+        ConcurrentMap<String, Object> conditionMap = new ConcurrentHashMap<>();
         try {
-            if (param.getClass().isPrimitive()
-                    || param instanceof Number
-                    || param instanceof Boolean
-                    || param instanceof String
-                //|| param.getClass().isArray()
-                //|| param instanceof Collection
-            ) {
+            if (param instanceof Map) {
+                ((Map<String, Object>) param).values().removeIf(Objects::isNull);
+                conditionMap = new ConcurrentHashMap<>((Map<String, Object>) param);
+            } else if (FlowUtil.isBaseType(param)) {
                 conditionMap = new ConcurrentHashMap<>();
                 conditionMap.put("param", param);
-            } else {
-                conditionMap = new ConcurrentHashMap<>(FlowUtil.toMap(param));
+            } else if (FlowUtil.isPlainObject(param)) {
+                Map<String, Object> map = FlowUtil.toMap(param);
+                map.values().removeIf(Objects::isNull);
+                conditionMap = new ConcurrentHashMap<>(map);
             }
         } catch (Exception e) {
             log.error("param to conditionMap error", e);

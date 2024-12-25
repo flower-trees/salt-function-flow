@@ -18,7 +18,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.salt.function.flow.FlowEngine;
+import org.salt.function.flow.FlowInstance;
+import org.salt.function.flow.Info;
 import org.salt.function.flow.TestApplication;
+import org.salt.function.flow.demo.train.node.TrainAdultTicket;
+import org.salt.function.flow.demo.train.node.TrainBasePrice;
+import org.salt.function.flow.demo.train.node.TrainChildTicket;
+import org.salt.function.flow.demo.train.node.TrainTicketResult;
 import org.salt.function.flow.demo.train.param.Passenger;
 import org.salt.function.flow.demo.train.param.Ticket;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,5 +79,28 @@ public class TrainTest {
         Ticket ticket = flowEngine.execute("train_ticket_input", passenger);
         System.out.println("train_ticket_input result: " + ticket.getPrice());
         Assert.assertTrue(ticket != null && ticket.getPrice() == 150);
+    }
+
+    @Test
+    public void testResultToCondition() {
+        FlowInstance flowInstance = flowEngine.builder()
+                .next(TrainBasePrice.class)
+                //.next(Info.c(TrainBasePrice.class).cAlias("price"))
+                .next(input -> Map.of("price", (Integer)input))
+                //.next(input -> Ticket.builder().price((Integer)input).result(true).build())
+                .next(
+                        Info.c("price < 200", TrainChildTicket.class)
+                                .cInput(bus -> ((Map)bus.getPreResult()).get("price"))
+                                //.cInput(bus -> ((Ticket)bus.getPreResult()).getPrice())
+                        ,
+                        Info.c("price >= 200", TrainAdultTicket.class)
+                                .cInput(bus -> ((Map)bus.getPreResult()).get("price"))
+                                //.cInput(bus -> ((Ticket)bus.getPreResult()).getPrice())
+                )
+                .next(TrainTicketResult.class)
+                .build();
+        Passenger passenger = Passenger.builder().name("jack").age(12).build();
+        Ticket ticket = flowEngine.execute(flowInstance, passenger);
+        System.out.println("train_ticket_input result: " + ticket.getPrice());
     }
 }

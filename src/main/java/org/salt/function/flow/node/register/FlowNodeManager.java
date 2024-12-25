@@ -21,15 +21,21 @@ import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
+import org.salt.function.flow.util.FlowUtil;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
 @Slf4j
+@ConfigurationProperties(prefix = "salt.function.flow.node")
 public class FlowNodeManager {
 
     private Map<String, FlowNode<?,?>> flowNodeMap = new HashMap<>();
+
+    private List<String> resultToConditionType = List.of("Map");
 
     protected void doRegistration(FlowNode<?,?> flowNode) {
         if (StringUtils.isEmpty(flowNode.getNodeId())) {
@@ -83,6 +89,16 @@ public class FlowNodeManager {
 
                 contextBus.putPreResult(result);
                 contextBus.setFlowResult(result);
+
+                if (result instanceof Map && resultToConditionType.contains("Map")) {
+                    ((Map<String, Object>) result).forEach(contextBus::addCondition);
+                } else if (FlowUtil.isPlainObject(result) && resultToConditionType.contains("Object")) {
+                    FlowUtil.toMap(result).forEach(contextBus::addCondition);
+                } else if (FlowUtil.isPlainObject(result) && resultToConditionType.contains(result.getClass().getSimpleName())) {
+                    FlowUtil.toMap(result).forEach(contextBus::addCondition);
+                } else if (FlowUtil.isBaseType(result) && resultToConditionType.contains(result.getClass().getSimpleName())) {
+                    contextBus.addCondition(idTmp, result);
+                }
             }
 
             if (!(flowNode instanceof FlowNodeStructure)) {

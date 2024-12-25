@@ -23,15 +23,16 @@ import org.salt.function.flow.node.structure.FlowNodeStructure;
 import java.util.List;
 
 @Slf4j
-public class FlowNodeAll extends FlowNodeStructure<Void> {
+public class FlowNodeAll<O> extends FlowNodeStructure<O> {
     @Override
-    public Void doProcessGateway(List<Info> infoList) {
+    public O doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         for (Info info : infoList) {
             try {
                 execute(info);
             } catch (Exception e) {
                 ((ContextBus) iContextBus).putException(info.getId(), e);
+                throw e;
             }
             if (isSuspend(iContextBus)) {
                 return null;
