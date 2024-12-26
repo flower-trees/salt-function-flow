@@ -9,12 +9,12 @@ Salt Function Flow是一款基于SpringBoot、内存级别、超轻量级流编�
 <dependency>
     <groupId>io.github.flower-trees</groupId>
     <artifactId>salt-function-flow</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'io.github.flower-trees:salt-function-flow:1.1.0'
+implementation 'io.github.flower-trees:salt-function-flow:1.1.2'
 ```
 
 ### 实现流程功能节点
