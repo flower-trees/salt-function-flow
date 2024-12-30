@@ -17,11 +17,11 @@ package org.salt.function.flow.thread;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.salt.function.flow.Info;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -60,7 +60,15 @@ public class TheadHelper {
         threadLocal.set(null);
     }
 
-    public Runnable getDecoratorAsync(Runnable runnable, Info info) {
+    public void submit(Runnable runnable) {
+        executor.submit(getDecoratorAsync(runnable));
+    }
+
+    public <T> Future<T> submit(Callable<T> task) {
+        return executor.submit(getDecoratorAsync(task));
+    }
+
+    public Runnable getDecoratorAsync(Runnable runnable) {
         final Map<String, Object> map = new HashMap<>(threadLocal.get());
         final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
         return () -> {
@@ -81,7 +89,7 @@ public class TheadHelper {
         };
     }
 
-    public Callable getDecoratorAsync(Callable callable, Info info) {
+    public <T> Callable<T> getDecoratorAsync(Callable<T> callable) {
         final Map<String, Object> map = new HashMap<>(threadLocal.get());
         final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
         return () -> {

@@ -28,14 +28,14 @@ public class FlowNodeFuture extends FlowNodeStructure<Future<?>> {
     @Override
     public Future<?> doProcessGateway(List<Info> infoList) {
         for (Info info : infoList) {
-            Future<?> future = theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
+            Future<?> future = theadHelper.submit(() -> {
                 try {
                     return execute(info);
                 } catch (Exception e) {
                     ((ContextBus) getContextBus()).putException(info.getId(), e);
                 }
                 return null;
-            }, info));
+            });
             ((ContextBus) getContextBus()).putResult(info.getId(), future);
         }
         return null;

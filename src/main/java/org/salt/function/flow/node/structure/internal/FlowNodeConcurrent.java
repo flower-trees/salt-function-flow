@@ -32,7 +32,7 @@ public class FlowNodeConcurrent<O> extends FlowNodeStructure<O> {
         IContextBus iContextBus = getContextBus();
         CountDownLatch finalCountDownLatch = new CountDownLatch(infoList.size());
         for (Info info : infoList) {
-            theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
+            theadHelper.submit(() -> {
                 try {
                     execute(info);
                 } catch (Exception e) {
@@ -40,7 +40,7 @@ public class FlowNodeConcurrent<O> extends FlowNodeStructure<O> {
                 } finally {
                     finalCountDownLatch.countDown();
                 }
-            }, info));
+            });
         }
         if (isSuspend(iContextBus)) {
             return null;

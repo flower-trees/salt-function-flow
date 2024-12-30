@@ -148,7 +148,7 @@ public class ContextBus implements IContextBus {
 
     public <P> P getResult(String nodeId, long timeout) throws InterruptedException, ExecutionException, TimeoutException {
         Object result = nodeResultMap.get(nodeId);
-        if (result != null && result instanceof Future) {
+        if (result instanceof Future) {
             return ((Future<P>) result).get(timeout, TimeUnit.MILLISECONDS);
         }
         throw new RuntimeException("node is not Future");
@@ -165,6 +165,7 @@ public class ContextBus implements IContextBus {
     }
 
     public void putException(String nodeId, Exception e) {
+        log.warn("node exception. nodeId:{}, exception:", nodeId, e);
         nodeExceptionMap.put(nodeId, e);
     }
 

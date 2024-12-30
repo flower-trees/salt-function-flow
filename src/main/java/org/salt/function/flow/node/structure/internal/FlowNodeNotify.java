@@ -27,14 +27,14 @@ public class FlowNodeNotify extends FlowNodeStructure<Void> {
     public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         for (Info info : infoList) {
-            theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
+            theadHelper.submit(() -> {
                 try {
                     ((ContextBus) iContextBus).copy();
                     execute(info);
                 } catch (Exception e) {
                     ((ContextBus) iContextBus).putException(info.getId(), e);
                 }
-            }, info));
+            });
         }
         return null;
     }
