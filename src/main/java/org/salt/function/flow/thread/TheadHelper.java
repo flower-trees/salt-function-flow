@@ -42,18 +42,19 @@ public class TheadHelper {
         threadLocalUsers.addAll(Arrays.asList(threadLocals));
     }
 
-    public static <P> void putThreadLocal(String key, P value) {
+    public static Map<String, Object> getThreadLocal() {
         if (threadLocal.get() == null) {
             threadLocal.set(new HashMap<>());
         }
-        threadLocal.get().put(key, value);
+        return threadLocal.get();
+    }
+
+    public static <P> void putThreadLocal(String key, P value) {
+        getThreadLocal().put(key, value);
     }
 
     public static <P> P getThreadLocal(String key) {
-        if (threadLocal.get() == null) {
-            threadLocal.set(new HashMap<>());
-        }
-        return (P) threadLocal.get().get(key);
+        return (P) getThreadLocal().get(key);
     }
 
     public static void clean() {
@@ -69,7 +70,7 @@ public class TheadHelper {
     }
 
     public Runnable getDecoratorAsync(Runnable runnable) {
-        final Map<String, Object> map = new HashMap<>(threadLocal.get());
+        final Map<String, Object> map = new HashMap<>(getThreadLocal());
         final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
         return () -> {
             threadLocal.set(map);
@@ -90,7 +91,7 @@ public class TheadHelper {
     }
 
     public <T> Callable<T> getDecoratorAsync(Callable<T> callable) {
-        final Map<String, Object> map = new HashMap<>(threadLocal.get());
+        final Map<String, Object> map = new HashMap<>(getThreadLocal());
         final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
         return () -> {
             threadLocal.set(map);

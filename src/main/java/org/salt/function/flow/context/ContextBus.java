@@ -151,7 +151,7 @@ public class ContextBus implements IContextBus {
         if (result instanceof Future) {
             return ((Future<P>) result).get(timeout, TimeUnit.MILLISECONDS);
         }
-        throw new RuntimeException("node is not Future");
+        return (P) result;
     }
 
     @Override

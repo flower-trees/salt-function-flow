@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 @Slf4j
-public class FlowNodeFuture extends FlowNodeStructure<Future<?>> {
+public class FlowNodeFuture<O> extends FlowNodeStructure<O> {
 
     @Override
-    public Future<?> doProcessGateway(List<Info> infoList) {
+    public O doProcessGateway(List<Info> infoList) {
         for (Info info : infoList) {
             Future<?> future = theadHelper.submit(() -> {
                 try {

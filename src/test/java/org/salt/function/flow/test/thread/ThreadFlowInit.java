@@ -41,7 +41,7 @@ public class ThreadFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_flow_future_timeout")
                 .next(AddNode.class)
                 .future(ReduceNode.class, BitRightNode.class)
-                .wait(new AddResult(), 3000, ReduceNode.class, BitRightNode.class)
+                .wait(new AddResult(), 10, ReduceNode.class, BitRightNode.class)
                 .next(DivisionNode.class)
                 .register();
 
