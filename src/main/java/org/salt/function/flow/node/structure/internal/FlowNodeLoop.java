@@ -41,7 +41,7 @@ public class FlowNodeLoop extends FlowNodeStructure<Void> {
                 try {
                     execute(info);
                 } catch (Exception e) {
-                    ((ContextBus) iContextBus).putException(info.getId(), e);
+                    ((ContextBus) iContextBus).putException(info.getIdOrAlias(), e);
                     throw e;
                 }
                 if (isSuspend(iContextBus)) {
@@ -50,6 +50,7 @@ public class FlowNodeLoop extends FlowNodeStructure<Void> {
             }
             i++;
         }
+        mergeRunIds();
         return null;
     }
 }

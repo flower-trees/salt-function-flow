@@ -23,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @Slf4j
 public class FlowInstance {
@@ -49,6 +50,10 @@ public class FlowInstance {
     }
 
     protected <T, R> R execute(T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap) {
+        return execute(param, transmitMap, conditionMap, null, null);
+    }
+
+    protected <T, R> R execute(T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap, Consumer<T> beforeRun, Consumer<R> afterRun) {
         ContextBus contextBus = ContextBus.create(param);
         if (transmitMap != null && !transmitMap.isEmpty()) {
             transmitMap.forEach(contextBus::putTransmit);
@@ -56,7 +61,16 @@ public class FlowInstance {
         if (conditionMap != null && !conditionMap.isEmpty()) {
             conditionMap.forEach(contextBus::addCondition);
         }
-        return execute();
+        try {
+            if (beforeRun != null) {
+                beforeRun.accept(param);
+            }
+            return execute();
+        } finally {
+            if (afterRun != null) {
+                afterRun.accept(contextBus.getFlowResult());
+            }
+        }
     }
 
     protected <R> R execute() {

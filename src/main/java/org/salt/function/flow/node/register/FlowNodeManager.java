@@ -66,6 +66,15 @@ public class FlowNodeManager {
 
             ContextBus contextBus = (ContextBus) ContextBus.get();
 
+            String nodeIdOrAlias = flowNode.getNodeId();
+            if (info != null) {
+                nodeIdOrAlias = info.getIdOrAlias();
+            }
+
+            contextBus.setNodeIdOrAlias(nodeIdOrAlias);
+            String runId = FlowUtil.id();
+            contextBus.putRunId(nodeIdOrAlias, runId);
+
             I input = ContextBus.get().getPreResult();
             if (info != null && info.getInput() != null) {
                 input = (I) info.getInput().apply(ContextBus.get());
@@ -75,20 +84,15 @@ public class FlowNodeManager {
 
             if (result != null) {
 
-                String idTmp = flowNode.getNodeId();
-
-                if (info != null && StringUtils.isNotEmpty(info.getIdAlias())) {
-                    idTmp = info.getIdAlias();
-                }
-
                 if (info != null && info.getOutput() != null) {
-                    contextBus.putResult(idTmp, info.getOutput().apply(contextBus, result));
+                    contextBus.putResult(nodeIdOrAlias, info.getOutput().apply(contextBus, result));
                 } else {
-                    contextBus.putResult(idTmp, result);
+                    contextBus.putResult(nodeIdOrAlias, result);
                 }
 
                 contextBus.putPreResult(result);
                 contextBus.setFlowResult(result);
+                contextBus.setPreRunIds(List.of(runId));
 
                 if (result instanceof Map && resultToConditionType.contains("Map")) {
                     ((Map<String, Object>) result).forEach(contextBus::addCondition);
@@ -97,7 +101,7 @@ public class FlowNodeManager {
                 } else if (FlowUtil.isPlainObject(result) && resultToConditionType.contains(result.getClass().getSimpleName())) {
                     FlowUtil.toMap(result).forEach(contextBus::addCondition);
                 } else if (FlowUtil.isBaseType(result) && resultToConditionType.contains(result.getClass().getSimpleName())) {
-                    contextBus.addCondition(idTmp, result);
+                    contextBus.addCondition(nodeIdOrAlias, result);
                 }
             }
 

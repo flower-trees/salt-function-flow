@@ -54,7 +54,18 @@ public class Info {
         if (flowNode != null) {
             return flowNode.getNodeId();
         }
+        if (funNode!= null) {
+            return funNode.getClass().getName();
+        }
         throw new RuntimeException("id is empty");
+    }
+
+    public String getIdOrAlias() {
+        if (StringUtils.isNotEmpty(idAlias)) {
+            return idAlias;
+        } else {
+            return getId();
+        }
     }
 
     public static Info c(String id) {

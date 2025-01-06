@@ -32,11 +32,11 @@ public class FlowNodeFuture<O> extends FlowNodeStructure<O> {
                 try {
                     return execute(info);
                 } catch (Exception e) {
-                    ((ContextBus) getContextBus()).putException(info.getId(), e);
+                    ((ContextBus) getContextBus()).putException(info.getIdOrAlias(), e);
                 }
                 return null;
             });
-            ((ContextBus) getContextBus()).putResult(info.getId(), future);
+            ((ContextBus) getContextBus()).putResult(info.getIdOrAlias(), future);
         }
         return null;
     }

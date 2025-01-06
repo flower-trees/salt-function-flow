@@ -31,13 +31,14 @@ public class FlowNodeAll<O> extends FlowNodeStructure<O> {
             try {
                 execute(info);
             } catch (Exception e) {
-                ((ContextBus) iContextBus).putException(info.getId(), e);
+                ((ContextBus) iContextBus).putException(info.getIdOrAlias(), e);
                 throw e;
             }
             if (isSuspend(iContextBus)) {
                 return null;
             }
         }
+        mergeRunIds();
         if (result != null) {
             return result.handle(iContextBus, false);
         }

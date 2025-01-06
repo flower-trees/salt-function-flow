@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Slf4j
@@ -87,6 +88,10 @@ public class FlowEngine implements InitializingBean {
 
     public <T, R> R execute(FlowInstance flowInstance, T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap) {
         return flowInstance.execute(param, transmitMap, conditionMap);
+    }
+
+    public <T, R> R execute(FlowInstance flowInstance, T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap, Consumer<T> beforeRun, Consumer<R> afterRun) {
+        return flowInstance.execute(param, transmitMap, conditionMap, beforeRun, afterRun);
     }
 
     public <R> R execute(String flowId) {

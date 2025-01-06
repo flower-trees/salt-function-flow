@@ -14,6 +14,8 @@
 
 package org.salt.function.flow.context;
 
+import java.util.List;
+
 public interface IContextBus {
 
     /**
@@ -81,4 +83,19 @@ public interface IContextBus {
      * Rollback flow execution instance
      */
     void rollbackProcess();
+
+    /**
+     * Get flow executing instance node ID or alias
+     */
+    String getNodeIdOrAlias();
+
+    /**
+     * Get the execution result of any node by node ID
+     */
+    String getRunId(String nodeId);
+
+    /**
+     * Get the execution result of the last node, which may return null
+     */
+    List<String> getPreRunIds();
 }

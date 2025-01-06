@@ -77,6 +77,7 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
             return flowNodeManager.execute((FlowNode<O, ?>) info.getFlowNode(), info);
         } else if (info.getFunNode() != null) {
             return flowNodeManager.execute(new FlowNode<>() {
+                final String nodeId = info.getId();
                 @Override
                 public O process(Object input) {
                     return (O) info.getFunNode().apply(input);
@@ -94,5 +95,10 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
 
     protected boolean isSuspend(IContextBus iContextBus) {
         return ((ContextBus) iContextBus).isRollbackProcess() || ((ContextBus) iContextBus).isStopProcess();
+    }
+
+    protected void mergeRunIds() {
+        List<String> runIds = infoList.stream().map(info -> getContextBus().getRunId(getContextBus().getNodeIdOrAlias())).toList();
+        ((ContextBus) getContextBus()).setPreRunIds(runIds);
     }
 }
