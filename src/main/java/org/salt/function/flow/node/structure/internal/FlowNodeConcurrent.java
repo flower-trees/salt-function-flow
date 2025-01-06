@@ -32,21 +32,22 @@ public class FlowNodeConcurrent<O> extends FlowNodeStructure<O> {
         IContextBus iContextBus = getContextBus();
         CountDownLatch finalCountDownLatch = new CountDownLatch(infoList.size());
         for (Info info : infoList) {
-            theadHelper.getExecutor().submit(theadHelper.getDecoratorAsync(() -> {
+            theadHelper.submit(() -> {
                 try {
                     execute(info);
                 } catch (Exception e) {
-                    ((ContextBus) iContextBus).putException(info.getId(), e);
+                    ((ContextBus) iContextBus).putException(info.getIdOrAlias(), e);
                 } finally {
                     finalCountDownLatch.countDown();
                 }
-            }, info));
+            });
         }
         if (isSuspend(iContextBus)) {
             return null;
         }
         try {
             boolean isTimeout = finalCountDownLatch.await(theadHelper.getTimeout(), TimeUnit.MILLISECONDS);
+            mergeRunIds();
             if (result != null) {
                 return result.handle(iContextBus, !isTimeout);
             }

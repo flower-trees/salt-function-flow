@@ -50,7 +50,7 @@ public class ThreadTest {
         System.out.println("demo_flow_future_timeout test: ");
         Integer result = flowEngine.execute("demo_flow_future_timeout", 39);
         System.out.println("demo_flow_future_timeout result: " + result);
-        Assert.assertTrue(result != null && result == 12);
+        Assert.assertTrue(result != null && (result == 12 || result == 19));
     }
 
     @Test

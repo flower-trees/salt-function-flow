@@ -32,7 +32,7 @@ public class FlowNodeNext extends FlowNodeStructure<Void> {
             try {
                 execute(info);
             } catch (Exception e) {
-                ((ContextBus) iContextBus).putException(info.getId(), e);
+                ((ContextBus) iContextBus).putException(info.getIdOrAlias(), e);
                 throw e;
             }
             return null;

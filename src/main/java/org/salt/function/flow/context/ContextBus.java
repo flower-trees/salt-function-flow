@@ -30,6 +30,9 @@ public class ContextBus implements IContextBus {
 
     private static String LAST_RESULT_KEY = "thead_last_result_key";
     private static String RESULT_KEY = "thead_result_key";
+    private static String NODE_RUN_ID_KEY = "node_run_id_key_%s";
+    private static String LAST_RUN_ID_KEY = "last_run_id_key";
+    private static String NODE_ID_OR_ALIAS_KEY = "node_id_or_alias_key";
 
     /**
      * ContextBus id
@@ -148,10 +151,10 @@ public class ContextBus implements IContextBus {
 
     public <P> P getResult(String nodeId, long timeout) throws InterruptedException, ExecutionException, TimeoutException {
         Object result = nodeResultMap.get(nodeId);
-        if (result != null && result instanceof Future) {
+        if (result instanceof Future) {
             return ((Future<P>) result).get(timeout, TimeUnit.MILLISECONDS);
         }
-        throw new RuntimeException("node is not Future");
+        return (P) result;
     }
 
     @Override
@@ -165,6 +168,7 @@ public class ContextBus implements IContextBus {
     }
 
     public void putException(String nodeId, Exception e) {
+        log.warn("node exception. nodeId:{}, exception:", nodeId, e);
         nodeExceptionMap.put(nodeId, e);
     }
 
@@ -221,7 +225,7 @@ public class ContextBus implements IContextBus {
                 .nodeResultMap(new ConcurrentHashMap<>())
                 .nodeExceptionMap(new ConcurrentHashMap<>())
                 .transmitMap(new ConcurrentHashMap<>())
-                .runtimeId(UUID.randomUUID().toString().replaceAll("-", ""))
+                .runtimeId(FlowUtil.id())
                 .rollbackList(new LinkedList<>())
                 .build();
         ContextBus.clean();
@@ -271,5 +275,26 @@ public class ContextBus implements IContextBus {
 
     public static IContextBus get() {
         return TheadHelper.getThreadLocal(IContextBus.class.getName());
+    }
+
+    public String getNodeIdOrAlias() {
+        return TheadHelper.getThreadLocal(NODE_ID_OR_ALIAS_KEY);
+    }
+    public void setNodeIdOrAlias(String nodeId) {
+        TheadHelper.putThreadLocal(NODE_ID_OR_ALIAS_KEY, nodeId);
+    }
+
+    public String getRunId(String nodeId) {
+        return (String) nodeResultMap.get(String.format(NODE_RUN_ID_KEY, nodeId));
+    }
+    public void putRunId(String nodeId, String runId) {
+        nodeResultMap.put(String.format(NODE_RUN_ID_KEY, nodeId), runId);
+    }
+
+    public List<String> getPreRunIds() {
+        return TheadHelper.getThreadLocal(LAST_RUN_ID_KEY);
+    }
+    public void setPreRunIds(List<String> runIds) {
+        TheadHelper.putThreadLocal(LAST_RUN_ID_KEY, runIds);
     }
 }
