@@ -59,7 +59,7 @@ public class FlowBuildExample {
                 .next(flowNode)  // 3.new
                 .next(num -> (Integer) num / 12) // 4.lambda
                 .next(flowEngine.builder().next(num -> (Integer) num % 12).build()) // 5.nesting flow
-                .next(Info.c(input -> (Integer) input >> 1)) // 6.Info
+                .next(Info.c("add_node > 100", input -> (Integer) input >> 1)) // 6.Info
                 .build();
 
         Integer result = flowEngine.execute(flow, 39);
