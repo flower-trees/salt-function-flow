@@ -17,6 +17,7 @@ package org.salt.function.flow.demo.math;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.config.IFlowInit;
+import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.demo.math.node.*;
 import org.salt.function.flow.node.IResult;
@@ -129,7 +130,7 @@ public class DemoFlowInit implements IFlowInit {
          */
         flowEngine.builder().id("demo_flow_loop")
                 .next(AddNode.class)
-                .loop((iContextBus, i) -> (Integer) iContextBus.getPreResult() < 56000000, ReduceNode.class, MultiplyNode.class)
+                .loop(i -> (Integer) ContextBus.get().getPreResult() < 56000000, ReduceNode.class, MultiplyNode.class)
                 .next(DivisionNode.class)
                 .register();
 

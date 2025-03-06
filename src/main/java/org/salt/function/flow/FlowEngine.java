@@ -572,32 +572,32 @@ public class FlowEngine implements InitializingBean {
         }
 
         //loop
-        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, Class<?>... clazzs) {
+        public Builder loop(Function<Integer, Boolean> loopCondition, Class<?>... clazzs) {
             return loop(loopCondition, toInfos(clazzs));
         }
 
-        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, String... ids) {
+        public Builder loop(Function<Integer, Boolean> loopCondition, String... ids) {
             return loop(loopCondition, toInfos(ids));
         }
 
-        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, FlowInstance... flows) {
+        public Builder loop(Function<Integer, Boolean> loopCondition, FlowInstance... flows) {
             return loop(loopCondition, toInfos(flows));
         }
 
-        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, FlowNode<?,?>... flowNodes) {
+        public Builder loop(Function<Integer, Boolean> loopCondition, FlowNode<?,?>... flowNodes) {
             return loop(loopCondition, toInfos(flowNodes));
         }
 
         @SafeVarargs
-        public final Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, Function<Object, ?>... funNodes) {
+        public final Builder loop(Function<Integer, Boolean> loopCondition, Function<Object, ?>... funNodes) {
             return loop(loopCondition, toInfos(funNodes));
         }
 
-        public Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, Info... infos) {
+        public Builder loop(Function<Integer, Boolean> loopCondition, Info... infos) {
             return loop(loopCondition, InitParam.builder().infos(infos).build());
         }
 
-        private Builder loop(BiFunction<IContextBus, Integer, Boolean> loopCondition, InitParam initParam) {
+        private Builder loop(Function<Integer, Boolean> loopCondition, InitParam initParam) {
             init(tempName("all", initParam.idTmp), new FlowNodeLoop(loopCondition), initParam);
             return this;
         }

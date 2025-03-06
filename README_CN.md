@@ -9,12 +9,12 @@ Salt Function Flow是一款基于SpringBoot、内存级别、超轻量级流编�
 <dependency>
     <groupId>io.github.flower-trees</groupId>
     <artifactId>salt-function-flow</artifactId>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'io.github.flower-trees:salt-function-flow:1.1.3'
+implementation 'io.github.flower-trees:salt-function-flow:1.1.4'
 ```
 
 ### 实现流程功能节点
@@ -360,7 +360,7 @@ Ticket ticket = flowEngine.execute(flow, passenger);
   flowEngine.builder()
           .next(AddNode.class)
           .loop(
-                  (iContextBus, i) -> (Integer) iContextBus.getPreResult() < 56000000, 
+                  i -> (Integer) ContextBus.get().getPreResult() < 56000000, 
                   ReduceNode.class, MultiplyNode.class)
           .next(DivisionNode.class)
           .build();
@@ -428,7 +428,7 @@ Ticket ticket = flowEngine.execute(flow, passenger);
   flowEngine.builder()
           .next(AddNode.class)
           .loop(
-                  (iContextBus, i) -> (Integer) iContextBus.getPreResult() < 56000000,
+                  i -> (Integer) ContextBus.get().getPreResult() < 56000000,
                   flowEngine.builder().next("demo_reduce").next("demo_remainder").build(),
                   flowEngine.builder().next("demo_multiply").next("demo_remainder").build()
           )
