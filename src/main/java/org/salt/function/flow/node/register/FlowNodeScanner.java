@@ -38,7 +38,6 @@ public class FlowNodeScanner implements ApplicationContextAware {
 
     @PostConstruct
     public void init() {
-        String[] beanNames = applicationContext.getBeanDefinitionNames();
         Map<String, Object> extensionBeans = applicationContext.getBeansWithAnnotation(NodeIdentity.class);
         extensionBeans.values().forEach(
             node -> {
