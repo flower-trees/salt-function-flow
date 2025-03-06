@@ -22,13 +22,14 @@ import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNode;
-import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.node.register.FlowNodeManager;
 import org.salt.function.flow.thread.TheadHelper;
 import org.salt.function.flow.util.FlowUtil;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,9 +40,6 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
 
     @Setter
     protected FlowNodeManager flowNodeManager;
-
-    @Setter
-    protected IResult<O> result;
 
     protected List<Info> infoList;
 
@@ -100,5 +98,31 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
     protected void mergeRunIds() {
         List<String> runIds = infoList.stream().map(info -> getContextBus().getRunId(getContextBus().getNodeIdOrAlias())).toList();
         ((ContextBus) getContextBus()).setPreRunIds(runIds);
+    }
+
+    public Map<String, Object> handle(List<Info> infoList, boolean isTimeout) {
+
+        List<String> ids = infoList.stream().map(Info::getIdOrAlias).toList();
+
+        if (isTimeout) {
+            log.warn("Node execute timeout: {}", FlowUtil.toJson(ids));
+            return Map.of();
+        }
+
+        if (CollectionUtils.isEmpty(ids)) {
+            log.warn("Node ids is empty");
+            return Map.of();
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        for (String id : ids) {
+            if (ContextBus.get().getResult(id) != null) {
+                result.put(id, ContextBus.get().getResult(id));
+            }
+            if (ContextBus.get().getException(id) != null) {
+                result.put(id, ContextBus.get().getException(id));
+            }
+        }
+        return result;
     }
 }

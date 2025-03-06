@@ -16,12 +16,12 @@ package org.salt.function.flow.test.stop;
 
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.config.IFlowInit;
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.demo.math.node.*;
-import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.test.stop.node.BitAndNode;
 import org.salt.function.flow.test.stop.node.BitOrNode;
 import org.salt.function.flow.test.stop.node.BitXorNode;
+
+import java.util.Map;
 
 public class StopFlowInit implements IFlowInit {
 
@@ -41,14 +41,16 @@ public class StopFlowInit implements IFlowInit {
 
         flowEngine.builder().id("demo_bit_and_concurrent")
                 .next(AddNode.class)
-                .concurrent(new AddBitAndResult(), ReduceNode.class, MultiplyNode.class, BitAndNode.class)
+                .concurrent(ReduceNode.class, MultiplyNode.class, BitAndNode.class)
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_bit_and_future")
                 .next(AddNode.class)
                 .future(ReduceNode.class, MultiplyNode.class, BitAndNode.class)
-                .wait(new AddBitAndResult(), ReduceNode.class, MultiplyNode.class, BitAndNode.class)
+                .wait(ReduceNode.class, MultiplyNode.class, BitAndNode.class)
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -74,14 +76,16 @@ public class StopFlowInit implements IFlowInit {
 
         flowEngine.builder().id("demo_bit_or_concurrent")
                 .next(AddNode.class)
-                .concurrent(new AddBitOrResult(), ReduceNode.class, MultiplyNode.class, BitOrNode.class)
+                .concurrent(ReduceNode.class, MultiplyNode.class, BitOrNode.class)
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_bit_or_future")
                 .next(AddNode.class)
                 .future(ReduceNode.class, MultiplyNode.class, BitOrNode.class)
-                .wait(new AddBitOrResult(), ReduceNode.class, MultiplyNode.class, BitOrNode.class)
+                .wait(ReduceNode.class, MultiplyNode.class, BitOrNode.class)
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -107,14 +111,16 @@ public class StopFlowInit implements IFlowInit {
 
         flowEngine.builder().id("demo_bit_xor_concurrent")
                 .next(AddNode.class)
-                .concurrent(new AddBitAndResult(), BitXorNode.class, ReduceNode.class, MultiplyNode.class)
+                .concurrent(BitXorNode.class, ReduceNode.class, MultiplyNode.class)
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_bit_xor_future")
                 .next(AddNode.class)
                 .future(ReduceNode.class, MultiplyNode.class, BitXorNode.class)
-                .wait(new AddBitAndResult(), ReduceNode.class, MultiplyNode.class, BitXorNode.class)
+                .wait(ReduceNode.class, MultiplyNode.class, BitXorNode.class)
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -142,14 +148,16 @@ public class StopFlowInit implements IFlowInit {
 
         flowEngine.builder().id("demo_branch_bit_and_concurrent")
                 .next(AddNode.class)
-                .concurrent(new AddBranchBitAndResult(),"demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
+                .concurrent("demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_branch_bit_and_future")
                 .next(AddNode.class)
                 .future("demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
-                .wait(new AddBranchBitAndResult(),"demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
+                .wait("demo_branch_bit_and_reduce", "demo_branch_bit_and_multiply")
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -176,14 +184,16 @@ public class StopFlowInit implements IFlowInit {
 
         flowEngine.builder().id("demo_branch_bit_or_concurrent")
                 .next(AddNode.class)
-                .concurrent(new AddBranchBitOrResult(), "demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
+                .concurrent("demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_branch_bit_or_future")
                 .next(AddNode.class)
                 .future("demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
-                .wait(new AddBranchBitOrResult(),"demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
+                .wait("demo_branch_bit_or_reduce", "demo_branch_bit_or_multiply")
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -211,14 +221,16 @@ public class StopFlowInit implements IFlowInit {
 
         flowEngine.builder().id("demo_branch_bit_xor_concurrent")
                 .next(AddNode.class)
-                .concurrent(new AddBranchBitAndResult(),"demo_branch_bit_xor_reduce", "demo_branch_bit_xor_multiply")
+                .concurrent("demo_branch_bit_xor_reduce", "demo_branch_bit_xor_multiply")
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_branch_bit_xor_future")
                 .next(AddNode.class)
                 .future("demo_branch_bit_xor_multiply", "demo_branch_bit_xor_reduce")
-                .wait(new AddBranchBitAndResult(),"demo_branch_bit_xor_reduce", "demo_branch_bit_xor_multiply")
+                .wait("demo_branch_bit_xor_reduce", "demo_branch_bit_xor_multiply")
+                .next(StopFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -235,48 +247,12 @@ public class StopFlowInit implements IFlowInit {
                 .register();
     }
 
-    private static class AddBitAndResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getResult(ReduceNode.class.getName()) : 0;
-            Integer demoMultiplyResult = iContextBus.getResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getResult(MultiplyNode.class.getName()): 0;
-            Integer demoBitAndResult = iContextBus.getResult(BitAndNode.class.getName()) != null ? (Integer) iContextBus.getResult(BitAndNode.class.getName()): 0;
-            Integer handleResult = demoReduceResult + demoMultiplyResult + demoBitAndResult;
-            System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "+" + demoBitAndResult + "=" + handleResult);
-            return handleResult;
-        }
-    }
-
-    private static class AddBitOrResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class.getName()) != null ?  (Integer) iContextBus.getResult(ReduceNode.class.getName()) : 0;
-            Integer demoMultiplyResult = iContextBus.getResult(MultiplyNode.class.getName()) != null ? (Integer) iContextBus.getResult(MultiplyNode.class.getName()): 0;
-            Integer demoBitAndResult = iContextBus.getResult(BitOrNode.class.getName()) != null ? (Integer) iContextBus.getResult(BitOrNode.class.getName()): 0;
-            Integer handleResult = demoReduceResult + demoMultiplyResult + demoBitAndResult;
-            System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "+" + demoBitAndResult + "=" + handleResult);
-            return handleResult;
-        }
-    }
-
-    private static class AddBranchBitAndResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer branchReduce = iContextBus.getResult("demo_branch_bit_and_reduce") != null ? (Integer) iContextBus.getResult("demo_branch_bit_and_reduce") : 0;
-            Integer branchMultiply = iContextBus.getResult("demo_branch_bit_and_multiply") != null ? (Integer) iContextBus.getResult("demo_branch_bit_and_multiply") : 0;
-            Integer handleResult = branchReduce + branchMultiply;
-            System.out.println("AddBranchresult " + branchReduce + "+" + branchMultiply + "=" + handleResult);
-            return handleResult;
-        }
-    }
-    private static class AddBranchBitOrResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer branchReduce = iContextBus.getResult("demo_branch_bit_or_reduce") != null ? (Integer) iContextBus.getResult("demo_branch_bit_or_reduce") : 0;
-            Integer branchMultiply = iContextBus.getResult("demo_branch_bit_or_multiply") != null ? (Integer) iContextBus.getResult("demo_branch_bit_or_multiply") : 0;
-            Integer handleResult = branchReduce + branchMultiply;
-            System.out.println("AddBranchresult " + branchReduce + "+" + branchMultiply + "=" + handleResult);
-            return handleResult;
-        }
+    @SuppressWarnings("unchecked")
+    public static Object addResult(Object map) {
+        assert map instanceof Map;
+        return ((Map<String, Object>) map).values().stream()
+                .filter(value -> value instanceof Integer)
+                .mapToInt(value -> (Integer) value)
+                .sum();
     }
 }

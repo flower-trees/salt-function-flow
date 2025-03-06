@@ -42,7 +42,7 @@ public class ThreadTest {
         System.out.println("demo_flow_concurrent_timeout test: ");
         Integer result = flowEngine.execute("demo_flow_concurrent_timeout", 39);
         System.out.println("demo_flow_concurrent_timeout result: " + result);
-        Assert.assertTrue(result != null && result == 12);
+        Assert.assertTrue(result != null && result == 0);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ThreadTest {
         System.out.println("demo_flow_future_timeout test: ");
         Integer result = flowEngine.execute("demo_flow_future_timeout", 39);
         System.out.println("demo_flow_future_timeout result: " + result);
-        Assert.assertTrue(result != null && (result == 12 || result == 19));
+        Assert.assertTrue(result != null && result == 0);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ThreadTest {
         System.out.println("demo_flow_concurrent_threadlocal test: ");
         Integer result = flowEngine.execute("demo_flow_concurrent_threadlocal", 39);
         System.out.println("demo_flow_concurrent_threadlocal result: " + result);
-        Assert.assertTrue(result != null && result == -41);
+        Assert.assertTrue(result != null && result == 66);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class ThreadTest {
         System.out.println("demo_branch_flow_concurrent_timeout test: ");
         Integer result = flowEngine.execute("demo_branch_flow_concurrent_timeout", 39);
         System.out.println("demo_branch_flow_concurrent_timeout result: " + result);
-        Assert.assertTrue(result != null && result == 1971);
+        Assert.assertTrue(result != null && result == 0);
     }
 
     @Test
