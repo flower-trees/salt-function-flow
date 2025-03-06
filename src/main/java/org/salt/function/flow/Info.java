@@ -25,6 +25,8 @@ import org.salt.function.flow.node.FlowNode;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static java.util.random.RandomGeneratorFactory.all;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -65,6 +67,20 @@ public class Info {
             return idAlias;
         } else {
             return getId();
+        }
+    }
+
+    public void set(Object o) {
+        if (o instanceof Class) {
+            node = (Class<?>) o;
+        } else if (o instanceof String) {
+            id = (String) o;
+        } else if (o instanceof FlowInstance) {
+            flow = (FlowInstance) o;
+        } else if (o instanceof FlowNode) {
+            flowNode = (FlowNode<?, ?>) o;
+        } else {
+            throw new RuntimeException("unknown type");
         }
     }
 

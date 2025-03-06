@@ -135,29 +135,13 @@ public class FlowEngine implements InitializingBean {
         }
 
         //next
-        public Builder next(Class<?>... clazzs) {
-            return next(toInfos(clazzs));
-        }
-
-        public Builder next(String... ids) {
-            return next(toInfos(ids));
-        }
-
-        public Builder next(FlowInstance... flows) {
-            return next(toInfos(flows));
-        }
-
-        public Builder next(FlowNode<?,?>... flowNodes) {
-            return next(toInfos(flowNodes));
+        public Builder next(Object... node) {
+            return next(InitParam.builder().infos(toInfos(node)).build());
         }
 
         @SafeVarargs
         public final Builder next(Function<Object, ?>... funNodes) {
-            return next(toInfos(funNodes));
-        }
-
-        public Builder next(Info... infos) {
-            return next(InitParam.builder().infos(infos).build());
+            return next(InitParam.builder().infos(toInfos(funNodes)).build());
         }
 
         private Builder next(InitParam initParam) {
@@ -166,29 +150,13 @@ public class FlowEngine implements InitializingBean {
         }
 
         //all
-        public Builder all(Class<?>... clazzs) {
-            return all(toInfos(clazzs));
-        }
-
-        public Builder all(String... ids) {
-            return all(toInfos(ids));
-        }
-
-        public Builder all(FlowInstance... flows) {
-            return all(toInfos(flows));
-        }
-
-        public Builder all(FlowNode<?,?>... flowNodes) {
-            return all(toInfos(flowNodes));
+        public Builder all(Object... node) {
+            return all(InitParam.builder().infos(toInfos(node)).build());
         }
 
         @SafeVarargs
         public final Builder all(Function<Object, ?>... funNodes) {
-            return all(toInfos(funNodes));
-        }
-
-        public Builder all(Info... infos) {
-            return all(InitParam.builder().infos(infos).build());
+            return all(InitParam.builder().infos(toInfos(funNodes)).build());
         }
 
         private Builder all(InitParam initParam) {
@@ -197,75 +165,41 @@ public class FlowEngine implements InitializingBean {
         }
 
         //concurrent
-        public Builder concurrent(Class<?>... clazzs) {
-            return concurrent(toInfos(clazzs));
-        }
-
-        public Builder concurrent(String... ids) {
-            return concurrent(toInfos(ids));
-        }
-
-        public Builder concurrent(FlowInstance... flows) {
-            return concurrent(toInfos(flows));
-        }
-
-        public Builder concurrent(FlowNode<?,?>... flowNodes) {
-            return concurrent(toInfos(flowNodes));
+        public Builder concurrent(Object... node) {
+            List<Object> infos = new ArrayList<>();
+            long timeout = InitParam.MAP_WAIT_TIMEOUT;
+            ExecutorService executor = null;
+            for (Object o : node) {
+                if (o instanceof Long) {
+                    if ((long) o > 0) {
+                        timeout = (Long) o;
+                    }
+                } else if (o instanceof Integer) {
+                    if ((int) o > 0) {
+                        timeout = (long) (int) o;
+                    }
+                } else if (o instanceof Executor) {
+                    executor = (ExecutorService) o;
+                } else {
+                    infos.add(o);
+                }
+            }
+            return concurrent(InitParam.builder().infos(toInfos(infos.toArray())).isolate(executor).timeout(timeout).build());
         }
 
         @SafeVarargs
         public final Builder concurrent(Function<Object, ?>... funNodes) {
-            return concurrent(toInfos(funNodes));
-        }
-
-        public Builder concurrent(Executor executor, long timeout, Class<?>... clazzs) {
-            return concurrent(timeout, toInfos(clazzs));
-        }
-
-        public Builder concurrent(Executor executor, long timeout, String... ids) {
-            return concurrent(timeout, toInfos(ids));
-        }
-
-        public Builder concurrent(Executor executor, long timeout, FlowInstance... flows) {
-            return concurrent(timeout, toInfos(flows));
-        }
-
-        public Builder concurrent(Executor executor, long timeout, FlowNode<?,?>... flowNodes) {
-            return concurrent(timeout, toInfos(flowNodes));
-        }
-
-        @SafeVarargs
-        public final Builder concurrent(Executor executor, long timeout, Function<Object, ?>... funNodes) {
-            return concurrent(timeout, toInfos(funNodes));
-        }
-
-        public Builder concurrent(long timeout, Class<?>... clazzs) {
-            return concurrent(timeout, toInfos(clazzs));
-        }
-
-        public Builder concurrent(long timeout, String... ids) {
-            return concurrent(timeout, toInfos(ids));
-        }
-
-        public Builder concurrent(long timeout, FlowInstance... flows) {
-            return concurrent(timeout, toInfos(flows));
-        }
-
-        public Builder concurrent(long timeout, FlowNode<?,?>... flowNodes) {
-            return concurrent(timeout, toInfos(flowNodes));
+            return concurrent(InitParam.builder().infos(toInfos(funNodes)).build());
         }
 
         @SafeVarargs
         public final Builder concurrent(long timeout, Function<Object, ?>... funNodes) {
-            return concurrent(timeout, toInfos(funNodes));
+            return concurrent(InitParam.builder().infos(toInfos(funNodes)).timeout(timeout).build());
         }
 
-        public Builder concurrent(Info... infos) {
-            return concurrent(InitParam.builder().infos(infos).build());
-        }
-
-        public Builder concurrent(long timeout, Info... infos) {
-            return concurrent(InitParam.builder().infos(infos).timeout(timeout).build());
+        @SafeVarargs
+        public final Builder concurrent(ExecutorService executor, long timeout, Function<Object, ?>... funNodes) {
+            return concurrent(InitParam.builder().infos(toInfos(funNodes)).timeout(timeout).isolate(executor).build());
         }
 
         private Builder concurrent(InitParam initParam) {
@@ -274,54 +208,27 @@ public class FlowEngine implements InitializingBean {
         }
 
         //notify
-        public Builder notify(Class<?>... clazzs) {
-            return notify(toInfos(clazzs));
-        }
-
-        public Builder notify(String... ids) {
-            return notify(toInfos(ids));
-        }
-
-        public Builder notify(FlowInstance... flows) {
-            return notify(toInfos(flows));
-        }
-
-        public Builder notify(FlowNode<?,?>... flowNodes) {
-            return notify(toInfos(flowNodes));
+        public Builder notify(Object... node) {
+            List<Object> infos = new ArrayList<>();
+            ExecutorService executor = null;
+            for (Object o : node) {
+                if (o instanceof Executor) {
+                    executor = (ExecutorService) o;
+                } else {
+                    infos.add(o);
+                }
+            }
+            return notify(InitParam.builder().infos(toInfos(infos.toArray())).isolate(executor).build());
         }
 
         @SafeVarargs
         public final Builder notify(Function<Object, ?>... funNodes) {
-            return notify(toInfos(funNodes));
-        }
-
-        public Builder notify(ExecutorService isolate, Class<?>... clazzs) {
-            return notify(isolate, toInfos(clazzs));
-        }
-
-        public Builder notify(ExecutorService isolate, String... ids) {
-            return notify(isolate, toInfos(ids));
-        }
-
-        public Builder notify(ExecutorService isolate, FlowInstance... flows) {
-            return notify(isolate, toInfos(flows));
-        }
-
-        public Builder notify(ExecutorService isolate, FlowNode<?,?>... flowNodes) {
-            return notify(isolate, toInfos(flowNodes));
+            return notify(InitParam.builder().infos(toInfos(toInfos(funNodes))).build());
         }
 
         @SafeVarargs
-        public final Builder notify(ExecutorService isolate, Function<Object, ?>... funNodes) {
-            return notify(isolate, toInfos(funNodes));
-        }
-
-        public Builder notify(Info... infos) {
-            return notify(InitParam.builder().infos(infos).build());
-        }
-
-        public Builder notify(ExecutorService isolate, Info... infos) {
-            return notify(InitParam.builder().infos(infos).isolate(isolate).build());
+        public final Builder notify(ExecutorService executor, Function<Object, ?>... funNodes) {
+            return notify(InitParam.builder().infos(toInfos(toInfos(funNodes))).isolate(executor).build());
         }
 
         private Builder notify(InitParam initParam) {
@@ -330,44 +237,17 @@ public class FlowEngine implements InitializingBean {
         }
 
         //future
-        public Builder future(Class<?>... clazzs) {
-            return future(toInfos(clazzs));
-        }
-
-        public Builder future(String... ids) {
-            return future(toInfos(ids));
-        }
-
-        public Builder future(FlowInstance... flows) {
-            return future(toInfos(flows));
-        }
-
-        public Builder future(FlowNode<?,?>... flowNodes) {
-            return future(toInfos(flowNodes));
-        }
-
-        public Builder future(ExecutorService isolate, Class<?>... clazzs) {
-            return future(isolate, toInfos(clazzs));
-        }
-
-        public Builder future(ExecutorService isolate, String... ids) {
-            return future(isolate, toInfos(ids));
-        }
-
-        public Builder future(ExecutorService isolate, FlowInstance... flows) {
-            return future(isolate, toInfos(flows));
-        }
-
-        public Builder future(ExecutorService isolate, FlowNode<?,?>... flowNodes) {
-            return future(isolate, toInfos(flowNodes));
-        }
-
-        public Builder future(Info... infos) {
-            return future(InitParam.builder().infos(infos).build());
-        }
-
-        public Builder future(ExecutorService isolate, Info... infos) {
-            return future(InitParam.builder().infos(infos).isolate(isolate).build());
+        public Builder future(Object... node) {
+            List<Object> infos = new ArrayList<>();
+            ExecutorService executor = null;
+            for (Object o : node) {
+                if (o instanceof Executor) {
+                    executor = (ExecutorService) o;
+                } else {
+                    infos.add(o);
+                }
+            }
+            return future(InitParam.builder().infos(toInfos(infos.toArray())).isolate(executor).build());
         }
 
         private Builder future(InitParam initParam) {
@@ -376,50 +256,23 @@ public class FlowEngine implements InitializingBean {
         }
 
         //wait
-        public Builder wait(Class<?>... clazzs) {
-            return wait(toInfos(clazzs));
-        }
-
-        public Builder wait(String... ids) {
-            return wait(toInfos(ids));
-        }
-
-        public Builder wait(FlowInstance... flows) {
-            return wait(toInfos(flows));
-        }
-
-        public Builder wait(FlowNode<?,?>... flowNodes) {
-            return wait(toInfos(flowNodes));
-        }
-
-
-
-        public Builder wait(long timeout, Class<?>... clazzs) {
-            return wait(timeout, toInfos(clazzs));
-        }
-
-        public Builder wait(long timeout, String... ids) {
-            return wait(timeout, toInfos(ids));
-        }
-
-        public Builder wait(long timeout, FlowInstance... flows) {
-            return wait(timeout, toInfos(flows));
-        }
-
-        public Builder wait(long timeout, FlowNode<?,?>... flowNodes) {
-            return wait(timeout, toInfos(flowNodes));
-        }
-
-
-
-        public Builder wait(Info... infos) {
-            return wait(InitParam.builder().infos(infos).build());
-        }
-
-
-
-        public Builder wait(long timeout, Info... infos) {
-            return wait(InitParam.builder().infos(infos).timeout(timeout).build());
+        public Builder wait(Object... node) {
+            List<Object> infos = new ArrayList<>();
+            long timeout = InitParam.MAP_WAIT_TIMEOUT;
+            for (Object o : node) {
+                if (o instanceof Long) {
+                    if ((long) o > 0) {
+                        timeout = (Long) o;
+                    }
+                } else if (o instanceof Integer) {
+                    if ((int) o > 0) {
+                        timeout = (long) (int) o;
+                    }
+                } else {
+                    infos.add(o);
+                }
+            }
+            return wait(InitParam.builder().infos(toInfos(infos.toArray())).timeout(timeout).build());
         }
 
         private Builder wait(InitParam initParam) {
@@ -428,33 +281,17 @@ public class FlowEngine implements InitializingBean {
         }
 
         //loop
-        public Builder loop(Function<Integer, Boolean> loopCondition, Class<?>... clazzs) {
-            return loop(loopCondition, toInfos(clazzs));
-        }
-
-        public Builder loop(Function<Integer, Boolean> loopCondition, String... ids) {
-            return loop(loopCondition, toInfos(ids));
-        }
-
-        public Builder loop(Function<Integer, Boolean> loopCondition, FlowInstance... flows) {
-            return loop(loopCondition, toInfos(flows));
-        }
-
-        public Builder loop(Function<Integer, Boolean> loopCondition, FlowNode<?,?>... flowNodes) {
-            return loop(loopCondition, toInfos(flowNodes));
+        public Builder loop(Function<Integer, Boolean> condition, Object... node) {
+            return loop(condition, InitParam.builder().infos(toInfos(node)).build());
         }
 
         @SafeVarargs
-        public final Builder loop(Function<Integer, Boolean> loopCondition, Function<Object, ?>... funNodes) {
-            return loop(loopCondition, toInfos(funNodes));
+        public final Builder loop(Function<Integer, Boolean> condition, Function<Object, ?>... funNodes) {
+            return loop(condition, InitParam.builder().infos(toInfos(funNodes)).build());
         }
 
-        public Builder loop(Function<Integer, Boolean> loopCondition, Info... infos) {
-            return loop(loopCondition, InitParam.builder().infos(infos).build());
-        }
-
-        private Builder loop(Function<Integer, Boolean> loopCondition, InitParam initParam) {
-            init(tempName("all", initParam.idTmp), new FlowNodeLoop(loopCondition), initParam);
+        private Builder loop(Function<Integer, Boolean> condition, InitParam initParam) {
+            init(tempName("all", initParam.idTmp), new FlowNodeLoop(condition), initParam);
             return this;
         }
 
@@ -489,34 +326,6 @@ public class FlowEngine implements InitializingBean {
             }
         }
 
-        private Info[] toInfos(String... ids) {
-            return Arrays.stream(ids)
-                    .map(id -> Info.builder().id(id).build())
-                    .toList()
-                    .toArray(new Info[ids.length]);
-        }
-
-        private Info[] toInfos(Class<?>... clazzs) {
-            return Arrays.stream(clazzs)
-                    .map(clazz -> Info.builder().node(clazz).build())
-                    .toList()
-                    .toArray(new Info[clazzs.length]);
-        }
-
-        private Info[] toInfos(FlowInstance... flows) {
-            return Arrays.stream(flows)
-                    .map(flow -> Info.builder().flow(flow).build())
-                    .toList()
-                    .toArray(new Info[flows.length]);
-        }
-
-        private Info[] toInfos(FlowNode<?,?>... flowNodes) {
-            return Arrays.stream(flowNodes)
-                    .map(flowNode -> Info.builder().flowNode(flowNode).build())
-                    .toList()
-                    .toArray(new Info[flowNodes.length]);
-        }
-
         @SafeVarargs
         private Info[] toInfos(Function<Object,?>... funNodes) {
             return Arrays.stream(funNodes)
@@ -524,6 +333,21 @@ public class FlowEngine implements InitializingBean {
                     .toList()
                     .toArray(new Info[funNodes.length]);
         }
+
+        private Info[] toInfos(Object[] objects) {
+            List<Info> infoList = new ArrayList<>();
+            for (Object o : objects) {
+                if (o instanceof Info) {
+                    infoList.add((Info) o);
+                } else {
+                    Info info = new Info();
+                    info.set(o);
+                    infoList.add(info);
+                }
+            }
+            return infoList.toArray(new Info[0]);
+        }
+
 
         private void init(String id, FlowNode<?,?> flowNode, InitParam initParam) {
 

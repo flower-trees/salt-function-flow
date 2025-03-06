@@ -86,7 +86,7 @@ public class TrainTest {
         FlowInstance flowInstance = flowEngine.builder()
                 .next(TrainBasePrice.class)
                 //.next(Info.c(TrainBasePrice.class).cAlias("price"))
-                .next(input -> Map.of("price", (Integer)input))
+                .next(input -> Map.of("price", input))
                 //.next(input -> Ticket.builder().price((Integer)input).result(true).build())
                 .next(
                         Info.c("price < 200", TrainChildTicket.class)
