@@ -16,6 +16,7 @@ package org.salt.function.flow.example;
 
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.FlowInstance;
+import org.salt.function.flow.Info;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,12 +54,13 @@ public class FlowBuildExample {
         };
 
         FlowInstance flow = flowEngine.builder()
-                    .next("add_node") // 1.id
-                    .next(Reduce.class) // 2.class
-                    .next(flowNode)  // 3.new
-                    .next(num -> (Integer) num / 12) // 4.lambda
-                    .next(flowEngine.builder().next(num -> (Integer) num % 12).build()) // 5.nesting flow
-                    .build();
+                .next("add_node") // 1.id
+                .next(Reduce.class) // 2.class
+                .next(flowNode)  // 3.new
+                .next(num -> (Integer) num / 12) // 4.lambda
+                .next(flowEngine.builder().next(num -> (Integer) num % 12).build()) // 5.nesting flow
+                .next(Info.c(input -> (Integer) input >> 1)) // 6.Info
+                .build();
 
         Integer result = flowEngine.execute(flow, 39);
         System.out.println("result: " + result);
