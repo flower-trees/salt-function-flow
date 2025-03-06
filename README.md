@@ -2,6 +2,8 @@
 
 Salt Function Flow is a SpringBoot-based, ultra-lightweight, in-memory flow orchestration component that leverages functional programming to implement node orchestration and routing.
 
+[中文](https://github.com/flower-trees/salt-function-flow/blob/master/README_CN.md)
+
 ## Quick Start
 This guide covers implementing general-purpose flow nodes, flow orchestration, and flow execution.
 
