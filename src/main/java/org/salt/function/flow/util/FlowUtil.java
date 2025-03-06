@@ -51,14 +51,13 @@ public class FlowUtil {
         return String.format("node_info_%s", nodeId);
     }
 
-    public static boolean isExe(IContextBus iContextBus, Info info) {
-        ContextBus contextBus = ((ContextBus) iContextBus);
+    public static boolean isExe(Object input, Info info) {
         return ((StringUtils.isEmpty(info.getInclude())
                     && info.getMatch() == null)
                 || (StringUtils.isNotEmpty(info.getInclude())
-                    && FlowUtil.el(info.getInclude(), contextBus.getConditionMap()))
+                    && FlowUtil.el(info.getInclude(), ((ContextBus) ContextBus.get()).getConditionMap()))
                 || (info.getMatch() != null
-                    && info.getMatch().apply(contextBus)));
+                    && info.getMatch().apply(input)));
     }
 
     private static final Gson gson = new Gson();

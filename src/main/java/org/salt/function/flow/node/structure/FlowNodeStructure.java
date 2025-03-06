@@ -61,7 +61,7 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
         if (CollectionUtils.isEmpty(infoList)) {
             return null;
         }
-        List<Info> infoListExe = infoList.stream().filter(info -> FlowUtil.isExe(getContextBus(), info)).collect(Collectors.toList());
+        List<Info> infoListExe = infoList.stream().filter(info -> FlowUtil.isExe(input, info)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(infoListExe)) {
             return null;
         }

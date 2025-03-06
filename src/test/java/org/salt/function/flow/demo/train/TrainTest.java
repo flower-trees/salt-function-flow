@@ -90,11 +90,11 @@ public class TrainTest {
                 //.next(input -> Ticket.builder().price((Integer)input).result(true).build())
                 .next(
                         Info.c("price < 200", TrainChildTicket.class)
-                                .cInput(bus -> ((Map)bus.getPreResult()).get("price"))
+                                .cInput(input -> ((Map)input).get("price"))
                                 //.cInput(bus -> ((Ticket)bus.getPreResult()).getPrice())
                         ,
                         Info.c("price >= 200", TrainAdultTicket.class)
-                                .cInput(bus -> ((Map)bus.getPreResult()).get("price"))
+                                .cInput(input -> ((Map)input).get("price"))
                                 //.cInput(bus -> ((Ticket)bus.getPreResult()).getPrice())
                 )
                 .next(TrainTicketResult.class)
