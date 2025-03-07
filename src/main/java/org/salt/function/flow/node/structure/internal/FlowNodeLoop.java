@@ -22,13 +22,14 @@ import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @Slf4j
 public class FlowNodeLoop extends FlowNodeStructure<Void> {
 
-    BiFunction<IContextBus, Integer, Boolean> loopCondition;
+    Function<Integer, Boolean> loopCondition;
 
-    public FlowNodeLoop(BiFunction<IContextBus, Integer, Boolean> loopCondition) {
+    public FlowNodeLoop(Function<Integer, Boolean> loopCondition) {
         this.loopCondition = loopCondition;
     }
 
@@ -36,7 +37,7 @@ public class FlowNodeLoop extends FlowNodeStructure<Void> {
     public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         int i = 0;
-        while(loopCondition.apply(iContextBus, i)) {
+        while(loopCondition.apply(i)) {
             for (Info info : infoList) {
                 try {
                     execute(info);

@@ -25,6 +25,8 @@ import org.salt.function.flow.node.FlowNode;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static java.util.random.RandomGeneratorFactory.all;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,9 +34,9 @@ import java.util.function.Function;
 public class Info {
     private String id;
     private String include;
-    private Function<IContextBus, Boolean> match;
-    private Function<IContextBus, Object> input;
-    private BiFunction<IContextBus, Object, Object> output;
+    private Function<Object, Boolean> match;
+    private Function<Object, Object> input;
+    private Function<Object, Object> output;
     private String idAlias;
     private Class<?> node;
     private FlowInstance flow;
@@ -68,6 +70,20 @@ public class Info {
         }
     }
 
+    public void set(Object o) {
+        if (o instanceof Class) {
+            node = (Class<?>) o;
+        } else if (o instanceof String) {
+            id = (String) o;
+        } else if (o instanceof FlowInstance) {
+            flow = (FlowInstance) o;
+        } else if (o instanceof FlowNode) {
+            flowNode = (FlowNode<?, ?>) o;
+        } else {
+            throw new RuntimeException("unknown type");
+        }
+    }
+
     public static Info c(String id) {
         return Info.builder().id(id).build();
     }
@@ -76,7 +92,7 @@ public class Info {
         return Info.builder().id(id).include(include).build();
     }
 
-    public static Info c(Function<IContextBus, Boolean> match, String id) {
+    public static Info c(Function<Object, Boolean> match, String id) {
         return Info.builder().id(id).match(match).build();
     }
 
@@ -88,7 +104,7 @@ public class Info {
         return Info.builder().node(node).include(include).build();
     }
 
-    public static Info c(Function<IContextBus, Boolean> match, Class<?> node) {
+    public static Info c(Function<Object, Boolean> match, Class<?> node) {
         return Info.builder().node(node).match(match).build();
     }
 
@@ -100,7 +116,7 @@ public class Info {
         return Info.builder().flow(flow).include(include).build();
     }
 
-    public static Info c(Function<IContextBus, Boolean> match, FlowInstance flow) {
+    public static Info c(Function<Object, Boolean> match, FlowInstance flow) {
         return Info.builder().flow(flow).match(match).build();
     }
 
@@ -112,7 +128,7 @@ public class Info {
         return Info.builder().flowNode(flowNode).include(include).build();
     }
 
-    public static Info c(Function<IContextBus, Boolean> match, FlowNode<?, ?> flowNode) {
+    public static Info c(Function<Object, Boolean> match, FlowNode<?, ?> flowNode) {
         return Info.builder().flowNode(flowNode).match(match).build();
     }
 
@@ -124,7 +140,7 @@ public class Info {
         return Info.builder().funNode(funNode).include(include).build();
     }
 
-    public static Info c(Function<IContextBus, Boolean> match, Function<Object, ?> funNode) {
+    public static Info c(Function<Object, Boolean> match, Function<Object, ?> funNode) {
         return Info.builder().funNode(funNode).match(match).build();
     }
 
@@ -133,12 +149,12 @@ public class Info {
         return this;
     }
 
-    public Info cInput(Function<IContextBus, Object> input) {
+    public Info cInput(Function<Object, Object> input) {
         this.input = input;
         return this;
     }
 
-    public Info cOutput(BiFunction<IContextBus, Object, Object> output) {
+    public Info cOutput(Function<Object, Object> output) {
         this.output = output;
         return this;
     }

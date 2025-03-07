@@ -86,15 +86,15 @@ public class TrainTest {
         FlowInstance flowInstance = flowEngine.builder()
                 .next(TrainBasePrice.class)
                 //.next(Info.c(TrainBasePrice.class).cAlias("price"))
-                .next(input -> Map.of("price", (Integer)input))
+                .next(input -> Map.of("price", input))
                 //.next(input -> Ticket.builder().price((Integer)input).result(true).build())
                 .next(
                         Info.c("price < 200", TrainChildTicket.class)
-                                .cInput(bus -> ((Map)bus.getPreResult()).get("price"))
+                                .cInput(input -> ((Map)input).get("price"))
                                 //.cInput(bus -> ((Ticket)bus.getPreResult()).getPrice())
                         ,
                         Info.c("price >= 200", TrainAdultTicket.class)
-                                .cInput(bus -> ((Map)bus.getPreResult()).get("price"))
+                                .cInput(input -> ((Map)input).get("price"))
                                 //.cInput(bus -> ((Ticket)bus.getPreResult()).getPrice())
                 )
                 .next(TrainTicketResult.class)

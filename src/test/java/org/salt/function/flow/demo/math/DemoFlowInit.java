@@ -17,9 +17,10 @@ package org.salt.function.flow.demo.math;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.config.IFlowInit;
-import org.salt.function.flow.context.IContextBus;
+import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.demo.math.node.*;
-import org.salt.function.flow.node.IResult;
+
+import java.util.Map;
 
 public class DemoFlowInit implements IFlowInit {
 
@@ -69,7 +70,8 @@ public class DemoFlowInit implements IFlowInit {
          */
         flowEngine.builder().id("demo_flow_concurrent")
                 .next(AddNode.class)
-                .concurrent(new AddResult(), ReduceNode.class, MultiplyNode.class)
+                .concurrent(ReduceNode.class, MultiplyNode.class)
+                .next(DemoFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -89,7 +91,8 @@ public class DemoFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_flow_future")
                 .next(AddNode.class)
                 .future(ReduceNode.class, MultiplyNode.class)
-                .wait(new AddResult(), ReduceNode.class, MultiplyNode.class)
+                .wait(ReduceNode.class, MultiplyNode.class)
+                .next(DemoFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -97,7 +100,8 @@ public class DemoFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .future(ReduceNode.class)
                 .next(MultiplyNode.class)
-                .wait(new AddResult(), ReduceNode.class)
+                .wait(ReduceNode.class)
+                .next(input -> (Integer) ContextBus.get().getResult(MultiplyNode.class) + addResult(input))
                 .next(DivisionNode.class)
                 .register();
 
@@ -118,10 +122,10 @@ public class DemoFlowInit implements IFlowInit {
         flowEngine.builder().id("demo_flow_inclusive_concurrent")
                 .next(AddNode.class)
                 .concurrent(
-                        new AddResult(),
                         Info.c("param > 30",ReduceNode.class),
                         Info.c("param < 50", MultiplyNode.class)
                 )
+                .next(DemoFlowInit::addResult)
                 .next(DivisionNode.class).register();
 
         /**
@@ -129,7 +133,7 @@ public class DemoFlowInit implements IFlowInit {
          */
         flowEngine.builder().id("demo_flow_loop")
                 .next(AddNode.class)
-                .loop((iContextBus, i) -> (Integer) iContextBus.getPreResult() < 56000000, ReduceNode.class, MultiplyNode.class)
+                .loop(i -> (Integer) ContextBus.get().getPreResult() < 56000000, ReduceNode.class, MultiplyNode.class)
                 .next(DivisionNode.class)
                 .register();
 
@@ -154,7 +158,8 @@ public class DemoFlowInit implements IFlowInit {
          */
         flowEngine.builder().id("demo_branch_concurrent")
                 .next(AddNode.class)
-                .concurrent(new AddBranchResult(), "demo_branch_reduce", "demo_branch_multiply")
+                .concurrent("demo_branch_reduce", "demo_branch_multiply")
+                .next(DemoFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -174,7 +179,8 @@ public class DemoFlowInit implements IFlowInit {
                 .next(AddNode.class)
                 .future("demo_branch_reduce")
                 .next("demo_branch_multiply")
-                .wait(new AddBranchResult(), "demo_branch_reduce")
+                .wait("demo_branch_reduce")
+                .next(input -> (Integer) ContextBus.get().getResult("demo_branch_multiply") + addResult(input))
                 .next(DivisionNode.class).register();
 
         /**
@@ -182,7 +188,8 @@ public class DemoFlowInit implements IFlowInit {
          */
         flowEngine.builder().id("demo_branch")
                 .next(AddNode.class)
-                .all("demo_branch_reduce", "demo_branch_multiply")
+                .next("demo_branch_reduce")
+                .next("demo_branch_multiply")
                 .next(DivisionNode.class)
                 .register();
 
@@ -209,25 +216,14 @@ public class DemoFlowInit implements IFlowInit {
                 .register();
     }
 
-    protected static class AddResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class) != null ?  (Integer) iContextBus.getResult(ReduceNode.class) : 0;
-            Integer demoMultiplyResult = iContextBus.getResult(MultiplyNode.class) != null ? (Integer) iContextBus.getResult(MultiplyNode.class): 0;
-            Integer handleResult = demoReduceResult + demoMultiplyResult;
-            System.out.println("Addresult " + demoReduceResult + "+" + demoMultiplyResult + "=" + handleResult);
-            return handleResult;
-        }
-    }
 
-    protected static class AddBranchResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            Integer branchReduce = iContextBus.getResult("demo_branch_reduce") != null ? (Integer) iContextBus.getResult("demo_branch_reduce") : 0;
-            Integer branchMultiply = iContextBus.getResult("demo_branch_multiply") != null ? (Integer) iContextBus.getResult("demo_branch_multiply") : 0;
-            Integer handleResult = branchReduce + branchMultiply;
-            System.out.println("AddBranchresult " + branchReduce + "+" + branchMultiply + "=" + handleResult);
-            return handleResult;
-        }
+
+    @SuppressWarnings("unchecked")
+    public static Integer addResult(Object map) {
+        assert map instanceof Map;
+        return ((Map<String, Object>) map).values().stream()
+                .filter(value -> value instanceof Integer)
+                .mapToInt(value -> (Integer) value)
+                .sum();
     }
 }

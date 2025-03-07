@@ -21,11 +21,12 @@ import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
-public class FlowNodeAll<O> extends FlowNodeStructure<O> {
+public class FlowNodeAll extends FlowNodeStructure<Void> {
     @Override
-    public O doProcessGateway(List<Info> infoList) {
+    public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         for (Info info : infoList) {
             try {
@@ -37,10 +38,6 @@ public class FlowNodeAll<O> extends FlowNodeStructure<O> {
             if (isSuspend(iContextBus)) {
                 return null;
             }
-        }
-        mergeRunIds();
-        if (result != null) {
-            return result.handle(iContextBus, false);
         }
         return null;
     }

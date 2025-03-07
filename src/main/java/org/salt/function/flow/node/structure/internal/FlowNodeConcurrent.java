@@ -21,14 +21,15 @@ import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class FlowNodeConcurrent<O> extends FlowNodeStructure<O> {
+public class FlowNodeConcurrent extends FlowNodeStructure<Map<String, Object>> {
 
     @Override
-    public O doProcessGateway(List<Info> infoList) {
+    public Map<String, Object> doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         CountDownLatch finalCountDownLatch = new CountDownLatch(infoList.size());
         for (Info info : infoList) {
@@ -48,9 +49,7 @@ public class FlowNodeConcurrent<O> extends FlowNodeStructure<O> {
         try {
             boolean isTimeout = finalCountDownLatch.await(theadHelper.getTimeout(), TimeUnit.MILLISECONDS);
             mergeRunIds();
-            if (result != null) {
-                return result.handle(iContextBus, !isTimeout);
-            }
+            return handle(infoList, !isTimeout);
         } catch (InterruptedException e) {
             ((ContextBus) iContextBus).putException(nodeId, e);
         }

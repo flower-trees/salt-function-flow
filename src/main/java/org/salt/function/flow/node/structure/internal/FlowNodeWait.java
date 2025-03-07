@@ -21,22 +21,23 @@ import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
-public class FlowNodeWait<O> extends FlowNodeStructure<O> {
+public class FlowNodeWait extends FlowNodeStructure<Map<String, Object>> {
 
     @Override
-    public O doProcessGateway(List<Info> infoList) {
+    public Map<String, Object> doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         long lastTimeout = theadHelper.getTimeout();
         for (Info info : infoList) {
             if (lastTimeout <= 0) {
                 ((ContextBus) iContextBus).putException(info.getIdOrAlias(), new RuntimeException("beyond maxTimeout"));
-                return result(iContextBus, true);
+                return handle(infoList, true);
             }
             long start = System.currentTimeMillis();
             try {
-                O result = ((ContextBus) iContextBus).getResult(info.getIdOrAlias(), lastTimeout);
+                Object result = ((ContextBus) iContextBus).getResult(info.getIdOrAlias(), lastTimeout);
                 if (result != null) {
                     ((ContextBus) iContextBus).putResult(info.getIdOrAlias(), result);
                 } else {
@@ -51,13 +52,6 @@ public class FlowNodeWait<O> extends FlowNodeStructure<O> {
             return null;
         }
         mergeRunIds();
-        return result(iContextBus, lastTimeout <= 0);
-    }
-
-    public O result(IContextBus iContextBus, boolean isTimeout) {
-        if (result != null) {
-            return result.handle(iContextBus, isTimeout);
-        }
-        return null;
+        return handle(infoList, lastTimeout <= 0);
     }
 }

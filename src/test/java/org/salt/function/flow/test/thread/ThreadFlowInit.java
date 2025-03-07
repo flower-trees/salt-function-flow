@@ -16,15 +16,14 @@ package org.salt.function.flow.test.thread;
 
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.config.IFlowInit;
-import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.demo.math.node.AddNode;
 import org.salt.function.flow.demo.math.node.DivisionNode;
 import org.salt.function.flow.demo.math.node.MultiplyNode;
 import org.salt.function.flow.demo.math.node.ReduceNode;
-import org.salt.function.flow.node.IResult;
 import org.salt.function.flow.test.thread.node.BitLeftNode;
 import org.salt.function.flow.test.thread.node.BitRightNode;
 
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class ThreadFlowInit implements IFlowInit {
@@ -34,26 +33,30 @@ public class ThreadFlowInit implements IFlowInit {
 
         flowEngine.builder().id("demo_flow_concurrent_timeout")
                 .next(AddNode.class)
-                .concurrent(new AddResult(), 10, ReduceNode.class, BitRightNode.class)
+                .concurrent(10, ReduceNode.class, BitRightNode.class)
+                .next(ThreadFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_flow_future_timeout")
                 .next(AddNode.class)
                 .future(ReduceNode.class, BitRightNode.class)
-                .wait(new AddResult(), 10, ReduceNode.class, BitRightNode.class)
+                .wait(10, ReduceNode.class, BitRightNode.class)
+                .next(ThreadFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_flow_concurrent_isolate")
                 .next(AddNode.class)
-                .concurrent(new AddResult(), Executors.newFixedThreadPool(3), ReduceNode.class, BitRightNode.class)
+                .concurrent(Executors.newFixedThreadPool(3), 300, ReduceNode.class, BitRightNode.class)
+                .next(ThreadFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_flow_concurrent_threadlocal")
                 .next(AddNode.class)
-                .concurrent(new ReduceResult(), ReduceNode.class, BitLeftNode.class)
+                .concurrent(ReduceNode.class, BitLeftNode.class)
+                .next(ThreadFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
@@ -62,63 +65,40 @@ public class ThreadFlowInit implements IFlowInit {
 
         flowEngine.builder().id("demo_branch_flow_concurrent_timeout")
                 .next(AddNode.class)
-                .concurrent(new AddBranchResult(), 10, "demo_branch_bit_right", "demo_branch_bit_left")
+                .concurrent(10, "demo_branch_bit_right", "demo_branch_bit_left")
+                .next(ThreadFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_branch_flow_future_timeout")
                 .next(AddNode.class)
                 .future("demo_branch_bit_right", "demo_branch_bit_left")
-                .wait(new AddBranchResult(), 20,"demo_branch_bit_right", "demo_branch_bit_left")
+                .wait(20,"demo_branch_bit_right", "demo_branch_bit_left")
+                .next(ThreadFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_branch_flow_concurrent_isolate")
                 .next(AddNode.class)
-                .concurrent(new AddBranchResult(), Executors.newFixedThreadPool(3), "demo_branch_bit_right", "demo_branch_bit_left")
+                .concurrent(Executors.newFixedThreadPool(3), 300, "demo_branch_bit_right", "demo_branch_bit_left")
+                .next(ThreadFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
 
         flowEngine.builder().id("demo_branch_flow_concurrent_threadlocal")
                 .next(AddNode.class)
-                .concurrent(new AddBranchResult(), "demo_branch_bit_right", "demo_branch_bit_left")
+                .concurrent("demo_branch_bit_right", "demo_branch_bit_left")
+                .next(ThreadFlowInit::addResult)
                 .next(DivisionNode.class)
                 .register();
     }
 
-    private static class AddResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            System.out.println("AddResult handle isTimeout: " + isTimeout);
-            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class.getName()) != null && iContextBus.getResult(ReduceNode.class.getName()) instanceof Integer ?  (Integer) iContextBus.getResult(ReduceNode.class.getName()) : 0;
-            Integer demoBitRightResult = iContextBus.getResult(BitRightNode.class.getName()) != null && iContextBus.getResult(BitRightNode.class.getName()) instanceof Integer ? (Integer) iContextBus.getResult(BitRightNode.class.getName()): 0;
-            Integer handleResult = demoReduceResult + demoBitRightResult;
-            System.out.println("Addresult " + demoReduceResult + "+" + demoBitRightResult + "=" + handleResult);
-            return handleResult;
-        }
-    }
-
-    private static class ReduceResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            System.out.println("AddResult handle isTimeout: " + isTimeout);
-            Integer demoReduceResult = iContextBus.getResult(ReduceNode.class.getName()) != null && iContextBus.getResult(ReduceNode.class.getName()) instanceof Integer ?  (Integer) iContextBus.getResult(ReduceNode.class.getName()) : 0;
-            Integer demoBitRightResult = iContextBus.getResult(BitLeftNode.class.getName()) != null && iContextBus.getResult(BitLeftNode.class.getName()) instanceof Integer ? (Integer) iContextBus.getResult(BitLeftNode.class.getName()): 0;
-            Integer handleResult = demoReduceResult - demoBitRightResult;
-            System.out.println("ReduceResult " + demoReduceResult + "-" + demoBitRightResult + "=" + handleResult);
-            return handleResult;
-        }
-    }
-
-    private static class AddBranchResult implements IResult<Integer> {
-        @Override
-        public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-            System.out.println("AddBranchResult handle isTimeout: " + isTimeout);
-            Integer demoBitRightResult = iContextBus.getResult("demo_branch_bit_right") != null && iContextBus.getResult("demo_branch_bit_right") instanceof Integer ?  (Integer) iContextBus.getResult("demo_branch_bit_right") : 0;
-            Integer demoBitLeftResult = iContextBus.getResult("demo_branch_bit_left") != null && iContextBus.getResult("demo_branch_bit_left") instanceof Integer ? (Integer) iContextBus.getResult("demo_branch_bit_left"): 0;
-            Integer handleResult = demoBitRightResult + demoBitLeftResult;
-            System.out.println("AddBranchResult " + demoBitRightResult + "+" + demoBitLeftResult + "=" + handleResult);
-            return handleResult;
-        }
+    @SuppressWarnings("unchecked")
+    public static Object addResult(Object map) {
+        assert map instanceof Map;
+        return ((Map<String, Object>) map).values().stream()
+                .filter(value -> value instanceof Integer)
+                .mapToInt(value -> (Integer) value)
+                .sum();
     }
 }

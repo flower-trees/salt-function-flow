@@ -17,6 +17,7 @@ package org.salt.function.flow.demo.train;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.config.IFlowInit;
+import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.demo.train.node.*;
 import org.salt.function.flow.demo.train.param.Passenger;
 import org.salt.function.flow.demo.train.param.Station;
@@ -41,19 +42,19 @@ public class TrainFlowInit implements IFlowInit {
         flowEngine.builder().id("train_ticket_match")
                 .next(TrainBasePrice.class)
                 .next(
-                        Info.c(iContextBus -> ((Passenger) iContextBus.getFlowParam()).getAge() < 14, TrainChildTicket.class),
-                        Info.c(iContextBus -> ((Passenger) iContextBus.getFlowParam()).getAge() >= 14, TrainAdultTicket.class))
+                        Info.c(iContextBus -> ((Passenger) ContextBus.get().getFlowParam()).getAge() < 14, TrainChildTicket.class),
+                        Info.c(iContextBus -> ((Passenger) ContextBus.get().getFlowParam()).getAge() >= 14, TrainAdultTicket.class))
                 .next(TrainTicketResult.class)
                 .register();
 
         flowEngine.builder().id("train_ticket_input")
                 .next(
                         Info.c(TrainBasePriceStation.class)
-                                .cInput(iContextBus -> {
-                                    Passenger passenger = iContextBus.getFlowParam();
+                                .cInput(input -> {
+                                    Passenger passenger = ContextBus.get().getFlowParam();
                                     return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
                                 })
-                                .cOutput((iContextBus, result) -> {
+                                .cOutput(result -> {
                                     System.out.println("base_price return " + result);
                                     return result;
                                 }))

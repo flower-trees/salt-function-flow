@@ -12,13 +12,18 @@ This guide covers implementing general-purpose flow nodes, flow orchestration, a
 <dependency>
     <groupId>io.github.flower-trees</groupId>
     <artifactId>salt-function-flow</artifactId>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
 </dependency>
 ```
 
 ### Gradle
 ```groovy
-implementation 'io.github.flower-trees:salt-function-flow:1.1.3'
+implementation 'io.github.flower-trees:salt-function-flow:1.1.4'
+```
+
+### Importing Configuration
+```java
+@Import(FlowConfiguration.class)
 ```
 
 ### Implementing Functional Nodes
@@ -386,7 +391,7 @@ The flow execution instance uses the `IContextBus` interface to transmit context
   flowEngine.builder()
           .next(AddNode.class)
           .loop(
-                  (iContextBus, i) -> (Integer) iContextBus.getPreResult() < 56000000, 
+                  i -> (Integer) ContextBus.get().getPreResult() < 56000000, 
                   ReduceNode.class, MultiplyNode.class)
           .next(DivisionNode.class)
           .build();
@@ -462,7 +467,7 @@ The orchestration of sub-flows is similar to individual nodes.
   flowEngine.builder()
           .next(AddNode.class)
           .loop(
-                  (iContextBus, i) -> (Integer) iContextBus.getPreResult() < 56000000,
+                  i -> (Integer) ContextBus.get().getPreResult() < 56000000,
                   flowEngine.builder().next("demo_reduce").next("demo_remainder").build(),
                   flowEngine.builder().next("demo_multiply").next("demo_remainder").build()
           )
