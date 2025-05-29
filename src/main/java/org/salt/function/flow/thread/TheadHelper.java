@@ -85,6 +85,9 @@ public class TheadHelper {
                 @SuppressWarnings("unchecked")
                 ThreadLocal<Object> threadLocalUser = (ThreadLocal<Object>) threadLocalUsers.get(i);
                 threadLocalUser.set(results.get(i));
+                if (threadLocalUser instanceof ThreadLocalBase) {
+                    ((ThreadLocalBase<?>)threadLocalUser).initExtra();
+                }
             }
             try {
                 runnable.run();
@@ -106,6 +109,9 @@ public class TheadHelper {
                 @SuppressWarnings("unchecked")
                 ThreadLocal<Object> threadLocalUser = (ThreadLocal<Object>) threadLocalUsers.get(i);
                 threadLocalUser.set(results.get(i));
+                if (threadLocalUser instanceof ThreadLocalBase) {
+                    ((ThreadLocalBase<?>)threadLocalUser).initExtra();
+                }
             }
             try {
                 return callable.call();
