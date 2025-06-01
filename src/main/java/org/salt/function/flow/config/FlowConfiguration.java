@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.FlowEngine;
 import org.salt.function.flow.node.register.FlowNodeManager;
 import org.salt.function.flow.node.register.FlowNodeScanner;
+import org.salt.function.flow.thread.TheadHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,9 +66,9 @@ public class FlowConfiguration {
         threadPoolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         threadPoolTaskExecutor.setThreadNamePrefix("thread-pool-flow-");
         threadPoolTaskExecutor.setWaitForTasksToCompleteOnShutdown(true);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            threadPoolTaskExecutor.shutdown();
-        }));
+        threadPoolTaskExecutor.setTaskDecorator(TheadHelper::getDecoratorAsync);
+        Runtime.getRuntime().addShutdownHook(new Thread(threadPoolTaskExecutor::shutdown));
+
         return threadPoolTaskExecutor;
     }
 

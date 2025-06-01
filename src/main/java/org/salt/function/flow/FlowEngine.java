@@ -115,6 +115,12 @@ public class FlowEngine implements InitializingBean {
         throw new RuntimeException("no have this process");
     }
 
+    public void stop(FlowInstance flowInstance) {
+        if (flowInstance != null) {
+            flowInstance.stop();
+        }
+    }
+
     public Builder builder() {
         return new Builder(this).id(FlowUtil.id());
     }

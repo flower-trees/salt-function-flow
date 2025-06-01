@@ -92,4 +92,8 @@ public class FlowInstance {
         }
         throw new RuntimeException("processInstance node list is empty.");
     }
+
+    public void stop() {
+        ContextBus.get().stopProcess();
+    }
 }

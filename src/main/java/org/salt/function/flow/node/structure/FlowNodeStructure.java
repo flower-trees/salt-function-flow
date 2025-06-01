@@ -106,12 +106,12 @@ public abstract class FlowNodeStructure<O> extends FlowNode<O, Object> {
 
         if (isTimeout) {
             log.warn("Node execute timeout: {}", FlowUtil.toJson(ids));
-            return Map.of();
+            return new HashMap<>();
         }
 
         if (CollectionUtils.isEmpty(ids)) {
             log.warn("Node ids is empty");
-            return Map.of();
+            return new HashMap<>();
         }
 
         Map<String, Object> result = new HashMap<>();
