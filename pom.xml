@@ -6,7 +6,7 @@
 
     <groupId>io.github.flower-trees</groupId>
     <artifactId>salt-function-flow</artifactId>
-    <version>1.1.5-SNAPSHOT</version>
+    <version>1.1.5</version>
 
     <licenses>
         <license>
@@ -170,7 +170,4 @@
             </plugin>
         </plugins>
     </build>
-
-
-
 </project>
