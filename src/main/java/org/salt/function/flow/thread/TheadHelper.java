@@ -17,12 +17,12 @@ package org.salt.function.flow.thread;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.salt.function.flow.util.FlowUtil;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Data
@@ -77,8 +77,9 @@ public class TheadHelper {
     }
 
     public static Runnable getDecoratorAsync(Runnable runnable) {
+        log.debug("process getDecoratorAsync runnable...");
         final Map<String, Object> map = new HashMap<>(getThreadLocal());
-        final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
+        final List<?> results = threadLocalUsers.stream().map(t -> new HashMap<>((Map<?, ?>) t.get())).toList();
         return () -> {
             threadLocal.set(map);
             for (int i = 0; i < threadLocalUsers.size(); i++) {
@@ -88,6 +89,7 @@ public class TheadHelper {
                 if (threadLocalUser instanceof ThreadLocalBase) {
                     ((ThreadLocalBase<?>)threadLocalUser).initExtra();
                 }
+                log.debug("process getDecoratorAsync runnable addThreadLocal param loop. key:{}, value:{}", threadLocalUser.getClass().getName(), FlowUtil.toJson(threadLocalUser.get()));
             }
             try {
                 runnable.run();
@@ -96,13 +98,15 @@ public class TheadHelper {
                     threadLocalUser.remove();
                 }
                 threadLocal.remove();
+                log.debug("process getDecoratorAsync runnable remove...");
             }
         };
     }
 
     public static <T> Callable<T> getDecoratorAsync(Callable<T> callable) {
+        log.debug("process getDecoratorAsync callable...");
         final Map<String, Object> map = new HashMap<>(getThreadLocal());
-        final List<?> results = threadLocalUsers.stream().map(ThreadLocal::get).collect(Collectors.toList());
+        final List<?> results = threadLocalUsers.stream().map(t -> new HashMap<>((Map<?, ?>) t.get())).toList();
         return () -> {
             threadLocal.set(map);
             for (int i = 0; i < threadLocalUsers.size(); i++) {
@@ -112,6 +116,7 @@ public class TheadHelper {
                 if (threadLocalUser instanceof ThreadLocalBase) {
                     ((ThreadLocalBase<?>)threadLocalUser).initExtra();
                 }
+                log.debug("process getDecoratorAsync callable addThreadLocal param loop. key:{}, value:{}", threadLocalUser.getClass().getName(), FlowUtil.toJson(threadLocalUser.get()));
             }
             try {
                 return callable.call();
@@ -120,6 +125,7 @@ public class TheadHelper {
                     threadLocalUser.remove();
                 }
                 threadLocal.remove();
+                log.debug("process getDecoratorAsync callable remove...");
             }
         };
     }
