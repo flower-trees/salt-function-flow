@@ -186,8 +186,8 @@ public class ContextBus implements IContextBus {
         return TheadHelper.getThreadLocal(LAST_RESULT_KEY);
     }
 
-    public void copy() {
-        ContextBus contextBus = ContextBus.builder()
+    public ContextBus copy() {
+        return ContextBus.builder()
                 .id("context-bus-" + UUID.randomUUID().toString().replaceAll("-", ""))
                 .param(param)
                 .conditionMap(new ConcurrentHashMap<>(conditionMap))
@@ -197,7 +197,6 @@ public class ContextBus implements IContextBus {
                 .runtimeId(runtimeId)
                 .rollbackList(new LinkedList<>())
                 .build();
-        TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
     }
 
     public static ContextBus create(Object param) {

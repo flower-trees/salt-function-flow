@@ -18,6 +18,7 @@ import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
 import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.structure.FlowNodeStructure;
+import org.salt.function.flow.thread.TheadHelper;
 
 import java.util.List;
 
@@ -27,9 +28,10 @@ public class FlowNodeNotify extends FlowNodeStructure<Void> {
     public Void doProcessGateway(List<Info> infoList) {
         IContextBus iContextBus = getContextBus();
         for (Info info : infoList) {
+            ContextBus contextBus = ((ContextBus) iContextBus).copy();
             theadHelper.submit(() -> {
                 try {
-                    ((ContextBus) iContextBus).copy();
+                    TheadHelper.putThreadLocal(IContextBus.class.getName(), contextBus);
                     execute(info);
                 } catch (Exception e) {
                     ((ContextBus) iContextBus).putException(info.getIdOrAlias(), e);
