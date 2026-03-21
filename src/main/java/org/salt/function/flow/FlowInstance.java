@@ -76,6 +76,7 @@ public class FlowInstance {
     protected <R> R execute() {
         if (!CollectionUtils.isEmpty(nodeList)) {
             ContextBus contextBus = (ContextBus) ContextBus.get();
+            contextBus.setFlowResult(null);
             for (FlowNode<?,?> flowNode : nodeList) {
                 flowNodeManager.execute(flowNode);
                 if (contextBus.isRollbackProcess()) {
@@ -88,7 +89,11 @@ public class FlowInstance {
                     break;
                 }
             }
-            return contextBus.getFlowResult();
+            R result = contextBus.getFlowResult();
+            if (result != null) {
+                contextBus.putResult(this.getFlowId(), result);
+            }
+            return result;
         }
         throw new RuntimeException("processInstance node list is empty.");
     }

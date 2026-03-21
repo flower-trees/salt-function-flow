@@ -22,7 +22,6 @@ import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.lang.StringUtils;
 import org.salt.function.flow.Info;
 import org.salt.function.flow.context.ContextBus;
-import org.salt.function.flow.context.IContextBus;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
 
