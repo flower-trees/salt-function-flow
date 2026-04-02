@@ -101,7 +101,7 @@ public class FlowEngine implements InitializingBean {
             }
             return result;
         }
-        throw new RuntimeException("no have this process");
+        throw new RuntimeException("no have this process: " + flowId);
     }
 
     public <R> R execute(FlowInstance flowInstance) {

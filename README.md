@@ -1,13 +1,40 @@
 # Salt Function Flow
 
-Salt Function Flow is a SpringBoot-based, ultra-lightweight, in-memory flow orchestration component that leverages functional programming to implement node orchestration and routing.
+> Lightweight, in-memory flow orchestration for Spring Boot.
 
-[中文](https://github.com/flower-trees/salt-function-flow/blob/master/README_CN.md)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.flower-trees/salt-function-flow)](https://central.sonatype.com/artifact/io.github.flower-trees/salt-function-flow)
+[![License](https://img.shields.io/github/license/flower-trees/salt-function-flow)](./LICENSE)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-friendly-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![GitHub stars](https://img.shields.io/github/stars/flower-trees/salt-function-flow)](https://github.com/flower-trees/salt-function-flow)
+
+[中文文档](./README_CN.md) · [Release Notes](./docs/release/pr-1.1.6.md)
+
+Salt Function Flow turns business logic into composable function nodes. With a fluent DSL, you can build linear flows, conditional branches, parallel gateways, async tasks, loops, and sub-flows without introducing a heavyweight workflow platform.
+
+## Why This Project
+
+- Lightweight runtime with in-memory execution and minimal ceremony
+- Fluent builder API for readable orchestration
+- Flexible node declaration: class, node id, instance, lambda, and sub-flow
+- Built-in gateway models: `next`, `all`, `concurrent`, `future`, `wait`, `notify`, `loop`
+- Unified context bus for data passing, condition evaluation, result lookup, stop, and rollback
+- Spring Boot friendly with configurable and isolated thread pools
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Gateway Overview](#gateway-overview)
+- [Architecture at a Glance](#architecture-at-a-glance)
+- [Core Concepts](#core-concepts)
+- [Advanced Usage](#advanced-usage)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Quick Start
-This guide covers implementing general-purpose flow nodes, flow orchestration, and flow execution.
 
-### Maven Dependency
+### 1. Add dependency
+
 ```xml
 <dependency>
     <groupId>io.github.flower-trees</groupId>
@@ -16,549 +43,344 @@ This guide covers implementing general-purpose flow nodes, flow orchestration, a
 </dependency>
 ```
 
-### Gradle
 ```groovy
-implementation 'io.github.flower-trees:salt-function-flow:1.1.6'
+implementation "io.github.flower-trees:salt-function-flow:1.1.6"
 ```
 
-### Importing Configuration
+### 2. Enable configuration
+
 ```java
 @Import(FlowConfiguration.class)
 ```
 
-### Implementing Functional Nodes
-Extend the `FlowNode` class, implement the `process` method, and annotate the class with `@NodeIdentity`. Below are examples of four basic functional nodes: addition, subtraction, multiplication, and division.
+### 3. Define nodes
 
-- **Addition**: Gets the output of the previous node, adds 123, and returns the result:
-    ```java
-    @NodeIdentity
-    public class AddNode extends FlowNode<Integer, Integer> {
-        @Override
-        public Integer process(Integer num) {
-            return num + 123;
-        }
+Using an e-commerce pricing flow as an example — each node handles one step in the pricing pipeline:
+
+```java
+@NodeIdentity("service_fee_node")
+public class ServiceFeeNode extends FlowNode<Integer, Integer> {
+    @Override
+    public Integer process(Integer price) {
+        return price + 20;
     }
-    ```
-- **Subtraction**: Gets the output of the previous node, subtracts 15, and returns the result:
-    ```java
-    @NodeIdentity
-    public class ReduceNode extends FlowNode<Integer, Integer> {
-        @Override
-        public Integer process(Integer num) {
-            return num - 15;
-        }
+}
+
+@NodeIdentity
+public class PricingMemberDiscountNode extends FlowNode<Integer, Integer> {
+    @Override
+    public Integer process(Integer price) {
+        return (int)(price * 0.85);
     }
-    ```
-- **Multiplication**: Gets the output of the previous node, multiplies it by 73, and returns the result:
-    ```java
-    @NodeIdentity
-    public class MultiplyNode extends FlowNode<Integer, Integer> {
+}
+
+public static Object applyRounding(Object price) {
+    return (Integer) price / 10 * 10;
+}
+```
+
+### 4. Build and run a flow
+
+Nodes can be referenced in multiple ways and mixed freely:
+
+```java
+@Autowired
+FlowEngine flowEngine;
+
+@Test
+public void testPricingFlow() {
+    FlowNode<Integer, Integer> taxNode = new FlowNode<>() {
         @Override
-        public Integer process(Integer num) {
-            return num * 73;
+        public Integer process(Integer price) {
+            return price + (int)(price * 0.06);
         }
+    };
+
+    FlowInstance flow = flowEngine.builder()
+            .next("service_fee_node")                            // 1. node id       +20 service fee
+            .next(PricingMemberDiscountNode.class)               // 2. class         *0.85 member discount
+            .next(taxNode)                                       // 3. new instance  +6% tax
+            .next(price -> (Integer) price - 1)                  // 4. lambda        -1 adjustment
+            .next(Demo::applyRounding)                           // 5. method ref    round down to tens
+            .next(flowEngine.builder()                           // 6. nested flow   +5 subsidy
+                    .next(price -> (Integer) price + 5)
+                    .build())
+            .next(Info.c("service_fee_node > 100",               // 7. Info cond     -10 rebate if fee > 100
+                    price -> (Integer) price - 10))
+            .build();
+
+    Integer result = flowEngine.execute(flow, 200);
+    Assert.assertEquals(185, (int) result);
+}
+```
+
+> [!TIP]
+> Use `build()` for local flow instances and `register()` for reusable flows executed by id.
+
+```java
+flowEngine.builder().id("pricing_flow")
+        .next("service_fee_node")
+        .next(PricingMemberDiscountNode.class)
+        .register();
+
+Integer result = flowEngine.execute("pricing_flow", 200);
+```
+
+## Gateway Overview
+
+| API | Purpose | Typical Scenario |
+| --- | --- | --- |
+| `next(...)` | Sequential execution or exclusive routing | Main path, switch-like branching |
+| `all(...)` | Inclusive sequential execution | Run all matched branches |
+| `concurrent(...)` | Parallel fan-out with merged results | Parallel calculations, aggregation |
+| `future(...)` | Start async execution | Launch background branch early |
+| `wait(...)` | Join async execution | Sync point before next step |
+| `notify(...)` | Fire-and-forget async execution | Side effects, notifications |
+| `loop(...)` | Repeated execution until condition changes | Retry, iterative processing |
+
+The following e-commerce order flow demonstrates all 7 gateways together ([full example](./src/test/java/org/salt/function/flow/demo/order/OrderGatewayTest.java)):
+
+```java
+FlowInstance flow = flowEngine.builder()
+        .future(UserProfileNode.class)                                          // future:      load user profile early (async)
+        .next(ItemPriceNode.class)                                              // next:        query item price
+        .all(                                                                   // all:         apply all matched promotions
+                Info.c("basePrice >= 300", PlatformPromotionNode.class),        //   platform promotion -20
+                Info.c("basePrice >= 200", ShopPromotionNode.class)             //   shop promotion     -10
+        )
+        .concurrent(MemberDiscountNode.class, CouponDiscountNode.class)         // concurrent:  calc member & coupon discounts in parallel
+        .next(Info.c(map -> ((Map<String, Object>) map).values().stream()       // next:        pick the best (lowest) price
+                .filter(v -> v instanceof Integer)
+                .mapToInt(v -> (Integer) v).min().orElse(0)
+        ).cAlias("discount_price"))
+        .wait(UserProfileNode.class)                                            // wait:        join user profile result
+        .next(ignored -> (Integer) ContextBus.get().getResult("discount_price") // next:       best price + profile adjustment
+                + (Integer) ((Map) ignored).get(UserProfileNode.class.getName()))
+        .next(TaxNode.class)                                                    // next:        add tax
+        .loop(i -> (Integer) ContextBus.get().getPreResult() < 0,              // loop:        retry inventory lock if failed
+                LockInventoryNode.class)
+        .next(OrderCreateNode.class)                                            // next:        create order
+        .notify(NotifyNode.class)                                               // notify:      async SMS, non-blocking
+        .build();
+```
+
+## Architecture at a Glance
+
+```mermaid
+flowchart LR
+    A[Input] --> B[FlowEngine]
+    B --> C[Flow Builder DSL]
+    C --> D[next / all / concurrent]
+    C --> E[future / wait / notify / loop]
+    D --> F[FlowNode]
+    E --> F
+    F --> G[IContextBus]
+    G --> H[Results]
+    G --> I[Conditions]
+    G --> J[Transmit Data]
+    G --> K[Stop / Rollback]
+```
+
+## Core Concepts
+
+### `FlowNode<O, I>`
+
+The basic execution unit. Extend `FlowNode` and implement `process(I input)`.
+
+- `I` is the node input type
+- `O` is the node output type
+- Override `rollback()` only when compensation is needed
+
+### `@NodeIdentity`
+
+Registers a node as a Spring component and gives it a node id.
+
+```java
+@NodeIdentity("custom_node")
+public class CustomNode extends FlowNode<String, String> {
+    @Override
+    public String process(String input) {
+        return input + "-done";
     }
-    ```
-- **Division**: Gets the output of the previous node, divides it by 12, and returns the result:
-    ```java
-    @NodeIdentity
-    public class DivisionNode extends FlowNode<Integer, Integer> {
-        @Override
-        public Integer process(Integer num) {
-            return num / 12;
+}
+```
+
+### `FlowEngine`
+
+The main entry point for building, registering, and executing flows.
+
+### `FlowInstance`
+
+An executable flow assembled at runtime. It can be anonymous via `build()` or globally reusable via `register()`.
+
+### `Info`
+
+A wrapper used to add conditions, aliases, and input/output adaptation during orchestration.
+
+### `IContextBus`
+
+The runtime context shared across nodes.
+
+- `getFlowParam()`
+- `getPreResult()`
+- `getResult(String)` / `getResult(Class<?>)`
+- `putTransmit()` / `getTransmit()`
+- `addCondition()`
+- `stopProcess()`
+- `rollbackProcess()`
+
+## Advanced Usage
+
+<details>
+<summary>Conditional routing</summary>
+
+Use expression-based or function-based matching before a node or sub-flow.
+
+```java
+FlowInstance flow = flowEngine.builder()
+        .next(AddNode.class)
+        .next(
+                Info.c("param <= 30", ReduceNode.class),
+                Info.c("param > 30", MultiplyNode.class)
+        )
+        .build();
+```
+
+```java
+FlowInstance flow = flowEngine.builder()
+        .next(
+                Info.c(input -> (Integer) input <= 30, ReduceNode.class),
+                Info.c(input -> (Integer) input > 30, MultiplyNode.class)
+        )
+        .build();
+```
+
+Additional condition variables can be provided at execution time or added dynamically:
+
+```java
+Map<String, Object> conditions = new HashMap<>();
+conditions.put("channel", "app");
+
+flowEngine.execute("pricing_flow", 39, conditions);
+```
+
+```java
+getContextBus().addCondition("channel", "app");
+```
+
+</details>
+
+<details>
+<summary>Input and output adaptation</summary>
+
+Use `Info.cInput(...)` and `Info.cOutput(...)` when node contracts do not match naturally.
+
+```java
+FlowInstance flow = flowEngine.builder()
+        .next(
+                Info.c(AddNode.class)
+                        .cInput(input -> (Integer) input + 10)
+                        .cOutput(output -> (Integer) output * 2)
+        )
+        .next(ReduceNode.class)
+        .build();
+```
+
+</details>
+
+<details>
+<summary>Context and result passing</summary>
+
+Read earlier node results or attach custom runtime data through `IContextBus`.
+
+```java
+@NodeIdentity
+public class ResultNode extends FlowNode<Integer, Integer> {
+    @Override
+    public Integer process(Integer input) {
+        IContextBus bus = getContextBus();
+        Integer addResult = bus.getResult(AddNode.class);
+        bus.putTransmit("stage", "after-add");
+        return addResult == null ? input : addResult;
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>Parallel and async orchestration</summary>
+
+```java
+FlowInstance flow = flowEngine.builder()
+        .next(AddNode.class)
+        .concurrent(ReduceNode.class, MultiplyNode.class)
+        .next(resultMap -> ((Map<String, Object>) resultMap).values().stream()
+                .filter(Integer.class::isInstance)
+                .mapToInt(v -> (Integer) v)
+                .sum())
+        .build();
+```
+
+```java
+FlowInstance flow = flowEngine.builder()
+        .future(ReduceNode.class)
+        .next(MultiplyNode.class)
+        .wait(ReduceNode.class)
+        .build();
+```
+
+</details>
+
+<details>
+<summary>Sub-flow composition</summary>
+
+Sub-flows can be composed exactly like nodes.
+
+```java
+FlowInstance branchA = flowEngine.builder()
+        .next(ReduceNode.class)
+        .build();
+
+FlowInstance branchB = flowEngine.builder()
+        .next(MultiplyNode.class)
+        .build();
+
+FlowInstance flow = flowEngine.builder()
+        .all(branchA, branchB)
+        .build();
+```
+
+</details>
+
+<details>
+<summary>Stop and rollback</summary>
+
+```java
+@NodeIdentity
+public class RiskNode extends FlowNode<Integer, Integer> {
+    @Override
+    public Integer process(Integer input) {
+        if (input > 500) {
+            getContextBus().rollbackProcess();
         }
+        return input;
     }
-    ```
 
-💡 **Notes:**
-- The `@NodeIdentity` annotation defaults to using the class name as the node identifier. Custom identifiers can also be specified, e.g., `@NodeIdentity("add_node")`.
-- In `FlowNode<O, I>`, `O` and `I` represent the input and output types of the node. Use `Void` as a placeholder if no input or output is needed.
+    @Override
+    public void rollback() {
+        System.out.println("RiskNode rollback executed");
+    }
+}
+```
 
-### Orchestrating & Executing Flows
-Inject `FlowEngine` and use functional programming to orchestrate and execute nodes sequentially:
+</details>
 
-- **Orchestration**
-  ```java
-  @Autowired
-  FlowEngine flowEngine;
-  
-  FlowInstance flowInstance = flowEngine.builder()
-                  .next(AddNode.class)
-                  .next(ReduceNode.class)
-                  .next(MultiplyNode.class)
-                  .next(DivisionNode.class)
-                  .build(); // Build the flow instance
-  
-  Integer result = flowEngine.execute(flowInstance, 39);
-  System.out.println("demo_flow result: " + result);
-  ```
+<details>
+<summary>Thread pool and timeout</summary>
 
-- **Execution Result**
-  ```
-  demo_flow result: 894
-  ```
+The framework provides a default `flowThreadPool` and supports per-gateway isolation.
 
-💡 **Notes:**
-- Use `.next()` to orchestrate nodes, passing the node type like `AddNode.class` or a custom identifier such as `next("add_node")`.
-- Use `.build()` to construct a flow instance and `.execute()` to run the flow instance.
-- The parameter passed to `.execute()` (e.g., `39`) is used as the input for the first node.
-- By default, the output of the previous node is used as the input for the next node. If this is not suitable, you can adapt it (details in later sections).
-- Anonymous dynamic classes can also be passed directly to `.next()`:
-    ```java
-    FlowInstance flowInstance = flowEngine.builder()
-                    .next(new FlowNode<Integer, Integer>() {
-                        @Override
-                        public Integer process(Integer input) {
-                            return input + 1;
-                        }
-                    })
-                    .build();
-    ```
-- `.next()` also supports lambda expressions:
-    ```java
-    FlowInstance flowInstance = flowEngine.builder()
-                   .next((num) -> num + 1)
-                   .build();
-    ```
-
-## Registering Flows
-For reusable flows, register a global flow that can be executed by its ID in specific scenarios.
-
-- **Registration**
-  ```java
-  flowEngine.builder().id("demo_flow") // Set a global flow ID
-          .next(AddNode.class)
-          .next(ReduceNode.class)
-          .next(MultiplyNode.class)
-          .next(DivisionNode.class)
-          .register(); // Register the flow instance
-  ```
-
-- **Execution**
-  ```java
-  Integer result = flowEngine.execute("demo_flow", 39);
-  ```
-
-💡 **Notes:**
-- Use `.id()` to specify a global ID for the flow.
-- Use `.register()` to register the flow instance. A flow ID can only be registered once.
-
----
-
-## Conditional Judgments
-
-Salt Function Flow allows adding conditions before nodes to control their execution. There are two ways to add conditions:
-
-### 1. Rule-Based Script Conditions
-You can use rule scripts for conditions. For example, issue a child ticket if age < 14 and an adult ticket if age >= 14:
-
-- **Orchestration**
-  ```java
-  FlowInstance flow = flowEngine.builder()
-          .next(TrainBasePrice.class)
-          .next(
-                  Info.c("age < 14", TrainChildTicket.class),
-                  Info.c("age >= 14", TrainAdultTicket.class))
-          .next(TrainTicketResult.class)
-          .build();
-  ```
-
-- **Execution**
-  ```java
-  Passenger passenger = Passenger.builder().name("Jack").age(12).build();
-  Ticket ticket = flowEngine.execute(flow, passenger);
-  ```
-
-### 2. Embedded Function Conditions
-You can use embedded functions to define conditions dynamically:
-
-- **Orchestration**
-  ```java
-  flowEngine.builder()
-          .next(TrainBasePrice.class)
-          .next(
-                  Info.c(iContextBus -> ((Passenger) iContextBus.getFlowParam()).getAge() < 14, TrainChildTicket.class),
-                  Info.c(iContextBus -> ((Passenger) iContextBus.getFlowParam()).getAge() >= 14, TrainAdultTicket.class))
-          .next(TrainTicketResult.class)
-          .build();
-  ```
-
-💡 **Notes:**
-- Use `Info.c()` for multi-parameter passing in `next()`.
-- `iContextBus` is used for context transmission during the flow, including input parameters, conditional parameters, and node results. Details are covered in later sections.
-
-### Conditional Parameters
-By default, the input parameters of the flow are used for condition evaluation. Additional parameters can also be passed:
-
-- **Passing Additional Conditional Parameters During Execution**
-  ```java
-  Map<String, Object> condition = new HashMap<>();
-  condition.put("sex", "male");
-  
-  Ticket ticket = flowEngine.execute(flow, passenger, condition);
-  ```
-
-- **Adding Conditional Parameters Dynamically Within a Node**
-  ```java
-  iContextBus.addCondition("sex", "male");
-  ```
-
----
-
-## Input and Output Adaptation for Nodes
-Nodes require fixed input and output types. To enhance generality, functions can be embedded during orchestration for adaptation.
-
-- **Adapting Input for `TrainBasePrice` Node**
-  ```java
-  @NodeIdentity
-  public class TrainBasePrice extends FlowNode<Integer, Station> {
-  
-      @Override
-      public Integer process(Station station) {
-          System.out.println("Passengers travel from " + station.getFrom() + " to " + station.getTo());
-          return 300;
-      }
-  }
-  ```
-
-- **Transforming Flow Input Parameter to Node-Specific Input**
-  ```java
-  FlowInstance flow = flowEngine.builder()
-          .next(
-                  Info.c(TrainBasePrice.class)
-                          .cInput(iContextBus -> {
-                              Passenger passenger = iContextBus.getFlowParam();
-                              return Station.builder().from(passenger.getFrom()).to(passenger.getTo()).build();
-                          })
-                          .cOutput((iContextBus, result) -> {
-                              System.out.println("base_price return " + result);
-                              return result;
-                          }))
-          .next(
-                  Info.c("age < 14", TrainChildTicket.class),
-                  Info.c("age >= 14", TrainAdultTicket.class))
-          .next(TrainTicketResult.class)
-          .build();
-  ```
-
-- **Execution**
-  ```java
-  Passenger passenger = Passenger.builder().name("Jack").age(12).from("Beijing").to("Shanghai").build();
-  Ticket ticket = flowEngine.execute(flow, passenger);
-  ```
-
-💡 **Notes:**
-- Use `Info.cInput()` to specify the input transformation function.
-- Use `Info.cOutput()` to specify the output transformation function.
-
----
-
-## Data Transmission
-The flow execution instance uses the `IContextBus` interface to transmit context information. Use `getContextBus()` to retrieve it.
-
-- **Retrieve `IContextBus` and Node Results**
-  ```java
-  @NodeIdentity
-  public class ResultNode extends FlowNode<Integer, Void> {
-  
-      @Override
-      public Integer process(Void v) {
-          IContextBus iContextBus = getContextBus();
-          Integer pResult = iContextBus.getResult(AddNode.class);
-          System.out.println("Add result: " + pResult);
-          return pResult;
-      }
-  }
-  ```
-
-- **`IContextBus` Interface Functions**
-  ```java
-  public interface IContextBus {
-
-    // Retrieve flow execution parameters
-    <T> T getFlowParam();
-
-    // Retrieve flow execution results
-    <R> R getFlowResult();
-
-    // Store additional context information
-    <P> void putTransmit(String key, P content);
-
-    // Retrieve additional context information
-    <P> P getTransmit(String key);
-
-    // Add parameters for node condition evaluation
-    <P> void addCondition(String key, P value);
-
-    // Retrieve the result of the previous node execution, which may return null
-    <P> P getPreResult();
-
-    // Retrieve the execution result of any node by its ID
-    <P> P getResult(String nodeId);
-
-    // Retrieve the execution result of any node by its class
-    <P> P getResult(Class<?> clazz);
-
-    // Retrieve exceptions for any node by its ID
-    Exception getException(String nodeId);
-
-    // Retrieve exceptions for any node by its class
-    Exception getException(Class<?> clazz);
-
-    // Retrieve the execution instance ID
-    String getRuntimeId();
-
-    // Stop the flow execution instance
-    void stopProcess();
-
-    // Rollback the flow execution instance
-    void rollbackProcess();
-  }
-  ```
----
-
-## Complex Gateway Orchestration
-
-### Exclusive Execution
-- Execute either the `ReduceNode` or `MultiplyNode` based on flow input parameters:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .next(
-                  Info.c("param <= 30", ReduceNode.class),
-                  Info.c("param > 30", MultiplyNode.class)
-          )
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Parallel Execution
-- Execute `ReduceNode` and `MultiplyNode` concurrently (asynchronously) and sum their results as input to the next node:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .concurrent(new AddResult(), ReduceNode.class, MultiplyNode.class)
-          .next(DivisionNode.class)
-          .build();
-
-  class AddResult implements IResult<Integer> {
-      @Override
-      public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-          return iContextBus.getResult(ReduceNode.class) + iContextBus.getResult(MultiplyNode.class);
-      }
-  }
-  ```
-
-### Asynchronous Execution
-- Execute `ReduceNode` asynchronously and `MultiplyNode` synchronously, then combine their results:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .future(ReduceNode.class) // Asynchronous execution
-          .next(MultiplyNode.class) 
-          .wait(new AddResult(), ReduceNode.class) // Wait and merge results
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Notification Execution
-- Notify `ReduceNode` to execute asynchronously without affecting the final result:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .notify(ReduceNode.class) // Asynchronous notification
-          .next(MultiplyNode.class)
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Compatible Execution
-- Synchronously execute both `ReduceNode` and `MultiplyNode` if conditions are met:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .all(
-                  Info.c("param > 30", ReduceNode.class),
-                  Info.c("param < 50", MultiplyNode.class)
-          )
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Loop Execution
-- Execute `ReduceNode` and `MultiplyNode` repeatedly until the result is less than 56,000,000:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .loop(
-                  i -> (Integer) ContextBus.get().getPreResult() < 56000000, 
-                  ReduceNode.class, MultiplyNode.class)
-          .next(DivisionNode.class)
-          .build();
-  ```
-
----
-
-## Sub-Flow Support
-The orchestration of sub-flows is similar to individual nodes.
-
-### Exclusive Execution
-- Execute one of two sub-flows based on flow input parameters:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .next(
-                  Info.c("param <= 30", flowEngine.builder().next("demo_reduce").next("demo_remainder").build()),
-                  Info.c("param > 30", flowEngine.builder().next("demo_multiply").next("demo_remainder").build()))
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Parallel Execution
-- Execute two sub-flows concurrently (asynchronously) and sum their results as input to the next node:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .concurrent(new AddBranchResult(), 
-                      flowEngine.builder().next("demo_reduce").next("demo_remainder").build(),
-                      flowEngine.builder().next("demo_multiply").next("demo_remainder").build())
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Asynchronous Execution
-- Execute one sub-flow asynchronously and combine results:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .future(flowEngine.builder().id("demo_branch_reduce").next(ReduceNode.class).next(RemainderNode.class).build())
-          .next(flowEngine.builder().next(MultiplyNode.class).next(RemainderNode.class).build())
-          .wait(new AddBranchResult(), "demo_branch_reduce")
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Notification Execution
-- Notify one sub-flow to execute asynchronously without affecting the final result:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .notify(flowEngine.builder().next("demo_reduce").next("demo_remainder").build())
-          .next(flowEngine.builder().next("demo_multiply").next("demo_remainder").build())
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Compatible Execution
-- Synchronously execute both sub-flows if conditions are met:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .all(
-               Info.c("param > 30", flowEngine.builder().next("demo_reduce").next("demo_remainder").build()),
-               Info.c("param < 50", flowEngine.builder().next("demo_multiply").next("demo_remainder").build()))
-          .next(DivisionNode.class)
-          .build();
-  ```
-
-### Loop Execution
-- Execute two sub-flows repeatedly until the result is less than 56,000,000:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .loop(
-                  i -> (Integer) ContextBus.get().getPreResult() < 56000000,
-                  flowEngine.builder().next("demo_reduce").next("demo_remainder").build(),
-                  flowEngine.builder().next("demo_multiply").next("demo_remainder").build()
-          )
-          .next(DivisionNode.class)
-          .build();
-  ```
-
----
-
-## Flow Termination
-
-### Normal Termination
-- Use the `stopProcess` method from the `IContextBus` interface to terminate the flow:
-  ```java
-  @NodeIdentity
-  public class BitAndNode extends FlowNode<Integer, Integer> {
-  
-      @Override
-      public Integer process(Integer num) {
-          if (num > 500) {
-              getContextBus().stopProcess();
-          }
-          return num & 256;
-      }
-  }
-  ```
-
-### Exception Termination
-- Throw an exception within a node to terminate the flow (only applies to synchronously executed nodes):
-  ```java
-  @NodeIdentity
-  public class BitOrNode extends FlowNode<Integer, Integer> {
-  
-      @Override
-      public Integer process(Integer num) {
-          if (num > 500) {
-              throw new RuntimeException("DemoBitOrNode Exception!");
-          }
-          return num | 128;
-      }
-  }
-  ```
-
-### Flow Rollback
-- Use the `rollbackProcess` method from the `IContextBus` interface to roll back the flow. This will trigger the `rollback` method in executed nodes in reverse order. Nodes can optionally implement the `rollback` method:
-  ```java
-  @NodeIdentity
-  public class BitXorNode extends FlowNode<Integer, Integer> {
-  
-      @Override
-      public Integer process(Integer num) {
-          if (num > 500) {
-              getContextBus().rollbackProcess();
-          }
-          return num | 128;
-      }
-  
-      @Override
-      public void rollback() {
-          System.out.println("DemoBitOrNode: rollback execute");
-      }
-  }
-  ```
-
----
-
-## Threads
-
-### Timeout Settings
-- The `concurrent()` and `wait()` asynchronous execution functions allow setting a maximum wait time in milliseconds, the default is 3000 milliseconds:
-  ```java
-  flowEngine.builder()
-          .next(AddNode.class)
-          .concurrent(new AddResult(), 10, ReduceNode.class, MultiplyNode.class)
-          .next(DivisionNode.class)
-          .build();
-  ```
-- The `handle()` method in the parallel result processor can check if a timeout occurred via the `isTimeout` flag:
-  ```java
-  private static class AddResult implements IResult<Integer> {
-      @Override
-      public Integer handle(IContextBus iContextBus, boolean isTimeout) {
-          System.out.println("AddResult handle isTimeout: " + isTimeout);
-      }
-  }
-  ```
-
-### Thread Pool Configuration
-
-#### Configure in YML
-Define thread pool settings in the YML file:
 ```yaml
 salt:
   function:
@@ -570,69 +392,38 @@ salt:
         keepAlive: 30
 ```
 
-#### Custom Thread Pool
+```java
+ExecutorService isolatePool = Executors.newFixedThreadPool(3);
 
-##### Redefine the `flowThreadPool` Bean
-- Redefine a custom thread pool named `flowThreadPool`:
-  ```java
-  @Bean
-  @ConditionalOnMissingBean(name = "flowThreadPool")
-  public ThreadPoolTaskExecutor flowThreadPool() {
-      ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-      threadPoolTaskExecutor.setCorePoolSize(50);
-      threadPoolTaskExecutor.setMaxPoolSize(150);
-      threadPoolTaskExecutor.setQueueCapacity(256);
-      threadPoolTaskExecutor.setKeepAliveSeconds(30);
-      threadPoolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-      threadPoolTaskExecutor.setThreadNamePrefix("thread-pool-flow");
-      threadPoolTaskExecutor.setWaitForTasksToCompleteOnShutdown(true);
-      Runtime.getRuntime().addShutdownHook(new Thread(() -> threadPoolTaskExecutor.shutdown()));
-      return threadPoolTaskExecutor;
-  }
-  ```
+FlowInstance flow = flowEngine.builder()
+        .concurrent(isolatePool, 1000L, ReduceNode.class, MultiplyNode.class)
+        .build();
+```
 
-##### Use a Separate Thread Pool
-- Pass an independent thread pool via parameters:
-  ```java
-  flowEngine.builder().id("demo_flow_concurrent_isolate")
-          .next(AddNode.class)
-          .concurrent(new AddResult(), Executors.newFixedThreadPool(3), ReduceNode.class, MultiplyNode.class)
-          .next(DivisionNode.class)
-          .build();
-  ```
+</details>
 
----
+## Examples
 
-### ThreadLocal Handling
+- [7 node reference styles](./src/test/java/org/salt/function/flow/demo/order/NodeStyleTest.java): id / class / new instance / lambda / method reference / nested flow / Info condition
+- [All-gateway example](./src/test/java/org/salt/function/flow/demo/order/OrderGatewayTest.java): future / next / all / concurrent / wait / loop / notify — all 7 gateways in one order flow
+- [Concurrent discount + async notify](./src/test/java/org/salt/function/flow/demo/order/OrderConcurrentTest.java): concurrent fan-out for best discount, notify for async SMS
+- [Conditional routing + rollback](./src/test/java/org/salt/function/flow/demo/order/OrderConditionTest.java): VIP/non-VIP exclusive routing, inventory deduct with rollback
+- [Builder example](./src/test/java/org/salt/function/flow/example/FlowBuildExample.java): demonstrates 7 node reference styles
+- [Gateway and sub-flow examples](./src/test/java/org/salt/function/flow/demo/math/DemoFlowInit.java): covers all gateway types
+- [Conditional ticketing example](./src/test/java/org/salt/function/flow/demo/train/TrainFlowInit.java): conditional routing and parameter adaptation
+- [Release notes for 1.1.6](./docs/release/pr-1.1.6.md)
 
-In multithreaded scenarios, ThreadLocal data inheritance can be handled in two ways:
+## Contributing
 
-1. **TaskDecorator Implementation**
-   - Implement the `TaskDecorator` interface in the custom `ThreadPoolTaskExecutor` to set `ThreadLocal` data:
-     ```java
-     @Bean
-     @ConditionalOnMissingBean(name = "flowThreadPool")
-     public ThreadPoolTaskExecutor flowThreadPool() {
-         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-         threadPoolTaskExecutor.setTaskDecorator(runnable -> {
-             Object context = UserThreadUtil.getThreadLocal();
-             return () -> {
-                 try {
-                     UserThreadUtil.setThreadLocal(context);
-                     runnable.run();
-                 } finally {
-                     UserThreadUtil.clean();
-                 }
-             };
-         });
-         return threadPoolTaskExecutor;
-     }
-     ```
+Issues and pull requests are welcome.
 
-2. **ThreadHelper Integration**
-   - Use the `ThreadHelper.initThreadLocal(ThreadLocal<?>... threadLocals)` method to register custom `ThreadLocal` instances for the framework to manage:
-     ```java
-     static {
-         ThreadHelper.initThreadLocal(UserThreadUtil.getThreadLocal());
-     }
-     ```
+If you plan to contribute:
+
+- keep nodes focused and single-purpose
+- prefer explicit flow ids for reusable flows
+- use aliases when the same node appears multiple times in one flow
+- add rollback logic only for compensatable operations
+
+## License
+
+Apache License 2.0. See [`LICENSE`](./LICENSE).
