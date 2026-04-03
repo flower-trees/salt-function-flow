@@ -193,14 +193,22 @@ The basic execution unit. Extend `FlowNode` and implement `process(I input)`.
 
 ### `@NodeIdentity`
 
-Registers a node as a Spring component and gives it a node id.
+Registers a node as a Spring component and gives it a node id. If no id is specified, `getClass().getName()` is used as the default.
 
 ```java
-@NodeIdentity("custom_node")
+@NodeIdentity("custom_node")          // explicit id, referenced as "custom_node"
 public class CustomNode extends FlowNode<String, String> {
     @Override
     public String process(String input) {
         return input + "-done";
+    }
+}
+
+@NodeIdentity                          // no id: defaults to the fully-qualified class name
+public class AnotherNode extends FlowNode<String, String> {
+    @Override
+    public String process(String input) {
+        return input + "-another";
     }
 }
 ```
@@ -234,38 +242,89 @@ The runtime context shared across nodes.
 <details>
 <summary>Conditional routing</summary>
 
-Use expression-based or function-based matching before a node or sub-flow.
+Using an e-commerce order as an example — routing to different discount nodes based on VIP status. Three styles are supported:
+
+**1. String expression**
+
+Variables in the expression can come from two sources:
+- **Flow parameter fields** (`getFlowParam()`): the framework automatically expands object fields as condition variables, e.g. `order.vip` can be written as just `vip`
+- **Condition map passed at execution time** via `execute(flow, param, conditionMap)`
+
+```java
+// "vip" comes from the condition map passed at execution time
+Order order = Order.builder().vip(true).basePrice(500).build();
+
+FlowInstance flow = flowEngine.builder()
+        .next(ItemPriceNode.class)                           // returns Integer price, passed as input to next node
+        .next(
+                Info.c("vip == true", MemberDiscountNode.class),   // VIP: 15% off
+                Info.c("vip == false", CouponDiscountNode.class)   // non-VIP: -30
+        )
+        .next(TaxNode.class)
+        .next(OrderCreateNode.class)
+        .build();
+
+flowEngine.execute(flow, order, Map.of("vip", true));
+```
+
+**2. Function condition** (reads runtime context directly, no condition map needed)
 
 ```java
 FlowInstance flow = flowEngine.builder()
-        .next(AddNode.class)
+        .next(ItemPriceNode.class)
         .next(
-                Info.c("param <= 30", ReduceNode.class),
-                Info.c("param > 30", MultiplyNode.class)
+                Info.c(bus -> ((Order) ContextBus.get().getFlowParam()).isVip(), MemberDiscountNode.class),
+                Info.c(bus -> !((Order) ContextBus.get().getFlowParam()).isVip(), CouponDiscountNode.class)
         )
+        .next(TaxNode.class)
+        .next(OrderCreateNode.class)
         .build();
+
+flowEngine.execute(flow, order);
 ```
 
+**3. Add condition dynamically inside a node**
+
+A node can inject condition variables at runtime for downstream expression conditions:
+
 ```java
+@NodeIdentity
+public class ItemPriceNode extends FlowNode<Integer, Order> {
+    @Override
+    public Integer process(Order order) {
+        getContextBus().addCondition("vip", order.isVip());  // injected here, usable as "vip" downstream
+        return order.getBasePrice();
+    }
+}
+```
+
+**4. Node return value auto-injected as conditions**
+
+When a node returns a `Map`, the framework automatically adds all key-value pairs into the condition context. Downstream expressions can reference them directly:
+
+```java
+@NodeIdentity
+public class ItemPriceWithTagNode extends FlowNode<Map<String, Object>, Order> {
+    @Override
+    public Map<String, Object> process(Order order) {
+        return Map.of(
+                "price", order.getBasePrice(),
+                "vip", order.isVip()
+        );
+    }
+}
+
 FlowInstance flow = flowEngine.builder()
+        .next(ItemPriceWithTagNode.class)       // returns Map{"price":500, "vip":true}, auto-injected into condition context
         .next(
-                Info.c(input -> (Integer) input <= 30, ReduceNode.class),
-                Info.c(input -> (Integer) input > 30, MultiplyNode.class)
+                Info.c("vip == true", MemberDiscountNode.class)    // "vip" comes from the previous node's return value
+                        .cInput(map -> ((Map) map).get("price")),
+                Info.c("vip == false", CouponDiscountNode.class)
+                        .cInput(map -> ((Map) map).get("price"))
         )
+        .next(TaxNode.class)
+        .next(OrderCreateNode.class)
         .build();
-```
-
-Additional condition variables can be provided at execution time or added dynamically:
-
-```java
-Map<String, Object> conditions = new HashMap<>();
-conditions.put("channel", "app");
-
-flowEngine.execute("pricing_flow", 39, conditions);
-```
-
-```java
-getContextBus().addCondition("channel", "app");
 ```
 
 </details>
@@ -411,7 +470,6 @@ FlowInstance flow = flowEngine.builder()
 - [Builder example](./src/test/java/org/salt/function/flow/example/FlowBuildExample.java): demonstrates 7 node reference styles
 - [Gateway and sub-flow examples](./src/test/java/org/salt/function/flow/demo/math/DemoFlowInit.java): covers all gateway types
 - [Conditional ticketing example](./src/test/java/org/salt/function/flow/demo/train/TrainFlowInit.java): conditional routing and parameter adaptation
-- [Release notes for 1.1.6](./docs/release/pr-1.1.6.md)
 
 ## Contributing
 

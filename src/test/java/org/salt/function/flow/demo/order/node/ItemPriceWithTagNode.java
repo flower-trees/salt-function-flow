@@ -18,12 +18,20 @@ import org.salt.function.flow.demo.order.param.Order;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.NodeIdentity;
 
+import java.util.Map;
+
+/**
+ * Returns a Map so the framework auto-injects all key-value pairs into the condition context.
+ * Downstream nodes can use "price" and "vip" directly in string expressions.
+ */
 @NodeIdentity
-public class ItemPriceNode extends FlowNode<Integer, Order> {
+public class ItemPriceWithTagNode extends FlowNode<Map<String, Object>, Order> {
 
     @Override
-    public Integer process(Order order) {
-        getContextBus().addCondition("vip", order.isVip());  // inject vip into condition context for downstream routing
-        return order.getBasePrice();
+    public Map<String, Object> process(Order order) {
+        return Map.of(
+                "price", order.getBasePrice(),
+                "vip", order.isVip()
+        );
     }
 }

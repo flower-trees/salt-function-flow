@@ -193,14 +193,22 @@ flowchart LR
 
 ### `@NodeIdentity`
 
-为节点声明 Spring Bean 与节点 ID。
+为节点声明 Spring Bean 与节点 ID。不指定 ID 时默认使用 `getClass().getName()`。
 
 ```java
-@NodeIdentity("custom_node")
+@NodeIdentity("custom_node")          // 指定节点 ID，可通过 "custom_node" 引用
 public class CustomNode extends FlowNode<String, String> {
     @Override
     public String process(String input) {
         return input + "-done";
+    }
+}
+
+@NodeIdentity                          // 不指定时默认使用类全限定名作为节点 ID
+public class AnotherNode extends FlowNode<String, String> {
+    @Override
+    public String process(String input) {
+        return input + "-another";
     }
 }
 ```
@@ -234,38 +242,89 @@ public class CustomNode extends FlowNode<String, String> {
 <details>
 <summary>条件路由</summary>
 
-可以通过表达式或函数在节点/子流程前增加执行条件。
+以电商下单为例，根据是否 VIP 走不同的折扣节点。条件支持三种写法：
+
+**1. 字符串表达式**
+
+表达式中的变量来源有两种：
+- **流程参数**（`getFlowParam()`）：框架会自动将其字段展开为条件变量，如 `order.vip` 可直接写成 `vip`
+- **执行时传入的条件 Map**：通过 `execute(flow, param, conditionMap)` 注入
+
+```java
+// vip 来自执行时传入的条件 Map
+Order order = Order.builder().vip(true).basePrice(500).build();
+
+FlowInstance flow = flowEngine.builder()
+        .next(ItemPriceNode.class)                           // 返回 Integer 价格，作为下一节点入参
+        .next(
+                Info.c("vip == true", MemberDiscountNode.class),   // VIP：85 折
+                Info.c("vip == false", CouponDiscountNode.class)   // 非 VIP：减 30 元
+        )
+        .next(TaxNode.class)
+        .next(OrderCreateNode.class)
+        .build();
+
+flowEngine.execute(flow, order, Map.of("vip", true));
+```
+
+**2. 函数条件**（直接读取运行时上下文，无需传入条件 Map）
 
 ```java
 FlowInstance flow = flowEngine.builder()
-        .next(AddNode.class)
+        .next(ItemPriceNode.class)
         .next(
-                Info.c("param <= 30", ReduceNode.class),
-                Info.c("param > 30", MultiplyNode.class)
+                Info.c(bus -> ((Order) ContextBus.get().getFlowParam()).isVip(), MemberDiscountNode.class),
+                Info.c(bus -> !((Order) ContextBus.get().getFlowParam()).isVip(), CouponDiscountNode.class)
         )
+        .next(TaxNode.class)
+        .next(OrderCreateNode.class)
         .build();
+
+flowEngine.execute(flow, order);
 ```
 
+**3. 节点内动态追加条件**
+
+节点执行时可向上下文注入条件变量，供后续节点的条件表达式使用：
+
 ```java
+@NodeIdentity
+public class ItemPriceNode extends FlowNode<Integer, Order> {
+    @Override
+    public Integer process(Order order) {
+        getContextBus().addCondition("vip", order.isVip());  // 动态注入，后续节点可直接用 "vip"
+        return order.getBasePrice();
+    }
+}
+```
+
+**4. 节点返回值自动注入条件**
+
+当节点返回 `Map` 时，框架默认将其所有 key-value 自动写入条件上下文，下游表达式可直接引用：
+
+```java
+@NodeIdentity
+public class ItemPriceWithTagNode extends FlowNode<Map<String, Object>, Order> {
+    @Override
+    public Map<String, Object> process(Order order) {
+        return Map.of(
+                "price", order.getBasePrice(),
+                "vip", order.isVip()
+        );
+    }
+}
+
 FlowInstance flow = flowEngine.builder()
+        .next(ItemPriceWithTagNode.class)       // 返回 Map{"price":500, "vip":true}，自动注入条件上下文
         .next(
-                Info.c(input -> (Integer) input <= 30, ReduceNode.class),
-                Info.c(input -> (Integer) input > 30, MultiplyNode.class)
+                Info.c("vip == true", MemberDiscountNode.class)    // "vip" 直接来自上一节点返回值
+                        .cInput(map -> ((Map) map).get("price")),
+                Info.c("vip == false", CouponDiscountNode.class)
+                        .cInput(map -> ((Map) map).get("price"))
         )
+        .next(TaxNode.class)
+        .next(OrderCreateNode.class)
         .build();
-```
-
-调用时可注入额外条件变量，也可在节点中动态追加：
-
-```java
-Map<String, Object> conditions = new HashMap<>();
-conditions.put("channel", "app");
-
-flowEngine.execute("pricing_flow", 39, conditions);
-```
-
-```java
-getContextBus().addCondition("channel", "app");
 ```
 
 </details>
@@ -411,7 +470,6 @@ FlowInstance flow = flowEngine.builder()
 - [基础 Builder 示例](./src/test/java/org/salt/function/flow/example/FlowBuildExample.java)：演示 7 种节点引用方式
 - [网关与子流程示例](./src/test/java/org/salt/function/flow/demo/math/DemoFlowInit.java)：覆盖所有网关类型
 - [车票条件分支示例](./src/test/java/org/salt/function/flow/demo/train/TrainFlowInit.java)：条件路由与参数适配
-- [1.1.6 发布说明](./docs/release/pr-1.1.6-cn.md)
 
 ## 参与贡献
 
