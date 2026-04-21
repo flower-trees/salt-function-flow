@@ -17,6 +17,8 @@ Salt Function Flow turns business logic into composable function nodes. With a f
 - Fluent builder API for readable orchestration
 - Flexible node declaration: class, node id, instance, lambda, and sub-flow
 - Built-in gateway models: `next`, `all`, `concurrent`, `future`, `wait`, `notify`, `loop`
+- Support infinite mixed nesting of nodes and processes
+- Support dynamic construction and mounting of nodes and processes
 - Unified context bus for data passing, condition evaluation, result lookup, stop, and rollback
 - Spring Boot friendly with configurable and isolated thread pools
 
