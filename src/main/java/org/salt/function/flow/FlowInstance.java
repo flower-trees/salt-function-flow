@@ -17,8 +17,10 @@ package org.salt.function.flow;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.salt.function.flow.context.ContextBus;
+import org.salt.function.flow.context.IContextBus;
 import org.salt.function.flow.node.FlowNode;
 import org.salt.function.flow.node.register.FlowNodeManager;
+import org.salt.function.flow.thread.TheadHelper;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -54,6 +56,7 @@ public class FlowInstance {
     }
 
     protected <T, R> R execute(T param, Map<String, Object> transmitMap, Map<String, Object> conditionMap, Consumer<T> beforeRun, Consumer<R> afterRun) {
+        IContextBus parent = ContextBus.get();
         ContextBus contextBus = ContextBus.create(param);
         if (transmitMap != null && !transmitMap.isEmpty()) {
             transmitMap.forEach(contextBus::putTransmit);
@@ -67,6 +70,9 @@ public class FlowInstance {
             }
             return execute();
         } finally {
+            if (parent != null) {
+                TheadHelper.putThreadLocal(IContextBus.class.getName(), parent);
+            }
             if (afterRun != null) {
                 afterRun.accept(contextBus.getFlowResult());
             }
