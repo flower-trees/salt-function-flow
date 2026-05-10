@@ -168,7 +168,11 @@ public class ContextBus implements IContextBus {
     }
 
     public void putException(String nodeId, Exception e) {
-        log.warn("node exception. nodeId:{}, exception:", nodeId, e);
+        if (e instanceof org.salt.function.flow.FlowControlException) {
+            log.debug("node flow control signal. nodeId:{}, type:{}", nodeId, e.getClass().getSimpleName());
+        } else {
+            log.warn("node exception. nodeId:{}, exception:", nodeId, e);
+        }
         nodeExceptionMap.put(nodeId, e);
     }
 
