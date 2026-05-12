@@ -41,12 +41,12 @@ Salt Function Flow turns business logic into composable function nodes. With a f
 <dependency>
     <groupId>io.github.flower-trees</groupId>
     <artifactId>salt-function-flow</artifactId>
-    <version>1.1.7</version>
+    <version>1.1.8</version>
 </dependency>
 ```
 
 ```groovy
-implementation "io.github.flower-trees:salt-function-flow:1.1.7"
+implementation "io.github.flower-trees:salt-function-flow:1.1.8"
 ```
 
 ### 2. Enable configuration
